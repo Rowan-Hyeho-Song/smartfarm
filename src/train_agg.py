@@ -1,16 +1,21 @@
 # -*- coding: utf-8 -*-
 """
-train_agg.py  (v2 모델)
-=======================
+train_agg.py  (v2.1 모델)
+=========================
 [이 파일이 하는 일 — 한 문장]
 '개체(표본) 하나하나'가 아니라 '온실-날짜 평균 생육'을 예측하는 v2 모델을 만듭니다.
-여기에 lag(전주 생육) feature와 Optuna 튜닝을 더해 착과수 R²를 0.80 이상으로 끌어올립니다.
+여기에 lag(전주 생육)·전주 개체 분포 feature와 Optuna 튜닝을 더해 착과수 R²를 0.89로 올립니다.
 
 [왜 '평균'을 예측하나 — v1의 한계 돌파]
 v1은 개체 하나하나를 예측했는데, 개체는 식물마다 랜덤 편차가 커서 R²가 막힙니다.
 그런데 우리가 실제로 제어하는 건 개체가 아니라 '온실 전체'입니다.
 그래서 '온실-날짜 평균 착과수'를 예측하면 개체 노이즈가 사라지고 정확도가 크게 오릅니다.
-(측정: 개체 R² 0.57~0.64  →  평균 예측 R² 0.78  →  +lag 0.83)
+(측정: 개체 R² 0.57~0.64  →  평균 예측 R² 0.78  →  +lag 0.84  →  +전주분포 0.89)
+
+[v2.1에서 무엇이 바뀌었나 — '정규화 말고 살리기']
+평균으로 뭉갤 때 사라지던 '전주 개체 분포'(표준편차·최소·최대·중앙값)를 feature로 되살립니다.
+개체를 통째로 살리면 노이즈(개체 편차 62%)만 늘어 오히려 나빠지지만(실측),
+'분포 모양'만 골라 살리면 순수 이득이 됩니다. (착과수 LOGO R² 0.87 → 0.89)
 
 [검증]
 착과수는 '온실별 교차검증(LOGO)' — 온실 하나씩 빼고 나머지로 학습해 정직하게 평가.
@@ -85,12 +90,13 @@ def objective(trial, agg, feat):
 
 def main():
     print("=" * 60)
-    print("v2 모델 — 온실-날짜 평균 + lag + Optuna  (대상: 착과수)")
+    print("v2.1 모델 — 온실-날짜 평균 + lag + 전주분포 + Optuna  (대상: 착과수)")
     print("=" * 60)
     agg, feat = load_aggregated()
     print(f"[데이터] 집계 {len(agg)}행 (온실×조사일) · 입력 feature {len(feat)}개")
-    lag_n = len([c for c in feat if "전주" in c])
-    print(f"         그중 lag(전주 생육) feature {lag_n}개\n")
+    lag_n = len([c for c in feat if "전주" in c and "분포" not in c])
+    dist_n = len([c for c in feat if "분포" in c])
+    print(f"         그중 lag(전주 생육) {lag_n}개 · 전주 개체 분포 {dist_n}개\n")
 
     # 비교 기준: 기본 설정 (튜닝 전)
     base = dict(objective="regression", n_estimators=400, learning_rate=0.05,
