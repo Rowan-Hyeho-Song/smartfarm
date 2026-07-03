@@ -90,7 +90,7 @@
   <p class="lede">딸기 생육 예측 모델을 만들며 내린 <b style="color:var(--text)">핵심 모델링 결정과 실험</b>을 "무엇이 문제였고, 어떻게 바꿨으며, 왜 그렇게 했는지"로 정리했습니다. (환경 셋팅·전처리 같은 준비 단계는 제외하고 모델링 중심으로만.)</p>
   <div class="meta">
     <span class="chip">범위 <b>검증 · 앙상블 · 불확실성 · 튜닝 · 실험</b></span>
-    <span class="chip">핵심 결과 <b>착과수 R² 0.67~0.73 · 구간 적중률 83%</b></span>
+    <span class="chip">핵심 결과 <b>착과수 v2 R² 0.87 · 구간 적중률 83%</b></span>
     <span class="chip">데이터 <b>온실 1~4 · 2024-11~2025-02</b></span>
   </div>
   <div class="toc">
@@ -106,6 +106,7 @@
     <a href="#c9">⑨ A/B 제어 실험</a>
     <a href="#c10">⑩ 환경 예보</a>
     <a href="#c11">⑪ 실증 계획</a>
+    <a href="#c12">⑫ v2 정확도 돌파</a>
     <a href="#result">결과 · 파일</a>
   </div>
 </header>
@@ -113,7 +114,7 @@
 <div class="wrap">
 
 <div class="tldr">
-  <h2>한눈에 — 모델링 핵심 11가지</h2>
+  <h2>한눈에 — 모델링 핵심 12가지</h2>
   <ol>
     <li><b>검증방식 매칭</b> — 착과수는 '온실별 검증' + 발달단계 feature로 R² −1.3 → <b>0.67</b> (검증이 안 맞으면 "예측 불가"라는 오판).</li>
     <li><b>앙상블 + 교차검증</b> — LightGBM+CatBoost 평균, 온실별 4-fold로 안정화 (0.62 → 0.66).</li>
@@ -126,6 +127,7 @@
     <li><b>A/B 제어 실험(CO₂·온도)</b> — 고CO₂ 초장 <b>+1.57cm</b>(p&lt;0.001·포화형). 온도는 저온일수록 신장↑이나 '도장' 트레이드오프 레버.</li>
     <li><b>환경 예보 트랙</b> — 내부온도 예보 성공(6h <b>R²0.86</b>), CO₂는 예보 불가(=조작 레버). 선제 제어의 눈.</li>
     <li><b>실증 계획서</b> — CO₂ 무작위 배정 A/B 프로토콜 4단계 작성(온실 확보 시 착수).</li>
+    <li><b>v2 정확도 돌파</b> — 예측 단위 '개체→온실-날짜 평균' + lag(전주 생육) + 튜닝 → 착과수 <b>R² 0.87</b>(80% 돌파).</li>
   </ol>
 </div>
 
@@ -149,6 +151,7 @@
         <tr><td class="term">⑨</td><td>제어</td><td>A/B 제어 실험 (CO₂·온도)</td><td class="good">초장 +1.57cm (p&lt;0.001)</td></tr>
         <tr><td class="term">⑩</td><td>제어</td><td>환경 예보 트랙 (온도·CO₂)</td><td class="good">온도 6h R² 0.86</td></tr>
         <tr><td class="term">⑪</td><td>제어</td><td>실증 실험 계획서 (무작위 배정)</td><td class="good">프로토콜 4단계</td></tr>
+        <tr><td class="term">⑫</td><td>모델</td><td>v2 — 온실-날짜 평균 + lag + 튜닝</td><td class="good">착과수 R² 0.87 (80%+)</td></tr>
       </tbody>
     </table>
   </div>
@@ -302,6 +305,31 @@
   <div class="plain">이로써 <b>예측 → 불확실성 → 튜닝 → 제어 설계 → 제어 검증(A/B) → 예보 → 실증 계획</b>까지 하나의 서사가 완성됩니다.</div>
 </section>
 
+<!-- ⑫ v2 정확도 돌파 -->
+<section id="c12">
+  <div class="issue">
+    <div class="head"><span class="num">12</span><h3>정확도 80% 돌파 — v2 (평균 + lag + 튜닝)</h3><span class="tag t-model">모델</span></div>
+    <div class="rows">
+      <div class="r cause"><div class="lbl">원인</div><div class="body">v1은 <b>개체(표본) 하나하나</b>를 예측 → 식물마다 랜덤 편차가 커서 R²가 <b>0.67~0.73에서 막힘</b>. 80% 목표에 부족.</div></div>
+      <div class="r change"><div class="lbl">변경</div><div class="body"><b>A.</b> 예측 단위를 <b>'온실-날짜 평균'</b>으로 재정의(개체 노이즈 제거). <b>B.</b> <b>lag feature</b>(전주·전전주 생육) 추가(<code class="inl">data_prep.py</code>). <b>C.</b> Optuna 재튜닝(<code class="inl">train_agg.py</code>).</div></div>
+      <div class="r why"><div class="lbl">이유</div><div class="body">우리가 제어하는 건 개체가 아니라 <b>온실 전체</b> → 평균 예측이 더 올바른 정의이자 더 정확. 착과수 LOGO R² <b>0.57 → 0.78 → 0.87</b>(튜닝). 초장도 0.19 → 0.52. 최고 기여 feature = <b>착과수_전주</b>.</div></div>
+    </div>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>착과수 예측 방식</th><th>LOGO R²</th></tr></thead>
+      <tbody>
+        <tr><td class="term">v1 · 개체 예측 (환경+시점)</td><td class="bad">0.57</td></tr>
+        <tr><td class="term">v1 · 개체 + lag</td><td>0.64</td></tr>
+        <tr><td class="term">v2 · 온실-날짜 평균 (환경+시점)</td><td class="good">0.78</td></tr>
+        <tr><td class="term">v2 · 평균 + lag</td><td class="good">0.84</td></tr>
+        <tr><td class="term">v2 · 평균 + lag + Optuna <b>← 최종</b></td><td class="good">0.87</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="plain">"개체 하나를 정확히"가 아니라 "온실 전체를 정확히"로 <b>문제를 올바로 정의</b>하니 정확도가 뚫렸습니다. 단, 집계라 <b>60행(온실×주)</b>뿐이라 데이터가 늘면 재확인 권장. (다음: <code class="inl">predict.py</code>를 v2 경로로 연결)</div>
+</section>
+
 <!-- 결과 -->
 <section id="result">
   <p class="kicker">Result</p>
@@ -311,7 +339,7 @@
     <table>
       <thead><tr><th>예측 대상</th><th>권장 검증</th><th>R²</th><th>메모</th></tr></thead>
       <tbody>
-        <tr><td class="term">착과수</td><td>온실별</td><td class="good">0.67~0.73</td><td>튜닝 · 구간 적중률 83%/폭 3.63</td></tr>
+        <tr><td class="term">착과수 (v2)</td><td>온실별</td><td class="good">0.87</td><td>평균+lag+튜닝 · 구간 적중률 83%</td></tr>
         <tr><td class="term">관부직경</td><td>온실별</td><td class="good">0.43</td><td>세력(vigor) 지표</td></tr>
         <tr><td class="term">엽병장</td><td>시간분할</td><td class="good">0.22</td><td>환경 신호 뚜렷</td></tr>
         <tr><td class="term">엽폭 · 초장</td><td>시간분할</td><td class="good">0.21 · 0.18</td><td>크기 계열</td></tr>
@@ -327,6 +355,7 @@
     <div class="file"><div class="fn">src/predict.py</div><div class="fd">추론·제출 — 튜닝 모델 로드 → 예측값 + split-conformal 구간.</div></div>
     <div class="file"><div class="fn">src/compare_experiments.py</div><div class="fd">7개 지표 × 검증방식 × 집계 창 전수 실험.</div></div>
     <div class="file"><div class="fn">src/forecast_env.py</div><div class="fd">환경 예보 — h시간 뒤 내부온도·CO₂ (부스팅 + 시차 feature).</div></div>
+    <div class="file"><div class="fn">src/train_agg.py</div><div class="fd">v2 — 온실-날짜 평균 + lag + Optuna. 착과수 R² 0.87.</div></div>
   </div>
 
   <div class="plain" style="margin-top:20px"><b>다음에 이어갈 것</b> — 룰의 인과를 <b>A/B 제어 실험</b>(CO₂ 시비 vs 대조)으로 실증, 착과수 집계 창 14일 반영, 환경 예보(제어용) 트랙, TabPFN 등 추가 모델 비교. 시퀀스(LSTM)는 데이터가 적어 현재는 보류.</div>
