@@ -55,8 +55,11 @@ def load_aggregated():
     df["조사일자"] = pd.to_datetime(df["조사일자"])
     # 온실·조사일자별 평균. (환경·lag는 원래 같은 값, 생육은 평균이 됨)
     agg = df.groupby(["온실번호", "조사일자"]).mean(numeric_only=True).reset_index()
-    # 입력(X): 키·생육을 뺀 나머지 = 환경요약 + 시점 + lag(전주 생육)
-    feat = ["온실번호"] + [c for c in agg.columns if c not in KEYS + GROWTH]
+    # 입력(X): 키·생육을 뺀 나머지 = 환경요약 + 시점 + lag(전주 생육) + 전주 분포
+    #  단, '개체lag'(_개체전주)는 v3(개체 모델) 전용이라 v2.1(집계)에선 제외
+    #  (집계하면 기존 그룹 lag와 거의 중복 → 넣으면 noise만 늘어남)
+    feat = ["온실번호"] + [c for c in agg.columns
+                          if c not in KEYS + GROWTH and "개체" not in c]
     return agg, feat
 
 

@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-predict.py  (v2.1 경로)
-=======================
+predict.py  (v3 경로 · 추론/제출)
+=================================
 [이 파일이 하는 일 — 한 문장]
-v2.1 모델(온실-날짜 평균 + lag + 전주 개체 분포)을 불러와 새 데이터의 착과수를 예측하고,
-'예측값 + 신뢰 구간(하한~상한)'을 제출용 CSV로 저장합니다.
+최고 모델 v3(개체 추적)를 불러와 '새 데이터(여기선 온실 4)'의 착과수를
+① 개체(표본)별로 예측하고 ② 온실-날짜 평균으로 집계하며,
+③ 각 예측에 신뢰 구간(하한~상한)을 붙여 제출용 CSV로 저장합니다.
 
-[v1 → v2 → v2.1 무엇이 바뀌었나]
-- 예측 단위: 개체(표본) → '온실-날짜 평균' (개체 노이즈 제거 → R² 0.87)
-- 입력에 lag(전주 생육) 포함. → v2.1은 여기에 '전주 개체 분포'까지 살려 R² 0.89.
-- 모델은 lgbm_fruit_count_v2.txt (feature 이름을 모델에서 그대로 읽어 자동 적용).
+[모델 버전]
+- 기본: lgbm_fruit_count_v3.txt (개체 추적 + 개체 lag + huber·MAE, 개체 R² 0.85 / 집계 0.94)
+- 없으면 v2.1(온실-날짜 평균) → v1 튜닝 순으로 자동 폴백.
 
-[정직한 안내]
-이 데모는 '저장된 v2.1 모델(전체 학습)'로 온실 4를 예측합니다. 실전에선 온실 4 자리에
-'진짜 새 데이터'가 들어갑니다. 정직한 일반화 성능은 train_agg.py의 LOGO R²=0.89 입니다.
+[실전에서 쓰는 법]
+'온실 4' 자리에 새 주차의 실제 데이터(각 개체의 직전 조사 포함)를 넣으면
+그 개체들의 예측값 + 구간이 나옵니다. 정직한 일반화 성능은 train_individual.py의
+LOGO 기준(개체 R² 0.85 · 집계 0.94 · MAE중앙 0.73)입니다.
 
 실행:  python src/predict.py
 """
@@ -31,18 +32,24 @@ except Exception:
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 DATA_PATH = PROJECT_DIR / "data" / "processed" / "train_table.csv"
+MODEL_DIR = PROJECT_DIR / "models"
+OUT_INDIV = PROJECT_DIR / "data" / "processed" / "predictions_v3_individual.csv"
+OUT_AGG = PROJECT_DIR / "data" / "processed" / "predictions_v3_greenhouse.csv"
 
 TARGET = "착과수"
-MODEL_PATH = PROJECT_DIR / "models" / "lgbm_fruit_count_v2.txt"     # ★ v2 모델
-FALLBACK = PROJECT_DIR / "models" / "lgbm_fruit_count_tuned.txt"    # 없으면 v1 튜닝
-
 GROWTH = ["관부직경", "엽병장", "엽수", "엽장", "엽폭", "착과수", "초장"]
 KEYS = ["온실번호", "조사일자", "측정라인", "표본번호"]
+
+# 모델 우선순위: v3(개체) → v2.1/v2(집계) → v1(튜닝)
+MODEL_CANDIDATES = [
+    ("v3", MODEL_DIR / "lgbm_fruit_count_v3.txt"),
+    ("v2.1", MODEL_DIR / "lgbm_fruit_count_v2.txt"),
+    ("v1", MODEL_DIR / "lgbm_fruit_count_tuned.txt"),
+]
 
 TRAIN_GREENHOUSES = [1, 2, 3]   # 학습에 쓴 온실
 CALIB_GREENHOUSE = 3            # 구간 보정용 (split-conformal)
 PREDICT_GREENHOUSE = 4          # '새 데이터'로 예측할 온실
-OUT_PATH = PROJECT_DIR / "data" / "processed" / "predictions_fruit_count_v2.csv"
 
 ALPHA = 0.20
 LO, HI = ALPHA / 2, 1 - ALPHA / 2
@@ -61,71 +68,101 @@ def conformal_Q(scores, alpha):
     return np.inf if k > n else s[k - 1]
 
 
-def load_aggregated():
-    """학습표를 '온실-날짜 평균'으로 집계 (v2와 동일)."""
-    df = pd.read_csv(DATA_PATH, encoding="utf-8-sig")
-    df["조사일자"] = pd.to_datetime(df["조사일자"])
-    agg = df.groupby(["온실번호", "조사일자"]).mean(numeric_only=True).reset_index()
-    return agg
+def pick_model():
+    for tag, path in MODEL_CANDIDATES:
+        if path.exists():
+            return tag, path
+    return None, None
 
 
 def main():
-    print("=" * 60)
-    print(f"예측(추론) v2 + 신뢰 구간 — 대상: {TARGET}")
-    print("=" * 60)
+    print("=" * 62)
+    print(f"예측(추론) + 신뢰 구간 — 대상: {TARGET}")
+    print("=" * 62)
 
-    # (1) v2 모델 로드
-    model_path = MODEL_PATH if MODEL_PATH.exists() else FALLBACK
-    if not model_path.exists():
-        print("[오류] 모델이 없습니다. 먼저 train_agg.py를 실행하세요.")
+    tag, model_path = pick_model()
+    if model_path is None:
+        print("[오류] 모델이 없습니다. 먼저 train_individual.py(또는 train_agg.py)를 실행하세요.")
         return
     booster = lgb.Booster(model_file=str(model_path))
     feat = booster.feature_name()
-    print(f"[모델] {model_path.name} · feature {len(feat)}개 (lag 포함)")
+    print(f"[모델] {model_path.name} ({tag}) · feature {len(feat)}개")
 
-    # (2) 집계 데이터 + 예측 온실 분리
-    agg = load_aggregated()
-    train = agg[agg["온실번호"].isin(TRAIN_GREENHOUSES)]
-    new = agg[agg["온실번호"] == PREDICT_GREENHOUSE].copy()
-    print(f"[데이터] 집계 {len(agg)}행 · 예측 온실 {PREDICT_GREENHOUSE}({len(new)}주)")
+    # 데이터 로드 (개체 단위 학습표)
+    df = pd.read_csv(DATA_PATH, encoding="utf-8-sig")
+    df["조사일자"] = pd.to_datetime(df["조사일자"])
 
-    # (3) 점 예측 (저장된 v2 모델)
-    new["예측값"] = booster.predict(new[feat])
+    # 모델 feature가 데이터에 다 있는지 확인 (버전 불일치 방지)
+    missing = [c for c in feat if c not in df.columns]
+    if missing:
+        print(f"[오류] 모델이 요구하는 feature가 학습표에 없습니다: {missing[:5]}...")
+        print("      data_prep.py를 다시 실행해 학습표를 최신화하세요.")
+        return
 
-    # (4) 예측 구간 — split-conformal (Q를 잰 모델과 예측 모델을 동일화)
+    train = df[df["온실번호"].isin(TRAIN_GREENHOUSES)]
+    new = df[df["온실번호"] == PREDICT_GREENHOUSE].copy()
+    print(f"[데이터] 학습 온실 {TRAIN_GREENHOUSES} · 예측 온실 {PREDICT_GREENHOUSE}"
+          f"({len(new)}개체행)")
+
+    # (1) 점 예측 (저장된 모델)
+    new["예측값"] = np.maximum(booster.predict(new[feat]), 0.0)
+
+    # (2) 예측 구간 — split-conformal (개체 단위)
     proper = train[train["온실번호"] != CALIB_GREENHOUSE]
     calib = train[train["온실번호"] == CALIB_GREENHOUSE]
     m_lo = quantile_model(LO).fit(proper[feat], proper[TARGET])
     m_hi = quantile_model(HI).fit(proper[feat], proper[TARGET])
     yc = calib[TARGET].to_numpy()
-    Q = conformal_Q(np.maximum(m_lo.predict(calib[feat]) - yc, yc - m_hi.predict(calib[feat])), ALPHA)
+    Q = conformal_Q(np.maximum(m_lo.predict(calib[feat]) - yc,
+                               yc - m_hi.predict(calib[feat])), ALPHA)
     new["예측하한"] = np.maximum(m_lo.predict(new[feat]) - Q, 0.0)   # 착과수 ≥ 0
     new["예측상한"] = m_hi.predict(new[feat]) + Q
+    # 점 예측(huber)과 구간(분위수)은 다른 모델 → 구간이 점 예측을 항상 감싸도록 보정
+    new["예측하한"] = np.minimum(new["예측하한"], new["예측값"])
+    new["예측상한"] = np.maximum(new["예측상한"], new["예측값"])
 
-    # (5) 저장
-    keep = ["온실번호", "조사일자", "예측하한", "예측값", "예측상한"]
+    # (3-a) 개체별 결과 저장
+    indiv_cols = ["온실번호", "측정라인", "표본번호", "조사일자",
+                  "예측하한", "예측값", "예측상한"]
     if TARGET in new.columns:
-        keep.append(TARGET)
-    result = new[keep].sort_values(["온실번호", "조사일자"])
-    result.to_csv(OUT_PATH, index=False, encoding="utf-8-sig")
-    print(f"[저장] 예측+구간 → {OUT_PATH}")
+        indiv_cols.append(TARGET)
+    indiv = new[indiv_cols].sort_values(["온실번호", "측정라인", "표본번호", "조사일자"])
+    indiv.to_csv(OUT_INDIV, index=False, encoding="utf-8-sig")
+    print(f"[저장] 개체별 예측 → {OUT_INDIV.name}")
 
-    # (6) 미리보기 + 참고 정확도
-    print("-" * 60)
-    print("미리보기(앞 6주):")
-    prev = result.copy()
-    prev["조사일자"] = prev["조사일자"].dt.date
-    print(prev.head(6).to_string(index=False))
+    # (3-b) 온실-날짜 평균으로 집계 (온실 전체 예보)
+    agg = (new.groupby(["온실번호", "조사일자"])
+              .agg(예측하한=("예측하한", "mean"), 예측값=("예측값", "mean"),
+                   예측상한=("예측상한", "mean"),
+                   실제평균=(TARGET, "mean") if TARGET in new.columns else ("예측값", "mean"))
+              .reset_index().sort_values("조사일자"))
+    agg.to_csv(OUT_AGG, index=False, encoding="utf-8-sig")
+    print(f"[저장] 온실-날짜 집계 예측 → {OUT_AGG.name}")
 
+    # (4) 미리보기
+    print("-" * 62)
+    print("온실-날짜 집계 예측 미리보기(앞 6주):")
+    prev = agg.copy(); prev["조사일자"] = prev["조사일자"].dt.date
+    show = ["조사일자", "예측하한", "예측값", "예측상한"]
+    if TARGET in new.columns:
+        show.append("실제평균")
+    print(prev[show].head(6).to_string(index=False))
+
+    # (5) 참고 정확도 (실제값이 있을 때만)
     if TARGET in new.columns:
         y = new[TARGET].to_numpy(); p = new["예측값"].to_numpy()
-        rmse = np.sqrt(np.mean((y - p) ** 2))
+        mae = np.mean(np.abs(y - p))
         cover = np.mean((y >= new["예측하한"]) & (y <= new["예측상한"]))
-        print("-" * 60)
-        print(f"[참고] 온실 {PREDICT_GREENHOUSE} RMSE={rmse:.3f} · 구간 적중률={cover*100:.0f}%")
-        print("       (저장 모델은 전체 학습이라 낙관적 — 정직한 성능은 LOGO R²=0.89)")
-    print("=" * 60)
-    print("[실전] '온실 4' 자리에 새 주차 데이터를 넣으면 예측값+구간이 나옵니다.")
+        gp = new.groupby(["온실번호", "조사일자"]).agg(a=(TARGET, "mean"), p=("예측값", "mean"))
+        agg_rmse = np.sqrt(np.mean((gp["a"] - gp["p"]) ** 2))
+        print("-" * 62)
+        print(f"[참고] 온실 {PREDICT_GREENHOUSE} — 개체 MAE={mae:.3f} · "
+              f"구간 적중률={cover*100:.0f}% · 집계 RMSE={agg_rmse:.3f}")
+        print("       (저장 모델은 전체 학습이라 낙관적 — 정직한 성능은 "
+              "LOGO 개체 R²=0.85 / 집계 0.94)")
+    print("=" * 62)
+    print("[실전] '온실 4' 자리에 새 주차 데이터(개체별 직전 조사 포함)를 넣으면 "
+          "개체·온실 예측이 나옵니다.")
 
 
 if __name__ == "__main__":

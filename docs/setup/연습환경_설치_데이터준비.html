@@ -294,13 +294,14 @@ pip install tabpfn chronos-forecasting
   <h2 class="sec">두 컴퓨터 환경 똑같이 유지하기</h2>
   <p class="sec-sub">손으로 맞추지 말고 파일 하나로 재현하세요.</p>
   <div class="card">
-    <pre><span class="c"># 한쪽에서 환경 내보내기 (torch 등 OS별 라인은 빼고 관리 권장)</span>
-pip freeze &gt; requirements.txt
-
-<span class="c"># 다른 컴퓨터에서 그대로 재현</span>
+    <pre><span class="c"># 저장소에는 '파이프라인 실행에 꼭 필요한' 최소 requirements.txt가 이미 있습니다</span>
+<span class="c">#   (pandas·numpy·scikit-learn·lightgbm·optuna·catboost — 6개)</span>
 conda create -n strawberry python=3.11 -y &amp;&amp; conda activate strawberry
-pip install -r requirements.txt   <span class="c"># torch는 위 OS별 명령으로 따로</span></pre>
-    <div class="plain">PyTorch 한 줄만 OS별로 다르게(맥=기본, 윈=CUDA) 두고, 나머지는 <code class="inl">requirements.txt</code>로 공유하면 양쪽이 항상 같은 버전으로 맞습니다. Git으로 <code class="inl">src/</code> 와 함께 올려두세요.</div>
+pip install -r requirements.txt      <span class="c"># 맥은 먼저:  brew install libomp</span>
+
+<span class="c"># 전체 재현은 한 방에</span>
+python src/run_all.py                 <span class="c"># 데이터→v2.1→v3→추론→결과지</span></pre>
+    <div class="plain">파이프라인만 돌리려면 위 <code class="inl">requirements.txt</code>(6개)면 충분합니다. 위쪽 Step 4의 <b>torch·darts·tabpfn 등 무거운 목록은 '리서치·실험용'(선택)</b>이라 파이프라인 재현엔 필요 없습니다. <code class="inl">pip freeze</code>로 전체를 덮어쓰면 GPU torch까지 섞여 맥에서 깨질 수 있으니, 최소 목록을 유지하세요.</div>
   </div>
 </section>
 

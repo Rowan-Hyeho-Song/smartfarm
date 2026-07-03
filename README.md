@@ -38,7 +38,8 @@ smartfarm/
 │  ├─ forecast_env.py        # 환경 예보 (h시간 뒤 내부 온도·CO₂)
 │  ├─ train_agg.py           # v2.1 — 온실-날짜 평균 + lag + 전주 분포 + 튜닝 (R² 0.89)
 │  ├─ train_individual.py    # v3 — 개체 추적 + 개체 lag, huber·MAE 튜닝 (집계 0.94·개체 0.85·MAE 0.73)
-│  └─ report.py              # 결과지 생성 (LOGO 행별 실제·예측·버킷·신뢰도 → CSV·HTML)
+│  ├─ report.py              # 결과지 생성 (LOGO 행별 실제·예측·버킷·신뢰도 → CSV·HTML)
+│  └─ run_all.py             # 전체 파이프라인 원커맨드 재현 (데이터→v2.1→v3→추론→결과지)
 ├─ models/                   # 학습된 모델
 ├─ docs/                     # 문서 (HTML, 브라우저로 열람)
 └─ requirements.txt
@@ -52,17 +53,22 @@ smartfarm/
 # 1) 가상환경 (Miniforge/conda 권장)
 conda create -n strawberry python=3.11 -y
 conda activate strawberry
-pip install pandas numpy scikit-learn lightgbm catboost optuna scipy
+pip install -r requirements.txt
 
 # (Mac은 LightGBM 전에)  brew install libomp
 
-# 2) 데이터 병합 → 학습 → 추론
-python src/data_prep.py       # data/processed/train_table.csv 생성
-python src/train.py           # 베이스라인 학습·저장
-python src/train_optuna.py    # 튜닝 모델 저장
-python src/predict.py         # 예측 + 신뢰 구간 → predictions_*.csv
-python src/forecast_env.py    # 환경 예보 성능
+# 2) 전체 재현 — 한 방에 (데이터→v2.1→v3→추론→결과지)
+python src/run_all.py
+
+# 2') 또는 단계별로
+python src/data_prep.py         # data/processed/train_table.csv 생성
+python src/train_agg.py         # v2.1 (온실 집계) 모델 저장
+python src/train_individual.py  # v3 (개체 추적) 모델 + 개체별 결과지
+python src/predict.py           # v3로 예측 + 구간 → predictions_v3_*.csv
+python src/forecast_env.py      # (선택) 환경 예보 성능
 ```
+
+> `predict.py`는 최고 모델 **v3**를 자동으로 씁니다(없으면 v2.1→v1 폴백). '온실 4' 자리에 새 주차 데이터를 넣으면 개체·온실 예측이 나옵니다.
 
 > 자세한 환경 구축(맥/윈도우 동일화)은 [docs/setup/연습환경_설치_데이터준비.html](docs/setup/연습환경_설치_데이터준비.html) 참고.
 

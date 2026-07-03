@@ -58,7 +58,9 @@ def load_aggregated():
     df = pd.read_csv(DATA_PATH, encoding="utf-8-sig")
     df["조사일자"] = pd.to_datetime(df["조사일자"])
     agg = df.groupby(["온실번호", "조사일자"]).mean(numeric_only=True).reset_index()
-    feat = ["온실번호"] + [c for c in agg.columns if c not in KEYS + GROWTH]
+    # '개체lag'(_개체전주)는 v3 전용 → v2.1 집계 결과지에선 제외 (train_agg와 동일 기준)
+    feat = ["온실번호"] + [c for c in agg.columns
+                          if c not in KEYS + GROWTH and "개체" not in c]
     return agg, feat
 
 
