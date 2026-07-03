@@ -90,7 +90,7 @@
   <p class="lede">딸기 생육 예측 모델을 만들며 내린 <b style="color:var(--text)">핵심 모델링 결정과 실험</b>을 "무엇이 문제였고, 어떻게 바꿨으며, 왜 그렇게 했는지"로 정리했습니다. (환경 셋팅·전처리 같은 준비 단계는 제외하고 모델링 중심으로만.)</p>
   <div class="meta">
     <span class="chip">범위 <b>검증 · 앙상블 · 불확실성 · 튜닝 · 실험</b></span>
-    <span class="chip">핵심 결과 <b>착과수 v3 집계 R² 0.94 · 개체 R² 0.84 · v2.1 0.89</b></span>
+    <span class="chip">핵심 결과 <b>착과수 v3 집계 R² 0.94 · 개체 R² 0.85 · MAE중앙 0.73</b></span>
     <span class="chip">데이터 <b>온실 1~4 · 2024-11~2025-02</b></span>
   </div>
   <div class="toc">
@@ -131,7 +131,7 @@
     <li><b>실증 계획서</b> — CO₂ 무작위 배정 A/B 프로토콜 4단계 작성(온실 확보 시 착수).</li>
     <li><b>v2 정확도 돌파</b> — 예측 단위 '개체→온실-날짜 평균' + lag(전주 생육) + 튜닝 → 착과수 <b>R² 0.87</b>(80% 돌파).</li>
     <li><b>v2.1 "살리기" + 결과지</b> — 평균으로 뭉갤 때 잃은 <b>전주 개체 분포</b>만 되살려 <b>R² 0.89</b>. 행별 결과지로 <b>버킷 정확도 73%</b> 확인.</li>
-    <li><b>v3 개체 추적(life2vec식)</b> — (온실+라인+표본)을 개체로 보고 그 <b>개체 자신의 과거</b>를 씀 → 개체 R² 0.64→<b>0.84</b>, 집계 <b>0.94</b>.</li>
+    <li><b>v3 개체 추적(life2vec식)</b> — (온실+라인+표본)을 개체로 보고 그 <b>개체 자신의 과거</b>를 씀 → 개체 R² 0.64→<b>0.85</b>, 집계 <b>0.94</b>. 손실을 <b>huber</b>로 바꿔 MAE중앙 <b>0.73</b>.</li>
   </ol>
 </div>
 
@@ -157,7 +157,7 @@
         <tr><td class="term">⑪</td><td>제어</td><td>실증 실험 계획서 (무작위 배정)</td><td class="good">프로토콜 4단계</td></tr>
         <tr><td class="term">⑫</td><td>모델</td><td>v2 — 온실-날짜 평균 + lag + 튜닝</td><td class="good">착과수 R² 0.87 (80%+)</td></tr>
         <tr><td class="term">⑬</td><td>모델</td><td>v2.1 — 전주 개체 분포 살리기 + 결과지</td><td class="good">R² 0.89 · 버킷 73%</td></tr>
-        <tr><td class="term">⑭</td><td>모델</td><td>v3 — 개체 추적(life2vec식) + 개체 lag</td><td class="good">개체 0.84 · 집계 0.94</td></tr>
+        <tr><td class="term">⑭</td><td>모델</td><td>v3 — 개체 추적 + huber·MAE 튜닝</td><td class="good">개체 0.85·집계 0.94·MAE 0.73</td></tr>
       </tbody>
     </table>
   </div>
@@ -367,8 +367,8 @@
     <div class="head"><span class="num">14</span><h3>개체를 시퀀스로 추적 — v3 (life2vec식 개체 lag)</h3><span class="tag t-model">모델</span></div>
     <div class="rows">
       <div class="r cause"><div class="lbl">원인</div><div class="body">v2.1까지 예측 단위는 '온실 평균'. 개체 하나하나는 R² <b>0.64에서 막혀</b> 있었고, <b>어느 표본이 부진한지</b> 알 수 없었다. "(온실+측정라인+표본번호)를 하나의 개체로 세분화하면?"이라는 질문(life2vec식 발상 — 개체의 과거 시퀀스).</div></div>
-      <div class="r change"><div class="lbl">변경</div><div class="body"><b>A.</b> 개체 식별 검증 — <b>40개체가 15회 조사에 모두 등장</b> → 같은 물리적 개체(추적 가능). <b>B.</b> '그 개체 <b>자신의</b> 전주·전전주' lag 추가(<code class="inl">data_prep.py</code> <code class="inl">add_plant_lag_features</code>) — v2 lag(온실 평균)와 달리 표본마다 값이 다름. <b>C.</b> v3 모델 + <b>개체별 결과지</b>(<code class="inl">train_individual.py</code> → 개체 15주 궤적 그래프).</div></div>
-      <div class="r why"><div class="lbl">이유</div><div class="body">개체 자신의 과거가 <b>최강 신호</b>(중요 feature 1위 <code class="inl">착과수_개체전주</code>). 개체 R² <b>0.64 → 0.84</b>, 집계 R² <b>0.78 → 0.94</b>(v2.1 0.89 상회). 정확도뿐 아니라 <b>개체 해상도</b>(라인·표본별 부진 진단)를 함께 얻음.</div></div>
+      <div class="r change"><div class="lbl">변경</div><div class="body"><b>A.</b> 개체 식별 검증 — <b>40개체가 15회 조사에 모두 등장</b> → 같은 물리적 개체(추적 가능). <b>B.</b> '그 개체 <b>자신의</b> 전주·전전주' lag 추가(<code class="inl">data_prep.py</code> <code class="inl">add_plant_lag_features</code>) — v2 lag(온실 평균)와 달리 표본마다 값이 다름. <b>C.</b> v3 모델 + <b>개체별 결과지</b>(<code class="inl">train_individual.py</code> → 개체 15주 궤적 그래프). <b>D.</b> MAE를 낮추려 손실을 <b>huber</b>(L2·L1 절충)로 바꾸고 튜닝 목표를 <b>MAE 최소화</b>로 — L1(순수 MAE)은 집계 R²가 떨어졌지만 huber는 MAE·R² 둘 다 개선.</div></div>
+      <div class="r why"><div class="lbl">이유</div><div class="body">개체 자신의 과거가 <b>최강 신호</b>(중요 feature 1위 <code class="inl">착과수_개체전주</code>). 개체 R² <b>0.64 → 0.85</b>, 집계 R² <b>0.78 → 0.94</b>(v2.1 0.89 상회). huber 손실로 <b>개체 MAE 중앙값 0.83 → 0.73</b>까지 낮춤. 정확도뿐 아니라 <b>개체 해상도</b>(라인·표본별 부진 진단)를 함께 얻음.</div></div>
     </div>
   </div>
   <div class="tbl-wrap">
@@ -377,7 +377,7 @@
       <tbody>
         <tr><td class="term">v1 · 개체 (개체 lag 없음)</td><td class="bad">0.64</td><td>0.78</td></tr>
         <tr><td class="term">v2.1 · 온실-날짜 평균 직접</td><td>—</td><td class="good">0.89</td></tr>
-        <tr><td class="term">v3 · 개체 추적 + 개체 lag <b>← 최종</b></td><td class="good">0.84</td><td class="good">0.94</td></tr>
+        <tr><td class="term">v3 · 개체 추적 + huber·MAE 튜닝 <b>← 최종</b></td><td class="good">0.85</td><td class="good">0.94</td></tr>
       </tbody>
     </table>
   </div>
@@ -393,7 +393,7 @@
     <table>
       <thead><tr><th>예측 대상</th><th>권장 검증</th><th>R²</th><th>메모</th></tr></thead>
       <tbody>
-        <tr><td class="term">착과수 (v3 개체추적)</td><td>온실별</td><td class="good">0.94 / 0.84</td><td>개체 lag · 집계R²/개체R² · 개체 해상도</td></tr>
+        <tr><td class="term">착과수 (v3 개체추적)</td><td>온실별</td><td class="good">0.94 / 0.85</td><td>개체 lag · huber·MAE 튜닝 · MAE중앙 0.73</td></tr>
         <tr><td class="term">착과수 (v2.1)</td><td>온실별</td><td class="good">0.89</td><td>평균+lag+<b>전주 분포</b>+튜닝 · 버킷 정확도 73%</td></tr>
         <tr><td class="term">착과수 (v2)</td><td>온실별</td><td class="good">0.87</td><td>평균+lag+튜닝 · 구간 적중률 83%</td></tr>
         <tr><td class="term">관부직경</td><td>온실별</td><td class="good">0.43</td><td>세력(vigor) 지표</td></tr>

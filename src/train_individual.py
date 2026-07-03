@@ -77,8 +77,11 @@ def scores(oof):
 
 
 def tune(df, feat):
+    # 손실은 huber(L2·L1 절충), 튜닝 목표는 '전체 MAE 최소화'.
+    #  → MAE(특히 개체 MAE 중앙값)를 직접 낮추면서도 huber라 R²까지 지킨다.
+    #    (실측: L2/R²튜닝 대비 MAE 중앙 0.78→0.73, 개체R² 0.84→0.85, 집계R² 0.94 유지)
     def obj(t):
-        p = dict(objective="regression",
+        p = dict(objective="huber",
                  n_estimators=t.suggest_int("n_estimators", 200, 700),
                  learning_rate=t.suggest_float("learning_rate", 0.01, 0.15, log=True),
                  num_leaves=t.suggest_int("num_leaves", 15, 63),
@@ -87,11 +90,12 @@ def tune(df, feat):
                  colsample_bytree=t.suggest_float("colsample_bytree", 0.5, 1.0),
                  reg_alpha=t.suggest_float("reg_alpha", 1e-3, 5.0, log=True),
                  reg_lambda=t.suggest_float("reg_lambda", 1e-3, 5.0, log=True))
-        return scores(logo_oof(df, feat, p))[1]   # 집계 R² 최대화 (v2.1과 공정 비교)
-    st = optuna.create_study(direction="maximize",
+        o = logo_oof(df, feat, p)
+        return mean_absolute_error(o[TARGET], o["예측"])   # 전체 MAE 최소화
+    st = optuna.create_study(direction="minimize",
                              sampler=optuna.samplers.TPESampler(seed=SEED))
     st.optimize(obj, n_trials=N_TRIALS)
-    return dict(objective="regression", **st.best_params)
+    return dict(objective="huber", **st.best_params)
 
 
 def sparkline(actual, pred, w=150, h=34, pad=4):
@@ -121,16 +125,22 @@ def main():
     plant_n = len([c for c in feat if "개체전" in c])
     print(f"[데이터] {len(df)}행(개체×조사) · feature {len(feat)}개 (그중 개체 lag {plant_n}개)")
 
+    def mae_median(o):
+        pm = o.groupby(["온실번호", "측정라인", "표본번호"]).apply(
+            lambda s: np.mean(np.abs(s[TARGET] - s["예측"])), include_groups=False)
+        return mean_absolute_error(o[TARGET], o["예측"]), float(np.median(pm))
+
     base = dict(objective="regression", n_estimators=400, learning_rate=0.05,
                 num_leaves=31, min_child_samples=10, subsample=0.9, colsample_bytree=0.8)
-    bi, ba = scores(logo_oof(df, feat, base))
-    print(f"[튜닝 전] 개체 R² {bi:.4f} · 집계 R² {ba:.4f}")
+    o0 = logo_oof(df, feat, base); bi, ba = scores(o0); bmae, bmed = mae_median(o0)
+    print(f"[튜닝 전 L2] 개체 R² {bi:.4f} · 집계 R² {ba:.4f} · 전체 MAE {bmae:.3f} · MAE중앙 {bmed:.3f}")
 
-    print(f"[탐색] {N_TRIALS}회...")
+    print(f"[탐색] huber + MAE 최소화 {N_TRIALS}회...")
     params = tune(df, feat)
     oof = logo_oof(df, feat, params)
-    ind, agg = scores(oof)
-    print(f"[튜닝 후] 개체 R² {ind:.4f} · 집계 R² {agg:.4f}   (v2.1 집계 0.893)")
+    ind, agg = scores(oof); tmae, tmed = mae_median(oof)
+    print(f"[튜닝 후 huber] 개체 R² {ind:.4f} · 집계 R² {agg:.4f} · "
+          f"전체 MAE {tmae:.3f} · MAE중앙 {tmed:.3f}")
 
     # 최종 모델(전체 학습) 저장
     final = lgb.LGBMRegressor(**params, random_state=SEED, verbose=-1)
@@ -161,6 +171,9 @@ def main():
 
 def render_html(oof, ind, agg):
     mae = mean_absolute_error(oof[TARGET], oof["예측"])
+    plant_mae = oof.groupby(["온실번호", "측정라인", "표본번호"]).apply(
+        lambda s: np.mean(np.abs(s[TARGET] - s["예측"])), include_groups=False)
+    mae_med = float(np.median(plant_mae))
     n_plant = oof.groupby(["온실번호", "측정라인", "표본번호"]).ngroups
 
     # 개체별 요약 행
@@ -213,14 +226,15 @@ a.back{{font-size:13px;color:#4f46e5;text-decoration:none}}
 <p class="sub">(온실+측정라인+표본번호) = 하나의 개체로 보고, 그 개체 자신의 과거로 예측 (LOGO out-of-fold)</p>
 <div class="chips">
 <span class="chip">모델 LightGBM v3</span>
+<span class="chip">손실 huber · MAE 최소화</span>
 <span class="chip">개체 lag(자기 전주·전전주)</span>
 <span class="chip">검증 LOGO (온실별)</span>
 <span class="chip">개체 {n_plant}개 × 15주</span>
 </div>
 <div class="cards">
-<div class="card main"><div class="v">{ind:.2f}</div><div class="l">개체 R²<br>(개체 하나하나)</div></div>
+<div class="card main"><div class="v">{mae_med:.2f}</div><div class="l">개체 MAE 중앙값<br>(huber·MAE 튜닝)</div></div>
+<div class="card"><div class="v">{ind:.2f}</div><div class="l">개체 R²<br>(개체 하나하나)</div></div>
 <div class="card"><div class="v">{agg:.2f}</div><div class="l">집계 R²<br>(온실-날짜 평균)</div></div>
-<div class="card"><div class="v">{mae:.2f}</div><div class="l">개체 MAE<br>(평균 절대오차)</div></div>
 <div class="card"><div class="v">{n_plant}</div><div class="l">추적 개체 수<br>(온실당 10)</div></div>
 </div>
 <div class="legend">
