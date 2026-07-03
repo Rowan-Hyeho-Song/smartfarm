@@ -46,9 +46,9 @@
   .sec-sub{color:var(--text-dim);margin:0 0 26px;font-size:15.5px;}
 
   /* ── JOURNEY ── */
-  .journey{overflow-x:auto;padding:4px 2px 8px;}
-  .jrow{display:flex;align-items:stretch;gap:0;min-width:min-content;}
-  .jstep{flex:0 0 auto;width:100px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 8px;text-align:center;}
+  .journey{padding:4px 2px 8px;}
+  .jrow{display:flex;flex-wrap:wrap;align-items:stretch;gap:9px 3px;}
+  .jstep{flex:0 0 auto;width:112px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 8px;text-align:center;}
   .jstep .jn{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,var(--berry),#d94d63);color:#fff;
     font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 7px;}
   .jstep .jt{font-size:12.5px;font-weight:750;line-height:1.25;}
@@ -125,6 +125,8 @@
       <div class="jstep"><div class="jn">7</div><div class="jt">환경 예보</div><div class="jd">선제 제어</div></div>
       <div class="jarrow">→</div>
       <div class="jstep win"><div class="jn">★</div><div class="jt">v2.1 돌파</div><div class="jd">R² 0.89</div></div>
+      <div class="jarrow">→</div>
+      <div class="jstep win"><div class="jn">★</div><div class="jt">v3 개체추적</div><div class="jd">집계 0.94·개체 0.84</div></div>
     </div>
   </div>
 </section>
@@ -150,6 +152,9 @@
       <a class="doc" href="report/착과수_예측_결과지.html">
         <div class="ic">📄</div><div class="dt">착과수 예측 결과지 (v2.1)</div>
         <div class="dd">온실-날짜 60건 행별 실제·예측·버킷일치·신뢰도. 버킷 정확도 73%.</div><span class="badge">결과지</span></a>
+      <a class="doc" href="report/착과수_개체별_결과지.html">
+        <div class="ic">🔬</div><div class="dt">착과수 개체별 결과지 (v3)</div>
+        <div class="dd">개체 40개 × 15주 궤적(실제 vs 예측). 개체 추적으로 개체 R² 0.84·집계 0.94.</div><span class="badge">결과지</span></a>
     </div>
   </div>
 
@@ -213,7 +218,7 @@
     <span class="chip">데이터 <b>온실 1~4 · 2024-11~2025-02</b></span>
   </div>
   <div class="note">
-    <b>정직성 원칙</b> — 모든 성능은 '처음 보는 상황'을 흉내 낸 검증(LOGO/시간분할) 기준이며, 데이터 누수를 구조적으로 차단했습니다. v2.1(R² 0.89)는 집계라 60행 기준이라 데이터 확대 시 재확인이 필요합니다.
+    <b>정직성 원칙</b> — 모든 성능은 '처음 보는 상황'을 흉내 낸 검증(LOGO/시간분할) 기준이며, 데이터 누수를 구조적으로 차단했습니다. v2.1(집계 R² 0.89)·v3(개체 추적, 집계 0.94·개체 0.84) 모두 온실 4개·소표본 기준이라 데이터 확대 시 재확인이 필요합니다.
   </div>
 </section>
 

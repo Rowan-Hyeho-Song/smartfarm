@@ -1,0 +1,304 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>착과수 개체별 결과지 (v3)</title>
+<style>
+:root{--bd:#e3e6ea;--mut:#6b7280;--ink:#111827;--accent:#16a34a}
+*{box-sizing:border-box}
+body{font-family:"Segoe UI","Malgun Gothic",system-ui,sans-serif;margin:0;background:#f7f8fa;color:var(--ink)}
+.wrap{max-width:960px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:24px;margin:0 0 4px}
+.sub{color:var(--mut);font-size:14px;margin:0 0 20px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.chip{background:#eef2ff;color:#3730a3;border-radius:999px;padding:4px 12px;font-size:12.5px;font-weight:600}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.card{background:#fff;border:1px solid var(--bd);border-radius:14px;padding:16px 14px;text-align:center}
+.card .v{font-size:26px;font-weight:800;line-height:1}
+.card .l{font-size:12px;color:var(--mut);margin-top:6px}
+.card.main .v{color:var(--accent)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin:0 2px 14px;align-items:center}
+.legend .ln{display:inline-block;width:18px;height:0;border-top:2px solid #9ca3af;vertical-align:middle;margin-right:4px}
+.legend .lp{display:inline-block;width:18px;height:0;border-top:2px solid var(--accent);vertical-align:middle;margin-right:4px}
+.tablewrap{max-height:74vh;overflow:auto;background:#fff;border:1px solid var(--bd);border-radius:14px}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:640px}
+th,td{padding:6px 10px;border-bottom:1px solid #eef0f3;text-align:center;white-space:nowrap}
+th{background:#eef1f5;color:#374151;font-weight:700;position:sticky;top:0;z-index:2;box-shadow:inset 0 -1px 0 #d5d9df}
+td.num{font-variant-numeric:tabular-nums}
+td.strong{font-weight:700;color:var(--accent)}
+td.spark{padding:2px 10px}
+.note{margin-top:20px;font-size:12.5px;color:var(--mut);line-height:1.7;background:#fff;border:1px solid var(--bd);border-radius:12px;padding:14px 16px}
+a.back{font-size:13px;color:#4f46e5;text-decoration:none}
+</style></head><body><div class="wrap">
+<a class="back" href="../index.html">← 문서 인덱스</a>
+<h1>🍓 착과수 개체별 결과지 <span style="font-size:15px;color:var(--mut)">v3 · 개체 추적</span></h1>
+<p class="sub">(온실+측정라인+표본번호) = 하나의 개체로 보고, 그 개체 자신의 과거로 예측 (LOGO out-of-fold)</p>
+<div class="chips">
+<span class="chip">모델 LightGBM v3</span>
+<span class="chip">개체 lag(자기 전주·전전주)</span>
+<span class="chip">검증 LOGO (온실별)</span>
+<span class="chip">개체 40개 × 15주</span>
+</div>
+<div class="cards">
+<div class="card main"><div class="v">0.84</div><div class="l">개체 R²<br>(개체 하나하나)</div></div>
+<div class="card"><div class="v">0.94</div><div class="l">집계 R²<br>(온실-날짜 평균)</div></div>
+<div class="card"><div class="v">0.78</div><div class="l">개체 MAE<br>(평균 절대오차)</div></div>
+<div class="card"><div class="v">40</div><div class="l">추적 개체 수<br>(온실당 10)</div></div>
+</div>
+<div class="legend">
+<span><span class="ln"></span>실제 착과수</span>
+<span><span class="lp"></span>예측 착과수</span>
+<span>· 궤적은 15주간 변화 (왼쪽 정식 초기 → 오른쪽 최근)</span>
+<span>· 오차 칸 색: 초록 낮음 / 노랑 중간 / 빨강 높음</span>
+</div>
+<div class="tablewrap"><table>
+<thead><tr>
+<th>온실</th><th>라인</th><th>표본</th><th>평균 실제</th><th>평균 예측</th><th>MAE</th><th>15주 궤적 (실제 vs 예측)</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>1</td><td>1</td><td>1</td>
+<td class="num">4.00</td><td class="num strong">4.05</td>
+<td class="num" style="background:#fff8e1">0.74</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,24.2 44.6,15.6 54.7,4.0 64.9,4.0 75.0,12.7 85.1,18.4 95.3,21.3 105.4,27.1 115.6,15.6 125.7,15.6 135.9,15.6 146.0,12.7" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.2 14.1,29.8 24.3,29.7 34.4,28.9 44.6,13.2 54.7,7.7 64.9,5.5 75.0,10.6 85.1,17.1 95.3,20.0 105.4,21.3 115.6,17.7 125.7,18.3 135.9,13.2 146.0,12.1" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>1</td><td>1</td><td>2</td>
+<td class="num">3.40</td><td class="num strong">3.89</td>
+<td class="num" style="background:#fff8e1">0.93</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,30.0 44.6,23.5 54.7,7.2 64.9,7.2 75.0,13.8 85.1,13.8 95.3,20.2 105.4,23.5 115.6,17.0 125.7,17.0 135.9,17.0 146.0,4.0" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.1 14.1,29.2 24.3,26.6 34.4,25.4 44.6,18.0 54.7,9.4 64.9,4.8 75.0,11.1 85.1,18.2 95.3,18.9 105.4,19.7 115.6,15.4 125.7,17.6 135.9,9.4 146.0,7.4" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>1</td><td>2</td><td>1</td>
+<td class="num">4.53</td><td class="num strong">4.56</td>
+<td class="num" style="background:#fdeaea">1.39</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,24.2 24.3,15.6 34.4,12.7 44.6,4.0 54.7,9.8 64.9,9.8 75.0,15.6 85.1,18.4 95.3,24.2 105.4,30.0 115.6,15.6 125.7,15.6 135.9,12.7 146.0,15.6" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.2 14.1,28.9 24.3,21.4 34.4,17.3 44.6,8.2 54.7,4.6 64.9,7.1 75.0,12.3 85.1,18.5 95.3,19.7 105.4,20.9 115.6,22.8 125.7,18.2 135.9,12.0 146.0,11.1" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>1</td><td>2</td><td>2</td>
+<td class="num">4.07</td><td class="num strong">4.21</td>
+<td class="num" style="background:#fdeaea">1.22</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,27.0 34.4,24.0 44.6,5.8 54.7,11.9 64.9,11.9 75.0,17.9 85.1,20.9 95.3,20.9 105.4,27.0 115.6,11.9 125.7,14.9 135.9,5.8 146.0,5.8" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.2 14.1,27.7 24.3,28.0 34.4,21.2 44.6,10.8 54.7,4.0 64.9,8.8 75.0,13.9 85.1,18.7 95.3,19.3 105.4,20.8 115.6,16.8 125.7,17.3 135.9,12.1 146.0,10.7" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>1</td><td>3</td><td>1</td>
+<td class="num">3.60</td><td class="num strong">3.81</td>
+<td class="num" style="background:#fff8e1">0.79</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,30.0 44.6,13.5 54.7,7.0 64.9,7.0 75.0,13.5 85.1,13.5 95.3,13.5 105.4,20.1 115.6,20.1 125.7,20.1 135.9,10.2 146.0,13.5" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.3 14.1,30.0 24.3,28.8 34.4,28.1 44.6,18.8 54.7,6.0 64.9,4.0 75.0,10.0 85.1,17.0 95.3,18.7 105.4,19.1 115.6,16.2 125.7,16.2 135.9,10.6 146.0,8.9" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>1</td><td>3</td><td>2</td>
+<td class="num">3.67</td><td class="num strong">3.87</td>
+<td class="num" style="background:#e8f5e9">0.67</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,30.0 44.6,16.8 54.7,6.9 64.9,6.9 75.0,10.2 85.1,13.5 95.3,16.8 105.4,23.4 115.6,23.4 125.7,16.8 135.9,6.9 146.0,6.9" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.3 14.1,29.5 24.3,28.3 34.4,27.7 44.6,20.6 54.7,6.0 64.9,4.0 75.0,10.5 85.1,14.5 95.3,18.2 105.4,19.3 115.6,15.8 125.7,15.9 135.9,10.5 146.0,8.5" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>1</td><td>4</td><td>1</td>
+<td class="num">3.53</td><td class="num strong">3.77</td>
+<td class="num" style="background:#e8f5e9">0.41</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,26.3 44.6,15.3 54.7,4.2 64.9,4.2 75.0,11.6 85.1,15.3 95.3,19.0 105.4,22.6 115.6,11.6 125.7,15.3 135.9,7.9 146.0,11.6" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.3 14.1,29.3 24.3,29.5 34.4,26.8 44.6,9.6 54.7,5.6 64.9,4.0 75.0,8.4 85.1,15.3 95.3,17.5 105.4,20.6 115.6,12.9 125.7,15.3 135.9,9.4 146.0,8.1" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>1</td><td>4</td><td>2</td>
+<td class="num">3.93</td><td class="num strong">4.01</td>
+<td class="num" style="background:#e8f5e9">0.50</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,26.8 44.6,13.8 54.7,4.0 64.9,4.0 75.0,10.5 85.1,13.8 95.3,20.2 105.4,23.5 115.6,10.5 125.7,17.0 135.9,10.5 146.0,13.8" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.3 14.1,29.7 24.3,30.0 34.4,28.3 44.6,12.1 54.7,6.6 64.9,5.0 75.0,8.9 85.1,13.4 95.3,17.0 105.4,21.8 115.6,14.7 125.7,15.8 135.9,11.2 146.0,10.4" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>1</td><td>5</td><td>1</td>
+<td class="num">3.53</td><td class="num strong">3.95</td>
+<td class="num" style="background:#e8f5e9">0.47</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,26.4 44.6,11.9 54.7,4.7 64.9,4.7 75.0,8.3 85.1,15.6 95.3,19.2 105.4,26.4 115.6,15.6 125.7,15.6 135.9,8.3 146.0,11.9" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.3 14.1,29.3 24.3,29.3 34.4,27.0 44.6,9.9 54.7,4.9 64.9,4.0 75.0,8.7 85.1,12.3 95.3,16.3 105.4,20.3 115.6,12.8 125.7,15.0 135.9,8.7 146.0,8.4" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>1</td><td>5</td><td>2</td>
+<td class="num">4.47</td><td class="num strong">4.32</td>
+<td class="num" style="background:#fff8e1">0.87</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,17.0 34.4,13.8 44.6,4.0 54.7,4.0 64.9,4.0 75.0,10.5 85.1,13.8 95.3,17.0 105.4,23.5 115.6,17.0 125.7,17.0 135.9,13.8 146.0,17.0" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.4 14.1,29.2 24.3,28.2 34.4,18.0 44.6,9.0 54.7,5.7 64.9,5.5 75.0,9.8 85.1,14.5 95.3,17.5 105.4,19.5 115.6,16.0 125.7,16.9 135.9,10.6 146.0,9.7" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>2</td><td>1</td><td>1</td>
+<td class="num">4.00</td><td class="num strong">3.81</td>
+<td class="num" style="background:#e8f5e9">0.54</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,26.8 44.6,13.8 54.7,4.0 64.9,4.0 75.0,10.5 85.1,13.8 95.3,17.0 105.4,23.5 115.6,17.0 125.7,17.0 135.9,7.2 146.0,10.5" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.8 14.1,30.0 24.3,29.4 34.4,29.2 44.6,16.1 54.7,5.5 64.9,5.2 75.0,8.1 85.1,14.8 95.3,18.2 105.4,19.0 115.6,16.4 125.7,16.6 135.9,14.7 146.0,11.3" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>2</td><td>1</td><td>2</td>
+<td class="num">3.33</td><td class="num strong">3.49</td>
+<td class="num" style="background:#e8f5e9">0.51</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,30.0 44.6,15.2 54.7,4.2 64.9,4.2 75.0,7.9 85.1,15.2 95.3,18.9 105.4,22.6 115.6,18.9 125.7,18.9 135.9,7.9 146.0,11.5" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.7 14.1,30.0 24.3,30.0 34.4,28.6 44.6,20.2 54.7,5.9 64.9,4.0 75.0,8.4 85.1,13.8 95.3,18.7 105.4,19.0 115.6,12.9 125.7,14.3 135.9,10.6 146.0,10.8" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>2</td><td>2</td><td>1</td>
+<td class="num">5.33</td><td class="num strong">4.52</td>
+<td class="num" style="background:#fdeaea">1.21</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,27.6 14.1,27.6 24.3,19.8 34.4,17.1 44.6,6.6 54.7,4.0 64.9,4.0 75.0,11.9 85.1,19.8 95.3,19.8 105.4,19.8 115.6,19.8 125.7,19.8 135.9,11.9 146.0,14.5" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,30.0 14.1,24.0 24.3,21.5 34.4,19.0 44.6,14.0 54.7,10.9 64.9,10.6 75.0,13.3 85.1,16.4 95.3,22.8 105.4,22.1 115.6,19.0 125.7,20.1 135.9,17.3 146.0,14.8" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>2</td><td>2</td><td>2</td>
+<td class="num">5.53</td><td class="num strong">4.53</td>
+<td class="num" style="background:#fff8e1">1.08</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,21.5 14.1,21.5 24.3,12.8 34.4,9.8 44.6,4.0 54.7,6.9 64.9,6.9 75.0,12.8 85.1,15.7 95.3,18.6 105.4,18.6 115.6,18.6 125.7,18.6 135.9,12.8 146.0,12.8" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,30.0 14.1,23.3 24.3,20.6 34.4,18.3 44.6,10.3 54.7,8.9 64.9,9.6 75.0,11.4 85.1,16.1 95.3,19.9 105.4,21.1 115.6,18.4 125.7,19.3 135.9,14.4 146.0,14.5" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>2</td><td>3</td><td>1</td>
+<td class="num">3.87</td><td class="num strong">3.94</td>
+<td class="num" style="background:#fff8e1">0.72</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,27.1 44.6,15.6 54.7,4.0 64.9,4.0 75.0,12.7 85.1,15.6 95.3,21.3 105.4,24.2 115.6,18.4 125.7,15.6 135.9,15.6 146.0,18.4" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.5 14.1,29.4 24.3,27.1 34.4,26.0 44.6,15.4 54.7,9.1 64.9,8.3 75.0,10.1 85.1,16.6 95.3,19.0 105.4,20.4 115.6,16.4 125.7,18.2 135.9,16.4 146.0,17.5" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>2</td><td>3</td><td>2</td>
+<td class="num">4.93</td><td class="num strong">4.41</td>
+<td class="num" style="background:#fff8e1">0.78</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,27.2 14.1,27.2 24.3,17.3 34.4,14.0 44.6,4.0 54.7,7.3 64.9,7.3 75.0,10.6 85.1,14.0 95.3,17.3 105.4,20.6 115.6,10.6 125.7,10.6 135.9,10.6 146.0,14.0" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,30.0 14.1,23.0 24.3,20.0 34.4,17.0 44.6,8.7 54.7,6.4 64.9,7.3 75.0,10.1 85.1,15.1 95.3,18.0 105.4,20.2 115.6,17.6 125.7,17.6 135.9,13.9 146.0,14.2" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>2</td><td>4</td><td>1</td>
+<td class="num">4.93</td><td class="num strong">4.48</td>
+<td class="num" style="background:#fff8e1">0.87</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,27.0 14.1,27.0 24.3,17.2 34.4,13.9 44.6,7.3 54.7,4.0 64.9,4.0 75.0,10.6 85.1,13.9 95.3,20.5 105.4,23.7 115.6,10.6 125.7,13.9 135.9,7.3 146.0,10.6" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,30.0 14.1,23.0 24.3,20.5 34.4,17.4 44.6,10.1 54.7,7.9 64.9,7.0 75.0,9.3 85.1,14.2 95.3,18.3 105.4,20.9 115.6,15.3 125.7,16.3 135.9,13.0 146.0,10.7" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>2</td><td>4</td><td>2</td>
+<td class="num">4.60</td><td class="num strong">4.39</td>
+<td class="num" style="background:#e8f5e9">0.67</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,27.0 14.1,27.0 24.3,20.5 34.4,17.2 44.6,7.3 54.7,7.3 64.9,4.0 75.0,13.9 85.1,17.2 95.3,17.2 105.4,20.5 115.6,13.9 125.7,13.9 135.9,10.6 146.0,10.6" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,30.0 14.1,22.7 24.3,19.3 34.4,16.4 44.6,7.6 54.7,7.4 64.9,7.1 75.0,9.5 85.1,16.5 95.3,20.8 105.4,20.5 115.6,16.9 125.7,17.0 135.9,13.3 146.0,13.1" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>2</td><td>5</td><td>1</td>
+<td class="num">4.07</td><td class="num strong">3.69</td>
+<td class="num" style="background:#e8f5e9">0.47</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,26.3 44.6,4.0 54.7,4.0 64.9,4.0 75.0,7.7 85.1,11.4 95.3,15.1 105.4,18.9 115.6,15.1 125.7,15.1 135.9,4.0 146.0,7.7" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.7 14.1,30.0 24.3,29.4 34.4,26.9 44.6,14.5 54.7,4.2 64.9,4.5 75.0,8.3 85.1,13.0 95.3,17.4 105.4,17.9 115.6,15.6 125.7,14.2 135.9,11.0 146.0,7.7" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>2</td><td>5</td><td>2</td>
+<td class="num">4.47</td><td class="num strong">4.21</td>
+<td class="num" style="background:#fff8e1">0.85</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,22.8 14.1,22.8 24.3,22.8 34.4,15.3 44.6,7.8 54.7,4.0 64.9,4.0 75.0,11.5 85.1,11.5 95.3,19.1 105.4,22.8 115.6,11.5 125.7,11.5 135.9,4.0 146.0,11.5" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,30.0 14.1,22.3 24.3,18.4 34.4,16.7 44.6,6.2 54.7,6.4 64.9,5.7 75.0,8.7 85.1,15.3 95.3,17.7 105.4,20.3 115.6,15.1 125.7,15.6 135.9,11.1 146.0,7.9" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>3</td><td>1</td><td>1</td>
+<td class="num">3.60</td><td class="num strong">3.58</td>
+<td class="num" style="background:#fff8e1">0.93</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,30.0 44.6,26.8 54.7,10.5 64.9,4.0 75.0,10.5 85.1,17.0 95.3,23.5 105.4,23.5 115.6,13.8 125.7,13.8 135.9,4.0 146.0,7.2" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,28.4 14.1,29.8 24.3,28.0 34.4,27.1 44.6,26.0 54.7,13.8 64.9,5.7 75.0,7.0 85.1,14.2 95.3,18.0 105.4,20.5 115.6,15.9 125.7,16.1 135.9,13.8 146.0,11.2" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>3</td><td>1</td><td>2</td>
+<td class="num">3.60</td><td class="num strong">3.45</td>
+<td class="num" style="background:#fff8e1">0.83</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,30.0 44.6,18.9 54.7,11.5 64.9,4.0 75.0,11.5 85.1,15.2 95.3,15.2 105.4,15.2 115.6,15.2 125.7,15.2 135.9,4.0 146.0,4.0" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,28.1 14.1,29.8 24.3,28.5 34.4,26.1 44.6,25.2 54.7,6.9 64.9,4.0 75.0,5.9 85.1,13.9 95.3,16.2 105.4,18.2 115.6,15.1 125.7,16.6 135.9,12.7 146.0,10.5" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>3</td><td>2</td><td>1</td>
+<td class="num">3.80</td><td class="num strong">3.67</td>
+<td class="num" style="background:#fff8e1">0.87</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,30.0 44.6,20.2 54.7,10.5 64.9,4.0 75.0,10.5 85.1,13.8 95.3,20.2 105.4,23.5 115.6,10.5 125.7,13.8 135.9,7.2 146.0,10.5" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,27.6 14.1,29.4 24.3,28.1 34.4,26.3 44.6,25.3 54.7,9.2 64.9,5.6 75.0,8.3 85.1,14.6 95.3,17.1 105.4,20.6 115.6,16.3 125.7,15.7 135.9,13.9 146.0,13.1" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>3</td><td>2</td><td>2</td>
+<td class="num">3.33</td><td class="num strong">3.76</td>
+<td class="num" style="background:#e8f5e9">0.69</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,30.0 44.6,23.3 54.7,10.0 64.9,6.7 75.0,10.0 85.1,16.7 95.3,20.0 105.4,26.7 115.6,13.3 125.7,13.3 135.9,10.0 146.0,13.3" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,27.5 14.1,29.3 24.3,26.9 34.4,24.6 44.6,23.9 54.7,11.1 64.9,4.0 75.0,9.3 85.1,14.0 95.3,17.7 105.4,19.4 115.6,14.7 125.7,14.5 135.9,12.3 146.0,12.6" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>3</td><td>3</td><td>1</td>
+<td class="num">3.80</td><td class="num strong">3.42</td>
+<td class="num" style="background:#fff8e1">0.70</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,30.0 44.6,23.5 54.7,10.5 64.9,4.0 75.0,10.5 85.1,10.5 95.3,13.8 105.4,17.0 115.6,13.8 125.7,13.8 135.9,13.8 146.0,13.8" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,28.2 14.1,29.9 24.3,28.9 34.4,26.9 44.6,26.0 54.7,13.3 64.9,6.8 75.0,8.8 85.1,15.3 95.3,15.8 105.4,18.7 115.6,17.6 125.7,17.7 135.9,14.4 146.0,15.2" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>3</td><td>3</td><td>2</td>
+<td class="num">4.93</td><td class="num strong">4.47</td>
+<td class="num" style="background:#fff8e1">0.76</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,25.0 14.1,28.5 24.3,21.5 34.4,14.5 44.6,7.5 54.7,7.5 64.9,4.0 75.0,7.5 85.1,11.0 95.3,14.5 105.4,21.5 115.6,14.5 125.7,14.5 135.9,14.5 146.0,14.5" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,30.0 14.1,25.0 24.3,22.4 34.4,15.5 44.6,10.0 54.7,5.4 64.9,5.3 75.0,10.0 85.1,15.5 95.3,18.2 105.4,19.0 115.6,18.7 125.7,17.6 135.9,15.5 146.0,16.8" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>3</td><td>4</td><td>1</td>
+<td class="num">3.47</td><td class="num strong">3.52</td>
+<td class="num" style="background:#fff8e1">0.89</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,26.4 44.6,11.9 54.7,8.3 64.9,8.3 75.0,11.9 85.1,19.2 95.3,19.2 105.4,26.4 115.6,15.5 125.7,11.9 135.9,4.7 146.0,8.3" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,28.0 14.1,30.0 24.3,28.4 34.4,26.8 44.6,18.9 54.7,4.0 64.9,5.4 75.0,8.6 85.1,15.4 95.3,17.9 105.4,20.3 115.6,16.7 125.7,15.9 135.9,11.9 146.0,11.2" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>3</td><td>4</td><td>2</td>
+<td class="num">4.27</td><td class="num strong">3.84</td>
+<td class="num" style="background:#fff8e1">0.99</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,26.8 44.6,7.3 54.7,4.1 64.9,4.1 75.0,7.3 85.1,10.6 95.3,13.8 105.4,26.8 115.6,20.3 125.7,17.0 135.9,7.3 146.0,7.3" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,28.2 14.1,29.8 24.3,29.0 34.4,27.7 44.6,20.1 54.7,4.8 64.9,4.0 75.0,8.1 85.1,14.9 95.3,15.8 105.4,18.2 115.6,18.1 125.7,17.6 135.9,13.9 146.0,13.0" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>3</td><td>5</td><td>1</td>
+<td class="num">3.20</td><td class="num strong">3.62</td>
+<td class="num" style="background:#fff8e1">1.05</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,26.6 44.6,19.8 54.7,13.0 64.9,13.0 75.0,16.4 85.1,13.0 95.3,19.8 105.4,26.6 115.6,13.0 125.7,13.0 135.9,9.7 146.0,13.0" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,27.9 14.1,29.4 24.3,28.6 34.4,27.3 44.6,17.2 54.7,6.0 64.9,4.0 75.0,10.1 85.1,17.2 95.3,17.5 105.4,20.6 115.6,16.9 125.7,16.0 135.9,13.5 146.0,13.8" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>3</td><td>5</td><td>2</td>
+<td class="num">3.53</td><td class="num strong">3.71</td>
+<td class="num" style="background:#fdeaea">1.27</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,30.0 44.6,9.4 54.7,9.4 64.9,9.4 75.0,12.8 85.1,16.3 95.3,23.1 105.4,26.6 115.6,12.8 125.7,12.8 135.9,6.0 146.0,9.4" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,27.9 14.1,29.6 24.3,28.4 34.4,24.7 44.6,24.3 54.7,5.0 64.9,4.0 75.0,8.7 85.1,14.6 95.3,17.8 105.4,19.9 115.6,16.9 125.7,14.8 135.9,11.6 146.0,11.1" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>4</td><td>1</td><td>1</td>
+<td class="num">3.53</td><td class="num strong">3.49</td>
+<td class="num" style="background:#fff8e1">0.80</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,30.0 44.6,20.2 54.7,7.2 64.9,4.0 75.0,7.2 85.1,13.8 95.3,23.5 105.4,17.0 115.6,17.0 125.7,20.2 135.9,13.8 146.0,13.8" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.8 14.1,30.0 24.3,28.2 34.4,27.5 44.6,20.9 54.7,11.6 64.9,6.6 75.0,10.4 85.1,11.7 95.3,17.1 105.4,24.5 115.6,14.9 125.7,17.8 135.9,16.2 146.0,13.0" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>4</td><td>1</td><td>2</td>
+<td class="num">3.87</td><td class="num strong">3.80</td>
+<td class="num" style="background:#e8f5e9">0.63</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,27.1 44.6,15.6 54.7,6.9 64.9,4.0 75.0,9.8 85.1,12.7 95.3,21.3 105.4,18.4 115.6,15.6 125.7,21.3 135.9,21.3 146.0,18.4" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.8 14.1,30.0 24.3,29.2 34.4,27.6 44.6,16.1 54.7,6.9 64.9,7.5 75.0,11.3 85.1,13.3 95.3,19.0 105.4,24.8 115.6,17.4 125.7,18.0 135.9,18.5 146.0,15.8" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>4</td><td>2</td><td>1</td>
+<td class="num">4.40</td><td class="num strong">4.27</td>
+<td class="num" style="background:#fff8e1">0.80</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,27.1 34.4,21.3 44.6,9.8 54.7,4.0 64.9,4.0 75.0,6.9 85.1,12.7 95.3,15.6 105.4,21.3 115.6,15.6 125.7,21.3 135.9,18.4 146.0,21.3" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,28.5 14.1,30.0 24.3,29.1 34.4,22.6 44.6,12.1 54.7,6.4 64.9,6.6 75.0,11.5 85.1,11.8 95.3,16.5 105.4,20.4 115.6,19.4 125.7,16.5 135.9,18.7 146.0,15.1" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>4</td><td>2</td><td>2</td>
+<td class="num">3.40</td><td class="num strong">3.67</td>
+<td class="num" style="background:#fff8e1">0.83</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,30.0 44.6,27.1 54.7,9.8 64.9,4.0 75.0,12.7 85.1,15.6 95.3,15.6 105.4,24.2 115.6,18.4 125.7,18.4 135.9,18.4 146.0,18.4" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,28.5 14.1,30.0 24.3,28.8 34.4,27.7 44.6,19.1 54.7,13.8 64.9,8.1 75.0,11.1 85.1,14.3 95.3,18.7 105.4,20.6 115.6,19.3 125.7,18.2 135.9,17.0 146.0,15.6" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>4</td><td>3</td><td>1</td>
+<td class="num">3.67</td><td class="num strong">3.91</td>
+<td class="num" style="background:#e8f5e9">0.50</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,30.0 44.6,17.0 54.7,7.2 64.9,4.0 75.0,10.5 85.1,10.5 95.3,17.0 105.4,20.2 115.6,17.0 125.7,17.0 135.9,17.0 146.0,13.8" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,28.6 14.1,30.0 24.3,26.5 34.4,25.5 44.6,19.0 54.7,8.1 64.9,4.5 75.0,8.9 85.1,11.1 95.3,15.9 105.4,20.8 115.6,18.7 125.7,16.6 135.9,13.0 146.0,12.1" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>4</td><td>3</td><td>2</td>
+<td class="num">3.67</td><td class="num strong">4.09</td>
+<td class="num" style="background:#e8f5e9">0.61</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,26.8 44.6,13.9 54.7,4.2 64.9,4.2 75.0,10.7 85.1,13.9 95.3,17.1 105.4,23.6 115.6,13.9 125.7,20.3 135.9,17.1 146.0,17.1" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,28.6 14.1,30.0 24.3,28.0 34.4,25.7 44.6,14.9 54.7,4.0 64.9,4.7 75.0,9.1 85.1,11.6 95.3,16.6 105.4,20.5 115.6,17.0 125.7,14.7 135.9,14.9 146.0,12.0" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>4</td><td>4</td><td>1</td>
+<td class="num">3.93</td><td class="num strong">4.17</td>
+<td class="num" style="background:#e8f5e9">0.55</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,27.1 44.6,15.6 54.7,6.9 64.9,4.0 75.0,9.8 85.1,12.7 95.3,15.6 105.4,21.3 115.6,18.4 125.7,18.4 135.9,18.4 146.0,21.3" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.2 14.1,29.8 24.3,27.7 34.4,25.8 44.6,15.4 54.7,7.4 64.9,7.2 75.0,11.2 85.1,13.0 95.3,16.9 105.4,20.5 115.6,18.2 125.7,18.2 135.9,14.7 146.0,14.1" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>4</td><td>4</td><td>2</td>
+<td class="num">2.93</td><td class="num strong">3.55</td>
+<td class="num" style="background:#fff8e1">0.84</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,30.0 44.6,26.5 54.7,8.8 64.9,5.2 75.0,12.3 85.1,15.8 95.3,19.4 105.4,26.5 115.6,12.3 125.7,15.8 135.9,15.8 146.0,15.8" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.0 14.1,30.0 24.3,27.2 34.4,25.5 44.6,19.7 54.7,11.8 64.9,4.0 75.0,9.1 85.1,12.5 95.3,15.1 105.4,22.3 115.6,15.2 125.7,14.1 135.9,13.7 146.0,12.2" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>4</td><td>5</td><td>1</td>
+<td class="num">3.80</td><td class="num strong">3.70</td>
+<td class="num" style="background:#e8f5e9">0.56</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,26.8 44.6,17.0 54.7,4.0 64.9,4.0 75.0,10.5 85.1,13.8 95.3,17.0 105.4,20.2 115.6,17.0 125.7,13.8 135.9,17.0 146.0,13.8" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.1 14.1,30.0 24.3,28.7 34.4,26.7 44.6,13.2 54.7,8.6 64.9,5.7 75.0,10.0 85.1,13.2 95.3,18.6 105.4,21.6 115.6,19.5 125.7,17.1 135.9,12.7 146.0,14.7" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+<tr>
+<td>4</td><td>5</td><td>2</td>
+<td class="num">3.40</td><td class="num strong">3.52</td>
+<td class="num" style="background:#e8f5e9">0.55</td>
+<td class="spark"><svg width="150" height="34" viewBox="0 0 150 34"><polyline points="4.0,30.0 14.1,30.0 24.3,30.0 34.4,30.0 44.6,26.3 54.7,8.0 64.9,4.3 75.0,8.0 85.1,8.0 95.3,11.6 105.4,15.3 115.6,15.3 125.7,19.0 135.9,15.3 146.0,11.6" fill="none" stroke="#9ca3af" stroke-width="1.5"/><polyline points="4.0,29.0 14.1,30.0 24.3,28.9 34.4,27.2 44.6,17.2 54.7,9.7 64.9,4.0 75.0,7.8 85.1,10.9 95.3,14.9 105.4,18.0 115.6,15.8 125.7,16.3 135.9,14.2 146.0,12.4" fill="none" stroke="#16a34a" stroke-width="1.8"/></svg></td>
+</tr>
+</tbody></table></div>
+<div class="note">
+<b>이 결과지가 v2.1과 다른 점</b> — v2.1은 '온실 전체 평균' 한 값을 예측했지만, v3은 <b>표본 개체 하나하나</b>를 예측합니다.
+그 개체 자신의 지난주 착과수(<code>착과수_개체전주</code>)가 가장 강한 단서라, 개체 예측 R²가 <b>0.64 → 0.84</b>로 크게 올랐습니다.
+집계로 올리면 R² <b>0.94</b>로 v2.1(0.893)과 대등하면서, <b>개체 해상도</b>(어느 라인·표본이 부진한지)를 추가로 얻습니다.<br>
+<b>정직한 한계</b> — 개체 40개·600행·온실 4개 LOGO 기준이라 데이터가 늘면 수치는 달라질 수 있습니다. 궤적의 실제선이 예측선과 붙어 있을수록 그 개체를 잘 맞힌 것입니다.
+</div>
+</div></body></html>
