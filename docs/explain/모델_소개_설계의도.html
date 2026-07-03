@@ -61,6 +61,21 @@
   .pr.p1 h4{color:var(--leaf);} .pr.p2 h4{color:var(--gold);} .pr.p3 h4{color:var(--violet);}
   .pr p{margin:0;font-size:14px;color:var(--text-dim);}
 
+  /* 버전 카드 */
+  .vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:14px;margin-bottom:20px;}
+  .vcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px;}
+  .vcard .vb{display:inline-block;font-size:12px;font-weight:800;padding:3px 11px;border-radius:7px;margin-bottom:11px;}
+  .vcard h4{margin:0 0 3px;font-size:15px;font-weight:750;color:var(--text);}
+  .vcard .u{font-size:12px;color:var(--text-faint);margin-bottom:11px;}
+  .vcard p{margin:0 0 11px;font-size:13px;color:var(--text-dim);line-height:1.6;}
+  .vcard .r{font-size:13px;font-weight:750;color:var(--leaf);}
+  .vcard.v1 .vb{background:rgba(124,132,148,.18);color:#aeb6c6;}
+  .vcard.v2 .vb{background:rgba(55,200,195,.16);color:var(--new);}
+  .vcard.v21 .vb{background:rgba(95,211,154,.16);color:var(--leaf);}
+  .vcard.v3 .vb{background:rgba(255,200,97,.16);color:var(--gold);}
+  .vcard.v3{border-color:rgba(255,200,97,.4);}
+  .vcard.v1 .r{color:#aeb6c6;}
+
   .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;margin:6px 0 0;}
   table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px;}
   thead th{background:#23283a;color:var(--berry-soft);text-align:left;font-weight:700;padding:12px 15px;border-bottom:1px solid var(--line);white-space:nowrap;}
@@ -102,6 +117,7 @@
     <a href="#io">입력·출력</a>
     <a href="#principle">설계 3원칙</a>
     <a href="#how">작동 4단계</a>
+    <a href="#versions">버전별 진화</a>
     <a href="#glossary">용어 풀이</a>
     <a href="#match">검증방식</a>
     <a href="#decisions">설계 결정</a>
@@ -229,6 +245,94 @@
       </g>
     </svg>
   </div>
+</section>
+
+<!-- 버전별 진화 -->
+<section id="versions">
+  <p class="kicker">Evolution</p>
+  <h2 class="sec">버전별 진화 — v1 → v2 → v2.1 → v3</h2>
+  <p class="sec-sub">같은 데이터로 <b style="color:var(--text)">'무엇을 예측 단위로 삼느냐'</b>와 <b style="color:var(--text)">'어떤 과거를 쓰느냐'</b>를 바꿔가며 정확도를 끌어올렸습니다.</p>
+
+  <div class="vgrid">
+    <div class="vcard v1">
+      <span class="vb">v1</span>
+      <h4>개체 단위 예측</h4>
+      <div class="u">예측 단위 · 표본 개체 하나</div>
+      <p>환경 요약 + 발달단계(재배 주차)로 부스팅 트리 학습. 하지만 개체마다 랜덤 편차(약 62%)가 커서 정확도가 막힘.</p>
+      <div class="r">개체 R² 0.64~0.73</div>
+    </div>
+    <div class="vcard v2">
+      <span class="vb">v2</span>
+      <h4>온실-날짜 평균 + lag</h4>
+      <div class="u">예측 단위 · 온실 전체 평균</div>
+      <p>개체 노이즈를 평균으로 제거하고 '전주 생육(lag)'을 추가. 우리가 실제 제어하는 단위(온실)와도 일치.</p>
+      <div class="r">집계 R² 0.87</div>
+    </div>
+    <div class="vcard v21">
+      <span class="vb">v2.1</span>
+      <h4>+ 전주 개체 '분포' 살리기</h4>
+      <div class="u">예측 단위 · 온실 전체 평균</div>
+      <p>평균으로 뭉갤 때 사라지던 '전주 개체 분포'(표준편차·최소·최대·중앙)만 골라 입력으로 되살림.</p>
+      <div class="r">집계 R² 0.89</div>
+    </div>
+    <div class="vcard v3">
+      <span class="vb">v3</span>
+      <h4>개체 추적 (life2vec식)</h4>
+      <div class="u">예측 단위 · 표본 개체 (시계열 추적)</div>
+      <p>(온실+라인+표본)을 한 개체로 보고 <b>그 개체 자신의 과거</b>를 사용. 손실도 huber로 바꿔 MAE까지 낮춤.</p>
+      <div class="r">개체 R² 0.85 · 집계 0.94 · MAE중앙 0.73</div>
+    </div>
+  </div>
+
+  <div class="fig">
+    <svg viewBox="0 0 620 300" role="img" aria-label="버전별 착과수 예측 정확도 진화">
+      <line class="grid-line" x1="70" y1="30"  x2="600" y2="30"/>
+      <line class="grid-line" x1="70" y1="66"  x2="600" y2="66"/>
+      <line class="grid-line" x1="70" y1="102" x2="600" y2="102"/>
+      <line class="grid-line" x1="70" y1="138" x2="600" y2="138"/>
+      <line class="grid-line" x1="70" y1="174" x2="600" y2="174"/>
+      <line class="grid-line" x1="70" y1="210" x2="600" y2="210"/>
+      <text class="axis-t" x="60" y="34"  text-anchor="end">1.0</text>
+      <text class="axis-t" x="60" y="70"  text-anchor="end">0.8</text>
+      <text class="axis-t" x="60" y="106" text-anchor="end">0.6</text>
+      <text class="axis-t" x="60" y="142" text-anchor="end">0.4</text>
+      <text class="axis-t" x="60" y="178" text-anchor="end">0.2</text>
+      <text class="axis-t" x="60" y="214" text-anchor="end">0</text>
+      <!-- bars: v1 .64, v2 .87, v2.1 .89, v3 .94 -->
+      <rect x="95"  y="94.8" width="80" height="115.2" rx="5" fill="#5c6478"/>
+      <rect x="225" y="53.4" width="80" height="156.6" rx="5" fill="#37c8c3"/>
+      <rect x="355" y="49.8" width="80" height="160.2" rx="5" fill="#5fd39a"/>
+      <rect x="485" y="40.8" width="80" height="169.2" rx="5" fill="#ffc861"/>
+      <text class="bar-lab" x="135" y="87"  text-anchor="middle">0.64</text>
+      <text class="bar-lab" x="265" y="46"  text-anchor="middle">0.87</text>
+      <text class="bar-lab" x="395" y="42"  text-anchor="middle">0.89</text>
+      <text class="bar-lab" x="525" y="33"  text-anchor="middle" fill="#ffc861">0.94</text>
+      <text class="cat-lab" x="135" y="230" text-anchor="middle" fill="#e7e9ee" font-weight="750">v1</text>
+      <text class="cat-lab" x="265" y="230" text-anchor="middle" fill="#e7e9ee" font-weight="750">v2</text>
+      <text class="cat-lab" x="395" y="230" text-anchor="middle" fill="#e7e9ee" font-weight="750">v2.1</text>
+      <text class="cat-lab" x="525" y="230" text-anchor="middle" fill="#ffc861" font-weight="750">v3</text>
+      <text class="cat-lab" x="135" y="246" text-anchor="middle" fill="#7b8294">개체 단위</text>
+      <text class="cat-lab" x="265" y="246" text-anchor="middle" fill="#7b8294">온실 집계</text>
+      <text class="cat-lab" x="395" y="246" text-anchor="middle" fill="#7b8294">온실 집계</text>
+      <text class="cat-lab" x="525" y="246" text-anchor="middle" fill="#7b8294">개체 추적</text>
+    </svg>
+  </div>
+  <p class="cap">착과수 예측 정확도 진화 — v1은 개체 R², v2·v2.1은 온실 집계 R², v3는 집계 0.94(개체 단위로도 0.85)</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>버전</th><th>핵심 변화</th><th>왜 그렇게 했나</th><th>성능</th></tr></thead>
+      <tbody>
+        <tr><td class="term">v1</td><td>환경 요약 + 발달단계, 부스팅 트리</td><td>개체 예측의 출발점 — 하지만 개체 편차가 노이즈로 작용.</td><td>개체 R² <b>0.64~0.73</b></td></tr>
+        <tr><td class="term">v2</td><td>예측 단위를 <b>온실-날짜 평균</b>으로 + lag(전주 생육)</td><td>개체 노이즈 제거 + 실제 <b>제어 단위(온실)</b>와 일치.</td><td>집계 R² <b>0.87</b></td></tr>
+        <tr><td class="term">v2.1</td><td>전주 개체 <b>분포</b>(std·min·max·중앙) 추가</td><td>평균으로 뭉갤 때 잃은 '분포 모양' 신호를 복원.</td><td>집계 R² <b>0.89</b></td></tr>
+        <tr><td class="term">v3</td><td><b>개체별 lag</b>(자기 과거) + huber·MAE 튜닝</td><td>개체 자신의 과거가 최강 신호 + MAE 직접 최소화.</td><td>개체 <b>0.85</b>·집계 <b>0.94</b>·MAE <b>0.73</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="plain">핵심 흐름: <b>개체(v1) → 온실 평균으로 노이즈 제거(v2) → 뭉갤 때 잃은 분포 되살리기(v2.1) → 개체를 시계열로 추적(v3)</b>. "문제를 어떻게 정의하느냐"가 정확도를 갈랐습니다.</div>
+  <div class="honest">v2.1·v3는 온실 4개·소표본(집계 60행 / 개체 600행) 기준이라 데이터가 늘면 수치가 달라질 수 있습니다. v3의 집계 우위(+0.05)는 소표본 차이일 수 있어, <b style="color:var(--text)">개체 해상도라는 '새 능력'</b>에 더 큰 의미가 있습니다.</div>
 </section>
 
 <!-- 용어 풀이 -->
