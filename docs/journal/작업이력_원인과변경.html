@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>모델링 작업 이력 — 원인 · 변경 · 이유</title>
+<style>
+  :root{
+    --bg:#0e1014; --bg-soft:#161922; --card:#1b1f2a; --card-2:#222736;
+    --line:#2c3242; --text:#e7e9ee; --text-dim:#a4abba; --text-faint:#7b8294;
+    --berry:#ff5d73; --berry-soft:#ff8a9c; --leaf:#5fd39a; --gold:#ffc861;
+    --sky:#5cc8ff; --violet:#b69bff; --radius:16px; --maxw:960px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%, #1d2230 0%, var(--bg) 55%);
+    color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px 120px;}
+  header.hero{max-width:var(--maxw);margin:0 auto;padding:60px 22px 34px;}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.14em;font-weight:700;color:var(--berry-soft);
+    text-transform:uppercase;border:1px solid rgba(255,93,115,.35);border-radius:999px;padding:6px 14px;margin-bottom:20px;background:rgba(255,93,115,.07);}
+  h1.title{font-size:clamp(26px,5vw,40px);line-height:1.2;margin:0 0 16px;font-weight:800;letter-spacing:-.01em;}
+  h1.title .accent{color:var(--berry);}
+  .lede{font-size:clamp(15.5px,2.3vw,18px);color:var(--text-dim);max-width:730px;margin:0;}
+  .meta{margin-top:24px;display:flex;flex-wrap:wrap;gap:10px;}
+  .chip{font-size:13px;color:var(--text-dim);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 13px;}
+  .chip b{color:var(--text);font-weight:700;}
+
+  .tldr{background:linear-gradient(135deg,rgba(255,93,115,.14),rgba(182,155,255,.10));
+    border:1px solid rgba(255,93,115,.30);border-radius:var(--radius);padding:24px 28px;margin:6px auto 0;max-width:var(--maxw);}
+  .tldr h2{margin:0 0 12px;font-size:17px;color:var(--berry-soft);letter-spacing:.02em;}
+  .tldr ol{margin:0;padding-left:22px;} .tldr li{margin:7px 0;font-size:15.5px;color:var(--text);} .tldr b{color:#fff;}
+
+  section{margin-top:52px;}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--berry);text-transform:uppercase;margin:0 0 8px;}
+  h2.sec{font-size:clamp(20px,3.4vw,26px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;}
+  .sec-sub{color:var(--text-dim);margin:0 0 24px;font-size:15.5px;}
+  p{margin:0 0 15px;} .dim{color:var(--text-dim);}
+
+  /* 이슈 카드 — 원인/변경/이유 3단 */
+  .issue{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:0;margin-bottom:18px;overflow:hidden;}
+  .issue > .head{display:flex;align-items:center;gap:12px;padding:16px 22px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--line);}
+  .issue .num{flex:0 0 30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--berry),#d94d63);
+    color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .issue .head h3{margin:0;font-size:17px;font-weight:750;}
+  .issue .tag{margin-left:auto;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:6px;white-space:nowrap;}
+  .t-data{background:rgba(95,211,154,.16);color:var(--leaf);}
+  .t-model{background:rgba(182,155,255,.16);color:var(--violet);}
+  .rows{padding:6px 22px 18px;}
+  .r{display:grid;grid-template-columns:96px 1fr;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+  .r:last-child{border-bottom:none;}
+  .r .lbl{font-size:13px;font-weight:800;padding-top:1px;}
+  .r.cause .lbl{color:var(--berry-soft);}
+  .r.change .lbl{color:var(--sky);}
+  .r.why .lbl{color:var(--leaf);}
+  .r .body{font-size:14.5px;color:var(--text-dim);}
+  .r .body b{color:var(--text);}
+  code.inl{background:var(--card-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-family:Consolas,monospace;font-size:12.5px;color:var(--sky);}
+
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;margin:6px 0 0;}
+  table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px;}
+  thead th{background:#23283a;color:var(--berry-soft);text-align:left;font-weight:700;padding:11px 15px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  tbody td{padding:11px 15px;border-bottom:1px solid var(--line);color:var(--text-dim);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:rgba(255,255,255,.018);}
+  tbody td b{color:var(--text);} td.term{color:#fff;font-weight:700;white-space:nowrap;}
+  .good{color:var(--leaf);font-weight:700;} .bad{color:var(--berry-soft);font-weight:700;}
+
+  .plain{border-left:3px solid var(--leaf);background:rgba(95,211,154,.07);border-radius:10px;padding:13px 17px;margin:16px 0 0;color:var(--text);font-size:14.5px;}
+  .plain b{color:var(--leaf);}
+  .plain::before{content:"🍓 핵심 교훈";display:block;font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--leaf);margin-bottom:5px;}
+
+  .files{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:6px;}
+  .file{background:var(--card-2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;}
+  .file .fn{font-family:Consolas,monospace;font-size:13px;color:var(--sky);margin-bottom:5px;}
+  .file .fd{font-size:13.5px;color:var(--text-dim);}
+
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;}
+  .toc a{font-size:13.5px;color:var(--text-dim);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:7px 12px;text-decoration:none;}
+  .toc a:hover{color:var(--text);border-color:var(--berry);}
+  footer{max-width:var(--maxw);margin:56px auto 0;padding:22px 22px 0;border-top:1px solid var(--line);color:var(--text-faint);font-size:13.5px;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">베리디시전 · 모델링 작업 이력</span>
+  <h1 class="title">모델링 작업 이력 — <span class="accent">원인 · 변경 · 이유</span></h1>
+  <p class="lede">딸기 생육 예측 모델을 만들며 내린 <b style="color:var(--text)">핵심 모델링 결정과 실험</b>을 "무엇이 문제였고, 어떻게 바꿨으며, 왜 그렇게 했는지"로 정리했습니다. (환경 셋팅·전처리 같은 준비 단계는 제외하고 모델링 중심으로만.)</p>
+  <div class="meta">
+    <span class="chip">범위 <b>검증 · 앙상블 · 불확실성 · 튜닝 · 실험</b></span>
+    <span class="chip">핵심 결과 <b>착과수 R² 0.67~0.73 · 구간 적중률 83%</b></span>
+    <span class="chip">데이터 <b>온실 1~4 · 2024-11~2025-02</b></span>
+  </div>
+  <div class="toc">
+    <a href="#timeline">전체 흐름</a>
+    <a href="#c1">① 검증방식</a>
+    <a href="#c2">② 앙상블·CV</a>
+    <a href="#c3">③ 불확실성</a>
+    <a href="#c4">④ 튜닝</a>
+    <a href="#c5">⑤ 추론·구간</a>
+    <a href="#c6">⑥ 지표·창 실험</a>
+    <a href="#c7">⑦ 강규제 비교</a>
+    <a href="#c8">⑧ 룰 베이스 제어</a>
+    <a href="#c9">⑨ A/B 제어 실험</a>
+    <a href="#c10">⑩ 환경 예보</a>
+    <a href="#c11">⑪ 실증 계획</a>
+    <a href="#result">결과 · 파일</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+<div class="tldr">
+  <h2>한눈에 — 모델링 핵심 11가지</h2>
+  <ol>
+    <li><b>검증방식 매칭</b> — 착과수는 '온실별 검증' + 발달단계 feature로 R² −1.3 → <b>0.67</b> (검증이 안 맞으면 "예측 불가"라는 오판).</li>
+    <li><b>앙상블 + 교차검증</b> — LightGBM+CatBoost 평균, 온실별 4-fold로 안정화 (0.62 → 0.66).</li>
+    <li><b>불확실성 정량화 + Conformal</b> — 예측 구간 적중률 54% → <b>77%</b>(목표 80%).</li>
+    <li><b>Optuna 튜닝</b> — 설정값 자동 탐색으로 0.62 → 0.67 (온실4 홀드아웃 0.73).</li>
+    <li><b>추론 + 예측 구간</b> — 저장 모델로 제출, split-conformal로 구간 폭 5.0 → <b>3.63</b>(적중률 83%).</li>
+    <li><b>지표·창 실험</b> — 7개 생육 지표 × 검증방식 × 집계 창을 비교해 지표별 최적 규명.</li>
+    <li><b>강규제 선형 vs 부스팅</b> — Ridge/Lasso를 실측 비교, 우리 데이터엔 부스팅이 우세.</li>
+    <li><b>룰 베이스 제어 설계</b> — 데이터 상관(복합·다변량)으로 제어 규칙 지정. <b>CO₂가 유일한 독립 레버</b>, VPD·습도는 그림자.</li>
+    <li><b>A/B 제어 실험(CO₂·온도)</b> — 고CO₂ 초장 <b>+1.57cm</b>(p&lt;0.001·포화형). 온도는 저온일수록 신장↑이나 '도장' 트레이드오프 레버.</li>
+    <li><b>환경 예보 트랙</b> — 내부온도 예보 성공(6h <b>R²0.86</b>), CO₂는 예보 불가(=조작 레버). 선제 제어의 눈.</li>
+    <li><b>실증 계획서</b> — CO₂ 무작위 배정 A/B 프로토콜 4단계 작성(온실 확보 시 착수).</li>
+  </ol>
+</div>
+
+<!-- 전체 흐름 -->
+<section id="timeline">
+  <p class="kicker">Overview</p>
+  <h2 class="sec">전체 흐름</h2>
+  <p class="sec-sub">모델을 세우고 → 안정화하고 → 불확실성을 붙이고 → 튜닝하고 → 검증한 순서입니다.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>#</th><th>분류</th><th>무엇</th><th>결과</th></tr></thead>
+      <tbody>
+        <tr><td class="term">①</td><td>모델</td><td>검증방식 매칭 + 발달단계 feature</td><td class="good">착과수 R² −1.3 → 0.67</td></tr>
+        <tr><td class="term">②</td><td>모델</td><td>앙상블 + 온실별 교차검증</td><td class="good">0.62 → 0.66</td></tr>
+        <tr><td class="term">③</td><td>모델</td><td>불확실성 구간 + Conformal 보정</td><td class="good">적중률 54% → 77%</td></tr>
+        <tr><td class="term">④</td><td>모델</td><td>Optuna 하이퍼파라미터 튜닝</td><td class="good">0.67 / 온실4 0.73</td></tr>
+        <tr><td class="term">⑤</td><td>모델</td><td>추론(predict) + 예측 구간</td><td class="good">폭 3.63 · 적중률 83%</td></tr>
+        <tr><td class="term">⑥</td><td>실험</td><td>7개 지표 × 검증 × 집계 창</td><td class="good">지표별 최적 규명</td></tr>
+        <tr><td class="term">⑦</td><td>실험</td><td>강규제 선형 vs 부스팅</td><td class="good">부스팅 우세 확인</td></tr>
+        <tr><td class="term">⑧</td><td>제어</td><td>상관 기반 룰 베이스 제어 설계</td><td class="good">CO₂ 독립 레버 규명</td></tr>
+        <tr><td class="term">⑨</td><td>제어</td><td>A/B 제어 실험 (CO₂·온도)</td><td class="good">초장 +1.57cm (p&lt;0.001)</td></tr>
+        <tr><td class="term">⑩</td><td>제어</td><td>환경 예보 트랙 (온도·CO₂)</td><td class="good">온도 6h R² 0.86</td></tr>
+        <tr><td class="term">⑪</td><td>제어</td><td>실증 실험 계획서 (무작위 배정)</td><td class="good">프로토콜 4단계</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ① 검증방식 -->
+<section id="c1">
+  <div class="issue">
+    <div class="head"><span class="num">1</span><h3>검증방식이 안 맞으면 예측이 안 된다 — 착과수</h3><span class="tag t-model">모델</span></div>
+    <div class="rows">
+      <div class="r cause"><div class="lbl">원인</div><div class="body">첫 베이스라인에서 착과수 <b>R²=−1.33</b>(평균 찍기보다 못함). ① 착과수는 '직전 환경'보다 <b>화방 발달주기(재배 몇 주차)</b>에 좌우됨. ② 데이터가 <b>15주뿐</b>이라 '뒤 4주 검증(시간분할)'은 그 주차가 학습범위 밖 → 트리 <b>외삽 불가</b>.</div></div>
+      <div class="r change"><div class="lbl">변경</div><div class="body"><b>A.</b> <b>발달단계 feature</b>(재배경과주차·조사회차·월) 추가. <b>B.</b> 검증방식 스위치(<code class="inl">VALIDATION</code>) — <code class="inl">time</code>(뒤 N주) / <code class="inl">greenhouse</code>(온실 하나를 통째로 검증). 착과수는 <code class="inl">greenhouse</code>. (평가 시 미래 정보가 새지 않게 조사 당일 환경은 제외 = 누수 차단)</div></div>
+      <div class="r why"><div class="lbl">이유</div><div class="body">'온실별 검증'은 <b>모든 주차가 학습에 포함</b>되어 발달단계 feature가 힘을 씁니다. → R² 0.67.</div></div>
+    </div>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>착과수 · 검증방식</th><th>feature</th><th>R²</th></tr></thead>
+      <tbody>
+        <tr><td class="term">시간분할(뒤4주)</td><td>환경만</td><td class="bad">−1.20</td></tr>
+        <tr><td class="term">시간분할(뒤4주)</td><td>환경+시점</td><td class="bad">−1.41</td></tr>
+        <tr><td class="term">온실별(LOGO)</td><td>환경만</td><td class="good">+0.59</td></tr>
+        <tr><td class="term">온실별(LOGO)</td><td>환경+시점</td><td class="good">+0.62</td></tr>
+        <tr><td class="term">온실별(온실4 검증)</td><td>환경+시점 <b>← 최종 채택</b></td><td class="good">+0.67</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="plain">같은 데이터·같은 모델이어도 <b>검증방식을 타깃 성격에 맞추지 않으면 "예측 불가"라는 잘못된 결론</b>에 빠집니다. 착과수(발달주기 지배)는 <b>온실별</b>, 초장·엽폭(환경 따라 서서히)은 <b>시간분할</b>이 맞습니다.</div>
+</section>
+
+<!-- ② 앙상블·CV -->
+<section id="c2">
+  <div class="issue">
+    <div class="head"><span class="num">2</span><h3>단일 모델·단일 검증의 우연을 줄이다</h3><span class="tag t-model">모델</span></div>
+    <div class="rows">
+      <div class="r cause"><div class="lbl">원인</div><div class="body">모델 하나·검증 한 번은 <b>운에 흔들립니다</b>. 점수가 진짜 실력인지 우연인지 구분이 안 됨.</div></div>
+      <div class="r change"><div class="lbl">변경</div><div class="body"><b>LightGBM + CatBoost 앙상블</b>(두 모델 예측 평균)과 <b>온실별 4-fold 교차검증</b>(온실 하나씩 빼며 4번) 적용. (<code class="inl">train_advanced.py</code>)</div></div>
+      <div class="r why"><div class="lbl">이유</div><div class="body">서로 다른 모델의 실수가 상쇄돼 <b>더 안정적</b>. 착과수 R² 0.62 → 0.65(CatBoost) → <b>0.66</b>(앙상블).</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ③ 불확실성 -->
+<section id="c3">
+  <div class="issue">
+    <div class="head"><span class="num">3</span><h3>값 하나가 아니라 '얼마나 확신하나'까지</h3><span class="tag t-model">모델</span></div>
+    <div class="rows">
+      <div class="r cause"><div class="lbl">원인</div><div class="body">의사결정엔 예측값뿐 아니라 <b>불확실성</b>이 필요. 분위수 회귀로 만든 예측 구간(P10~P90)의 <b>적중률이 54%</b>로 목표 80%에 한참 못 미침(과신).</div></div>
+      <div class="r change"><div class="lbl">변경</div><div class="body"><b>Conformal 보정(CQR)</b> — 보정용 데이터에서 '구간이 빗나간 양'을 재서 그만큼 구간을 넓힘. (<code class="inl">conformal.py</code>)</div></div>
+      <div class="r why"><div class="lbl">이유</div><div class="body">구간이 <b>약속한 80%만큼 실제로 맞도록</b> 교정하기 위해. 적중률 54% → <b>77%</b>(구간이 넓어진 건 '정직해진 것').</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ④ 튜닝 -->
+<section id="c4">
+  <div class="issue">
+    <div class="head"><span class="num">4</span><h3>설정값을 손이 아니라 Optuna로</h3><span class="tag t-model">모델</span></div>
+    <div class="rows">
+      <div class="r cause"><div class="lbl">원인</div><div class="body">트리 깊이·학습률 등 <b>하이퍼파라미터</b>의 기본값이 최적이라는 보장이 없음.</div></div>
+      <div class="r change"><div class="lbl">변경</div><div class="body"><b>Optuna로 60회 자동 탐색</b>(LOGO R²를 기준으로). 최적 설정으로 재학습·저장. (<code class="inl">train_optuna.py</code>)</div></div>
+      <div class="r why"><div class="lbl">이유</div><div class="body">수동보다 빠르고 체계적. 착과수 LOGO R² 0.62 → <b>0.67</b>, 온실4 홀드아웃 <b>0.73</b> (튜닝 단일모델이 앙상블도 상회).</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑤ 추론·구간 -->
+<section id="c5">
+  <div class="issue">
+    <div class="head"><span class="num">5</span><h3>학습만 있고 '사용(제출)'이 없었다</h3><span class="tag t-model">모델</span></div>
+    <div class="rows">
+      <div class="r cause"><div class="lbl">원인</div><div class="body">파이프라인에 <b>추론·제출 단계가 없음</b>. 처음 만든 구간은 방식 오류로 과하게 넓었음(폭 5.0, 적중률 96%).</div></div>
+      <div class="r change"><div class="lbl">변경</div><div class="body"><code class="inl">predict.py</code> — 튜닝 모델 로드 → 예측값+구간 출력. <b>정석 split-conformal</b>(Q를 잰 모델과 예측 모델을 동일화) + 착과수 하한 0 클리핑.</div></div>
+      <div class="r why"><div class="lbl">이유</div><div class="body">실전 제출 완성 + <b>더 좁은 구간</b>. 폭 5.0 → <b>3.63</b>, 적중률 96% → <b>83%</b>(목표 80% 근접).</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑥ 실험 -->
+<section id="c6">
+  <div class="issue">
+    <div class="head"><span class="num">6</span><h3>"왜 착과수·초장만?", "왜 7일?" — 데이터로 답하다</h3><span class="tag t-data">실험</span></div>
+    <div class="rows">
+      <div class="r cause"><div class="lbl">원인</div><div class="body">대표 지표 2개만 본 근거, 집계 창 7일의 근거를 <b>설명할 수 있어야</b> 함(발표 대비).</div></div>
+      <div class="r change"><div class="lbl">변경</div><div class="body"><b>7개 생육 지표 × 2검증</b>, <b>집계 창 3/7/14일</b> 전수 비교. (<code class="inl">compare_experiments.py</code>)</div></div>
+      <div class="r why"><div class="lbl">이유</div><div class="body">지표가 두 부류로 갈림을 확인 — <b>온실별</b>(착과수·관부직경·엽수) vs <b>시간분할</b>(엽병장·엽폭·초장·엽장). 창은 <b>착과수=14일, 크기지표=7일</b>이 최적.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑦ 강규제 비교 -->
+<section id="c7">
+  <div class="issue">
+    <div class="head"><span class="num">7</span><h3>"데이터 적으면 강규제 선형" — 정말 그런가</h3><span class="tag t-data">실험</span></div>
+    <div class="rows">
+      <div class="r cause"><div class="lbl">원인</div><div class="body">데이터가 적을 때 <b>강규제 선형(Ridge/Lasso)</b>이 낫다는 통념을 우리 데이터로 검증할 필요.</div></div>
+      <div class="r change"><div class="lbl">변경</div><div class="body">Ridge·Lasso vs LightGBM을 같은 조건으로 <b>실측 비교</b>.</div></div>
+      <div class="r why"><div class="lbl">이유</div><div class="body">우리 환경→생육 관계는 <b>비선형</b>이라 선형이 약함. 착과수 Lasso 0.42 vs 부스팅 <b>0.62</b> → <b>부스팅 채택</b>. (Lasso는 feature 선택용으로만 유용)</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑧ 룰 베이스 제어 -->
+<section id="c8">
+  <div class="issue">
+    <div class="head"><span class="num">8</span><h3>예측을 넘어 '제어'로 — 상관 기반 룰 설계</h3><span class="tag t-data">제어</span></div>
+    <div class="rows">
+      <div class="r cause"><div class="lbl">원인</div><div class="body">폐루프 제어를 하려면 "이 조건이면 이렇게"라는 규칙이 필요. 그런데 <b>원시 상관은 계절 교란</b>으로 가짜(예: "온도↓ → 착과↑"는 겨울작 착시). 게다가 짝(pairwise) 상관은 변수 간 <b>복합 효과</b>를 못 가름.</div></div>
+      <div class="r change"><div class="lbl">변경</div><div class="body"><b>A.</b> 발달단계(조사회차) 제거 후 상관으로 계절 교란 차단. <b>B.</b> <b>다변량 분석</b> — 부분상관(다른 변수 통제) + 상호작용으로 진짜 레버 규명. 이를 <b>조건부 룰 세트</b>로 정리.</div></div>
+      <div class="r why"><div class="lbl">이유</div><div class="body"><b>CO₂만 독립 레버</b>(부분상관 +0.26)로 살아남고, VPD·습도는 CO₂·온도의 그림자(≈0)임을 확인 → 짝 상관만 믿는 오판 방지. 착과수는 환경 상관이 미미해 <b>환경 룰을 지양</b>(발달·적과로 관리).</div></div>
+    </div>
+  </div>
+  <div class="plain">예측 모델(berry_ai)이 "이대로면 생장이 이 정도"를 알려주면, 이 룰이 "그럼 CO₂·온도를 이렇게"라는 <b>행동</b>을 정합니다. 상세는 <code class="inl">docs/control/룰베이스_제어규칙.html</code>.</div>
+</section>
+
+<!-- ⑨ A/B 제어 실험 -->
+<section id="c9">
+  <div class="issue">
+    <div class="head"><span class="num">9</span><h3>룰의 인과를 A/B로 검증 — CO₂ 시비</h3><span class="tag t-data">제어</span></div>
+    <div class="rows">
+      <div class="r cause"><div class="lbl">원인</div><div class="body">룰(상관)은 <b>가설</b>일 뿐. CO₂가 정말 생장을 늘리는지 인과 검증이 필요한데, <b>살아있는 온실이 없어</b> 실제 무작위 실험은 불가.</div></div>
+      <div class="r change"><div class="lbl">변경</div><div class="body">데이터로 A/B를 <b>대리 재현</b> — <b>A.</b> 관측 준-A/B(같은 단계에서 고CO₂ vs 저CO₂, t검정) <b>B.</b> 모델 반사실 시뮬(CO₂ ±Δ 조작 시 예측 생장 변화, dose-response).</div></div>
+      <div class="r why"><div class="lbl">이유</div><div class="body">두 방법 모두 <b>CO₂↑ → 생장↑</b> 확인(초장 +1.57cm, p&lt;0.001). 반사실은 <b>비대칭 포화 반응</b>(떨어뜨리면 −1.4cm, 올리면 이득 체감) → "<b>적정선 유지·하락 방지</b>"가 핵심 메시지.</div></div>
+    </div>
+  </div>
+  <div class="plain">상관(가설) → 대리 실험(검증)으로 한 단계 나아갔습니다. 진짜 인과 확정은 <b>온실 무작위 배정 실증</b>이 필요(문서에 프로토콜 포함). 상세는 <code class="inl">docs/experiments/AB제어실험_CO2.html</code>.</div>
+</section>
+
+<!-- ⑩ 환경 예보 -->
+<section id="c10">
+  <div class="issue">
+    <div class="head"><span class="num">10</span><h3>제어의 눈 — 앞으로 h시간 뒤 환경 예보</h3><span class="tag t-data">제어</span></div>
+    <div class="rows">
+      <div class="r cause"><div class="lbl">원인</div><div class="body">폐루프 제어가 '지금'만 보면 늦음(한파는 오기 전에 대응해야). "앞으로 환경이 어떻게 변할지"를 아는 예보가 필요.</div></div>
+      <div class="r change"><div class="lbl">변경</div><div class="body">시간별 데이터로 h시간 뒤 내부온도·CO₂ 예보 (부스팅 + 시차 feature, 지속성 기준선과 비교). (<code class="inl">forecast_env.py</code>)</div></div>
+      <div class="r why"><div class="lbl">이유</div><div class="body"><b>온도 예보 성공</b>(6h R²0.86, 12h 0.61, 지속성 우세) → 룰의 IF 조건에 넣어 선제 제어. <b>CO₂는 예보 실패</b>(지속성 못 이김) = 날씨가 아니라 '제어 행동'에 좌우 → <b>조작 레버</b>라는 방증.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑪ 실증 계획 -->
+<section id="c11">
+  <div class="issue">
+    <div class="head"><span class="num">11</span><h3>가설 → 인과 확정을 위한 실증 계획</h3><span class="tag t-data">제어</span></div>
+    <div class="rows">
+      <div class="r cause"><div class="lbl">원인</div><div class="body">대리 A/B는 <b>강한 가설</b>일 뿐. 인과 확정은 <b>무작위 배정 실험</b>이 필요한데 현재 살아있는 온실이 없음.</div></div>
+      <div class="r change"><div class="lbl">변경</div><div class="body">온실 확보 시 즉시 실행 가능한 <b>실증 계획서</b> 작성 — 가설·무작위 배정·처치 정의·측정·분석·리스크. (<code class="inl">docs/plan/실증실험_계획서.html</code>)</div></div>
+      <div class="r why"><div class="lbl">이유</div><div class="body">실증 데이터가 현 파이프라인(<code class="inl">data_prep→train</code>)에 <b>동일 스키마로 바로 연결</b>되게 설계 → 실증이 곧 모델 업데이트로 이어짐.</div></div>
+    </div>
+  </div>
+  <div class="plain">이로써 <b>예측 → 불확실성 → 튜닝 → 제어 설계 → 제어 검증(A/B) → 예보 → 실증 계획</b>까지 하나의 서사가 완성됩니다.</div>
+</section>
+
+<!-- 결과 -->
+<section id="result">
+  <p class="kicker">Result</p>
+  <h2 class="sec">최종 상태 · 만들어진 파일</h2>
+
+  <div class="tbl-wrap" style="margin-bottom:18px">
+    <table>
+      <thead><tr><th>예측 대상</th><th>권장 검증</th><th>R²</th><th>메모</th></tr></thead>
+      <tbody>
+        <tr><td class="term">착과수</td><td>온실별</td><td class="good">0.67~0.73</td><td>튜닝 · 구간 적중률 83%/폭 3.63</td></tr>
+        <tr><td class="term">관부직경</td><td>온실별</td><td class="good">0.43</td><td>세력(vigor) 지표</td></tr>
+        <tr><td class="term">엽병장</td><td>시간분할</td><td class="good">0.22</td><td>환경 신호 뚜렷</td></tr>
+        <tr><td class="term">엽폭 · 초장</td><td>시간분할</td><td class="good">0.21 · 0.18</td><td>크기 계열</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="files">
+    <div class="file"><div class="fn">src/train.py</div><div class="fd">LightGBM 베이스라인. 검증방식 스위치(time/greenhouse), 성능·중요도·모델 저장.</div></div>
+    <div class="file"><div class="fn">src/train_advanced.py</div><div class="fd">앙상블(LGBM+CatBoost)·온실별 교차검증·불확실성(분위수).</div></div>
+    <div class="file"><div class="fn">src/conformal.py</div><div class="fd">Conformal 보정(CQR) — 예측 구간 적중률을 80%에 맞춤.</div></div>
+    <div class="file"><div class="fn">src/train_optuna.py</div><div class="fd">Optuna 하이퍼파라미터 튜닝(LOGO R² 기준). 튜닝 모델 저장.</div></div>
+    <div class="file"><div class="fn">src/predict.py</div><div class="fd">추론·제출 — 튜닝 모델 로드 → 예측값 + split-conformal 구간.</div></div>
+    <div class="file"><div class="fn">src/compare_experiments.py</div><div class="fd">7개 지표 × 검증방식 × 집계 창 전수 실험.</div></div>
+    <div class="file"><div class="fn">src/forecast_env.py</div><div class="fd">환경 예보 — h시간 뒤 내부온도·CO₂ (부스팅 + 시차 feature).</div></div>
+  </div>
+
+  <div class="plain" style="margin-top:20px"><b>다음에 이어갈 것</b> — 룰의 인과를 <b>A/B 제어 실험</b>(CO₂ 시비 vs 대조)으로 실증, 착과수 집계 창 14일 반영, 환경 예보(제어용) 트랙, TabPFN 등 추가 모델 비교. 시퀀스(LSTM)는 데이터가 적어 현재는 보류.</div>
+</section>
+
+<footer>
+  베리디시전 · 모델링 작업 이력(원인·변경·이유) &nbsp;·&nbsp; 검증 · 앙상블 · 불확실성 · 튜닝 · 실험 &nbsp;·&nbsp; 환경 셋팅·전처리 단계는 제외<br>
+  성능 수치는 보유 데이터(온실1~4, 2024-11~2025-02) 기준이며, 데이터가 늘거나 검증 설정이 바뀌면 달라질 수 있습니다.
+</footer>
+
+</div>
+</body>
+</html>

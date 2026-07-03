@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>딸기 의사결정 AI — 오픈 모델 지형 & 혼합운용 리서치</title>
+<style>
+  :root{
+    --bg:#0e1014; --bg-soft:#161922; --card:#1b1f2a; --card-2:#222736;
+    --line:#2c3242; --text:#e7e9ee; --text-dim:#a4abba; --text-faint:#7b8294;
+    --berry:#ff5d73; --berry-soft:#ff8a9c; --leaf:#5fd39a; --gold:#ffc861;
+    --sky:#5cc8ff; --violet:#b69bff; --radius:16px; --maxw:960px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;background:radial-gradient(1200px 600px at 80% -10%, #1d2230 0%, var(--bg) 55%);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px 120px;}
+  header.hero{max-width:var(--maxw);margin:0 auto;padding:60px 22px 34px;}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.14em;font-weight:700;color:var(--berry-soft);
+    text-transform:uppercase;border:1px solid rgba(255,93,115,.35);border-radius:999px;padding:6px 14px;margin-bottom:20px;background:rgba(255,93,115,.07);}
+  h1.title{font-size:clamp(27px,5vw,42px);line-height:1.2;margin:0 0 16px;font-weight:800;letter-spacing:-.01em;}
+  h1.title .accent{color:var(--berry);}
+  .lede{font-size:clamp(15.5px,2.3vw,18.5px);color:var(--text-dim);max-width:720px;margin:0;}
+  .meta{margin-top:24px;display:flex;flex-wrap:wrap;gap:10px;}
+  .chip{font-size:13px;color:var(--text-dim);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 13px;}
+  .chip b{color:var(--text);font-weight:700;}
+
+  .tldr{background:linear-gradient(135deg,rgba(255,93,115,.14),rgba(182,155,255,.10));
+    border:1px solid rgba(255,93,115,.30);border-radius:var(--radius);padding:24px 28px;margin:6px auto 0;max-width:var(--maxw);}
+  .tldr h2{margin:0 0 12px;font-size:17px;color:var(--berry-soft);letter-spacing:.02em;}
+  .tldr ul{margin:0;padding-left:20px;}
+  .tldr li{margin:7px 0;font-size:16px;color:var(--text);}
+  .tldr b{color:#fff;}
+
+  section{margin-top:54px;}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--berry);text-transform:uppercase;margin:0 0 8px;}
+  h2.sec{font-size:clamp(21px,3.4vw,27px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;}
+  .sec-sub{color:var(--text-dim);margin:0 0 24px;font-size:15.5px;}
+  p{margin:0 0 15px;} .dim{color:var(--text-dim);}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;margin-bottom:16px;}
+  .card h3{margin:0 0 10px;font-size:18px;font-weight:750;}
+  .card h3 .lic{font-size:12px;font-weight:700;margin-left:8px;vertical-align:middle;}
+
+  .plain{border-left:3px solid var(--leaf);background:rgba(95,211,154,.07);border-radius:10px;padding:13px 17px;margin:14px 0 0;color:var(--text);font-size:15px;}
+  .plain b{color:var(--leaf);}
+  .plain::before{content:"🍓 우리 프로젝트 적용";display:block;font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--leaf);margin-bottom:5px;}
+  .warn{border-left:3px solid var(--gold);background:rgba(255,200,97,.08);border-radius:10px;padding:13px 17px;margin:14px 0 0;color:var(--text);font-size:15px;}
+  .warn b{color:var(--gold);}
+  .warn::before{content:"⚠️ 주의";display:block;font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--gold);margin-bottom:5px;}
+
+  .badge{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:6px;white-space:nowrap;}
+  .b-ok{background:rgba(95,211,154,.16);color:var(--leaf);}
+  .b-warn{background:rgba(255,200,97,.16);color:var(--gold);}
+  .b-no{background:rgba(255,93,115,.16);color:var(--berry-soft);}
+  .b-sky{background:rgba(92,200,255,.16);color:var(--sky);}
+  .b-vio{background:rgba(182,155,255,.16);color:var(--violet);}
+
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;margin:6px 0 0;}
+  table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px;}
+  thead th{background:#23283a;color:var(--berry-soft);text-align:left;font-weight:700;padding:12px 15px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  tbody td{padding:12px 15px;border-bottom:1px solid var(--line);color:var(--text-dim);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:rgba(255,255,255,.018);}
+  tbody td b{color:var(--text);}
+  td.term{color:#fff;font-weight:700;white-space:nowrap;}
+  .diagram-cap{font-size:13px;font-weight:700;color:var(--text-faint);margin:2px 4px 10px;letter-spacing:.02em;}
+
+  .layer{display:flex;gap:16px;align-items:stretch;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px;}
+  .layer .lnum{flex:0 0 44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--berry),#d94d63);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 4px 14px rgba(255,93,115,.22);}
+  .layer .lbody h4{margin:3px 0 5px;font-size:16px;font-weight:750;}
+  .layer .lbody h4 span{font-size:12.5px;color:var(--text-faint);font-weight:600;margin-left:6px;}
+  .layer .lbody p{margin:0;color:var(--text-dim);font-size:14.5px;}
+  .layer .lbody .mods{margin-top:7px;display:flex;flex-wrap:wrap;gap:6px;}
+  .layer .lbody .mods span{font-size:12px;background:var(--card-2);border:1px solid var(--line);border-radius:7px;padding:3px 9px;color:var(--text);}
+
+  .ladder{display:flex;flex-direction:column;gap:10px;}
+  .rung{display:flex;align-items:flex-start;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px 18px;}
+  .rung .rank{font-size:15px;font-weight:800;color:#0e1014;background:var(--berry-soft);border-radius:8px;padding:4px 11px;min-width:74px;text-align:center;}
+  .rung .rtext b{font-size:15.5px;} .rung .rtext p{margin:4px 0 0;font-size:14px;color:var(--text-dim);}
+
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;}
+  .close{background:linear-gradient(135deg,rgba(182,155,255,.12),rgba(255,93,115,.10));border:1px solid var(--line);border-radius:var(--radius);padding:26px 28px;}
+  .close ul{margin:12px 0 0;padding-left:20px;} .close li{margin:8px 0;font-size:16px;}
+
+  details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px 18px;margin-bottom:10px;}
+  summary{cursor:pointer;font-weight:700;padding:12px 0;font-size:15px;color:var(--text);}
+  details[open] summary{border-bottom:1px solid var(--line);margin-bottom:10px;}
+  details a{color:var(--sky);word-break:break-all;text-decoration:none;font-size:13px;}
+  details li{font-size:13px;color:var(--text-dim);margin:4px 0;}
+  footer{max-width:var(--maxw);margin:56px auto 0;padding:22px 22px 0;border-top:1px solid var(--line);color:var(--text-faint);font-size:13.5px;}
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;}
+  .toc a{font-size:13.5px;color:var(--text-dim);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:7px 12px;text-decoration:none;}
+  .toc a:hover{color:var(--text);border-color:var(--berry);}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">베리디시전 · 기술 리서치</span>
+  <h1 class="title">딸기 의사결정 AI를 위한<br><span class="accent">오픈 모델 지형 & 혼합운용</span> 리서치</h1>
+  <p class="lede">보유 중인 4개 온실의 환경·생육 데이터로 "목표 기반 농작업 의사결정형 딸기 AI"를 만들 때, 지금(2025–2026) 쓸 수 있는 오픈 모델은 무엇이 있고, 각각의 장단점과 라이선스는 어떠하며, 이들을 어떻게 <b style="color:var(--text)">혼합운용(앙상블·하이브리드)</b> 하는지 정리한 문서입니다.</p>
+  <div class="meta">
+    <span class="chip">범위 <b>정형/시계열 ML + 오픈 LLM/파운데이션</b></span>
+    <span class="chip">기준 <b>회의록(보완의견) 아키텍처</b></span>
+    <span class="chip">시점 <b>2025–2026</b></span>
+    <span class="chip">성격 <b>모델 선정·운용 가이드</b></span>
+  </div>
+  <div class="toc">
+    <a href="#tldr">요약</a>
+    <a href="#map">회의록 매핑</a>
+    <a href="#ts">① 시계열 파운데이션</a>
+    <a href="#tab">② 정형/시계열 ML</a>
+    <a href="#llm">③ 오픈 LLM</a>
+    <a href="#mix">④ 혼합운용 패턴</a>
+    <a href="#arch">계층형 아키텍처</a>
+    <a href="#road">로드맵</a>
+    <a href="#lic">라이선스 표</a>
+    <a href="#caveat">주의/권고</a>
+  </div>
+</header>
+
+<div class="tldr" id="tldr">
+  <h2>한눈 요약 (TL;DR)</h2>
+  <ul>
+    <li><b>"하나의 만능 모델"은 없습니다.</b> 역할별로 다른 오픈 모델을 층층이 쌓아 <b>혼합운용</b>하는 것이 정답입니다 — 회의록의 방향과 일치합니다.</li>
+    <li><b>환경 센서 예측</b>: 오픈·상용가능·다변량(공변량) 지원의 <b>Amazon Chronos-2</b>가 1순위. 단, 소규모·단기 예측에선 <b>LightGBM + 기본 베이스라인</b>이 더 나을 때가 많아 반드시 비교.</li>
+    <li><b>생육·수확 예측(정형 데이터)</b>: <b>CatBoost / LightGBM</b>(부스팅 트리)이 여전히 강자. 소량 데이터엔 <b>TabPFN v2</b>를 함께 벤치마크. 시계열 딥러닝(TFT 등)은 데이터가 많아질 때.</li>
+    <li><b>자연어·에이전트·교차검증(LLM)</b>: 한국어+상용가능+에이전트 관점에서 <b>Qwen3 + 카카오 Kanana-2</b> 조합이 안전한 백본. 무거운 추론엔 <b>DeepSeek-R1(MIT)</b>. <b>LG EXAONE</b>는 성능은 최상급이나 <span class="badge b-no">연구용 라이선스</span>라 상용은 별도 계약 필요.</li>
+    <li><b>혼합운용의 핵심</b>: 물리모델(딸기 sink–source) + ML 하이브리드, 다중모달 <b>late fusion</b>, 파운데이션+로컬 <b>잔차보정</b>, LLM 오케스트레이션 + <b>GraphRAG(온톨로지 접지)</b> + 가드레일, 그리고 <b>사람 검토(휴먼 인 더 루프)</b>.</li>
+    <li><b>1차 버전은 자동제어가 아니라 "점검·추천"</b>이어야 합니다. RL Actor는 <b>실행이 아니라 제안</b>만 — 소량 데이터·안전 현실에 맞는 선택입니다.</li>
+  </ul>
+</div>
+
+<div class="wrap">
+
+<!-- ===== 회의록 매핑 ===== -->
+<section id="map">
+  <p class="kicker">출발점</p>
+  <h2 class="sec">회의록 아키텍처를 오픈 모델로 매핑하면</h2>
+  <p class="sec-sub">보완의견(회의록)이 제시한 엔진 구성요소 각각에, "지금 쓸 수 있는 실제 오픈 모델"을 대응시켰습니다. 표의 마지막 열이 이 리서치의 핵심 결론입니다.</p>
+  <p class="diagram-cap">표 A. 초안 구성요소 → 실제 오픈 모델 후보</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>초안 구성요소</th><th>하는 일</th><th>실제 오픈 모델 후보 (2025–2026)</th></tr></thead>
+      <tbody>
+        <tr><td class="term">OpenTSLM</td><td>센서 시계열을 읽고 <b>추론·설명</b></td><td>OpenTSLM(실존, 단 <b>의료 도메인·추론용</b>) — 수치예측기는 아님. 예측은 아래 시계열 파운데이션이 담당</td></tr>
+        <tr><td class="term">시계열 예측</td><td>환경·생육·수확 흐름 예측</td><td><b>Chronos-2</b>, Toto, TabPFN-TS, TimesFM / + 로컬 LightGBM 잔차보정</td></tr>
+        <tr><td class="term">영상 진단(CNN)</td><td>잎 사진으로 생육·병해 진단</td><td>CNN/비전(YOLO·EfficientNet·ViT 등) — 본 리서치 범위 밖, <span class="badge b-sky">late fusion</span>으로 결합</td></tr>
+        <tr><td class="term">딸기 생육 온톨로지</td><td>지식(백과사전) 접지</td><td><b>GraphRAG</b> / 지식그래프 + LLM 검색증강</td></tr>
+        <tr><td class="term">Berry2Vec</td><td>재배 이벤트를 숫자열로 임베딩</td><td>개념은 <b>event2vec</b>(검증된 이름 아님 → 내부 명칭). med2vec·Event2Vec류로 구현</td></tr>
+        <tr><td class="term">Downstream</td><td>수확량·병해·품질·편차 예측</td><td><b>CatBoost / LightGBM / XGBoost</b> + (소량 데이터) TabPFN v2</td></tr>
+        <tr><td class="term">RL Actor</td><td>제어(작업) 후보 생성·평가</td><td>오프라인/모델기반 RL + <b>물리 월드모델</b>, <b>제안만(실행 X)</b></td></tr>
+        <tr><td class="term">LLM 교차검증</td><td>판단 근거 검증·개선</td><td><b>Qwen3 / Kanana-2</b>(한국어·에이전트) + <b>DeepSeek-R1</b>(무거운 추론), LLM-as-judge</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="warn">
+    <b>Berry2Vec</b>와 <b>OpenTSLM</b> 두 가지는 표현을 명확히 해야 합니다. Berry2Vec는 검증 가능한 공개 논문/모델이 <b>없는 내부 명칭</b>이므로 대외 문서에서 "선행연구"로 인용하지 마세요(개념은 event2vec으로 실존). OpenTSLM은 실존하지만 <b>의료·생체신호 도메인의 "추론/설명" 모델</b>이며 농업 검증 이력이 없고 수치 예측기가 아닙니다 — 예측은 별도 시계열 모델이 맡고, OpenTSLM은 "왜 이런가"를 설명하는 상단 레이어로 쓰는 것이 맞습니다(농업 파인튜닝 필요).
+  </div>
+</section>
+
+<!-- ===== ① 시계열 파운데이션 ===== -->
+<section id="ts">
+  <p class="kicker">카테고리 ①</p>
+  <h2 class="sec">시계열 파운데이션 모델 — 환경·센서 예측</h2>
+  <p class="sec-sub">수십억 개의 시계열로 미리 학습돼, 처음 보는 센서 데이터도 <b>제로샷(무학습)</b>으로 예측하는 대형 모델군입니다. 온·습도·CO₂·일사·VPD·EC/pH 같은 온실 센서 예측이 대상입니다.</p>
+
+  <div class="card">
+    <h3>Amazon Chronos-2 <span class="lic badge b-ok">Apache-2.0 · 상용OK</span></h3>
+    <p class="dim">오픈 시계열 파운데이션 중 <b>제로샷 다변량 + 공변량(외생변수)</b>을 기본 지원하는 거의 유일한 선택. "일사·관수·설정값을 주면 내부 온도·습도·VPD를 예측"에 정확히 맞습니다. 경량 <b>Chronos-Bolt</b>는 단일 센서 초단기 예측에 빠르고 저렴.</p>
+    <div class="plain">환경 예측의 <b>1순위 후보</b>. 제로샷으로 시작 → 4개 온실 데이터로 파인튜닝. 공변량 지원 덕에 "제어 입력 → 환경 반응" 구조에 직결됩니다.</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Datadog Toto <span class="lic badge b-ok">Apache-2.0</span></h3>
+      <p class="dim">관측(텔레메트리) 지표 특화. <b>고빈도·다변량·노이즈·스파이크</b>가 온실 IoT 센서와 매우 흡사 — 저평가된 강력 후보. 직접 벤치마크 권장.</p>
+    </div>
+    <div class="card">
+      <h3>TabPFN-TS <span class="lic badge b-warn">Apache pkg · 가중치 확인</span></h3>
+      <p class="dim"><b>소량 데이터·짧은 이력</b>에 강함(외생변수 지원). 온실별 데이터가 적을 때 유리. TabPFN 가중치 상용 라이선스는 확인 필요.</p>
+    </div>
+    <div class="card">
+      <h3>Google TimesFM 2.5 <span class="lic badge b-ok">Apache-2.0</span></h3>
+      <p class="dim"><b>단변량 장기맥락</b> 강자(맥락 16K). 일주기·계절 패턴 포착에 좋음. 공변량은 Chronos-2보다 약함.</p>
+    </div>
+    <div class="card">
+      <h3>Sundial / Time-MoE / Lag-Llama <span class="lic badge b-ok">Apache-2.0</span></h3>
+      <p class="dim">경량·확률예측 베이스라인. Sundial은 밀리초 확률예측(제어 불확실성 밴드에 유용), Lag-Llama는 CPU에서도 구동.</p>
+    </div>
+  </div>
+
+  <div class="warn">
+    <b>라이선스 함정.</b> 성능이 좋은 <b>Salesforce Moirai 1.x / Moirai-MoE</b>는 <span class="badge b-no">CC-BY-NC(비상업)</span>라 상용 제품엔 부적합(Moirai 2.0은 미확인 → 확인 필요). <b>Nixtla TimeGPT</b>는 성능·편의성은 좋으나 <b>가중치 비공개 유료 API</b> — 데이터가 외부로 나가고 온팜/엣지 배포에 제약.
+  </div>
+
+  <div class="plain">
+    <b>중요한 현실:</b> 분(minute) 단위·초단기 제어 예측에서는 파운데이션 모델이 <b>단순 베이스라인(계절-나이브, LightGBM 지연특징)에 지는 경우가 흔합니다.</b> 파운데이션 모델을 "무조건 우위"로 가정하지 말고, <b>항상 값싼 베이스라인과 비교(bake-off)</b>한 뒤 채택하세요. 맥락 길이(context length)는 사실상 하이퍼파라미터라 튜닝이 필요합니다.
+  </div>
+</section>
+
+<!-- ===== ② 정형/시계열 ML ===== -->
+<section id="tab">
+  <p class="kicker">카테고리 ②</p>
+  <h2 class="sec">정형/시계열 ML — 생육·수확 예측</h2>
+  <p class="sec-sub">우리 데이터(주 단위 생육 측정 + 시간 단위 환경)는 전형적인 <b>소~중 규모 정형 데이터</b>입니다. 이 영역은 아직도 <b>부스팅 트리</b>가 왕입니다.</p>
+
+  <div class="card">
+    <h3>부스팅 트리: CatBoost · LightGBM · XGBoost <span class="lic badge b-ok">MIT / Apache</span></h3>
+    <p class="dim">정형 데이터의 사실상 표준. 수백~수천 행에서도 강하고, GPU 없이 빠르며, SHAP로 해석 가능. <b>CatBoost</b>는 범주형(품종·구역·개체ID) 처리와 기본값이 뛰어나 소량 데이터에서 튜닝 부담이 적음 → 종종 최고의 시작점.</p>
+    <div class="plain">초장·엽수·착과수·수확량 <b>회귀의 1순위</b>. 지연특징(lag)·누적광량(DLI)·생육도일(GDD)·정식 후 일수·품종·개체ID를 피처로. 개체·시즌 기준 <b>그룹 교차검증</b>으로 누수 방지.</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>TabPFN v2 <span class="lic badge b-warn">Apache+귀속 · 상용확인</span></h3>
+      <p class="dim">학습 없이 문맥으로 예측하는 <b>정형 파운데이션</b>(회귀 지원). <b>≤1만 행/500피처</b>(2.5는 ~5만 행)의 소량 데이터에서 튜닝 없이 부스팅과 대등/우위. 우리 규모에 딱 맞아 <b>필수 벤치마크 상대</b>.</p>
+    </div>
+    <div class="card">
+      <h3>시계열 딥러닝: TFT·PatchTST·iTransformer·N-HiTS <span class="lic badge b-sky">MIT/Apache</span></h3>
+      <p class="dim"><b>다수 시계열·장기 예측·많은 데이터</b>가 있을 때 진가. TFT는 공변량·미래입력·구간예측·해석성이 강점이나 <b>데이터 굶주림</b>. 주 단위 생육 예측엔 과함 → 데이터 축적 후 고려.</p>
+    </div>
+  </div>
+
+  <div class="warn">
+    <b>"딥러닝이 항상 낫다"는 오해.</b> 정형 데이터(≤1만 행)에서는 트리 앙상블이 딥러닝을 이긴다는 연구가 일관됩니다(Grinsztajn 2022, Shwartz-Ziv 2022). 작물 수확량 응용 문헌도 RF/XGBoost가 주류이고, 딥러닝은 <b>영상이나 대규모 데이터</b>에서 주로 유리합니다. <b>DLinear</b> 같은 초단순 선형 베이스라인이 트랜스포머를 이기기도 하니, <b>단순부터</b> 시작하세요.
+  </div>
+
+  <div class="plain">
+    <b>시작 레시피:</b> (a) 생육/수확 회귀 → <b>CatBoost(또는 LightGBM)</b> + <b>TabPFN v2</b> 헤드투헤드, 선형/Ridge 베이스라인 포함. (b) 환경 다단계 예측이 필요하면 <b>DLinear</b> 베이스라인 후 필요 시 시계열 파운데이션·DL로 승급. 실제 데이터로 작은 <b>bake-off</b>가 유일하게 믿을 답입니다.
+  </div>
+</section>
+
+<!-- ===== ③ 오픈 LLM ===== -->
+<section id="llm">
+  <p class="kicker">카테고리 ③</p>
+  <h2 class="sec">오픈 LLM — 자연어·에이전트·교차검증</h2>
+  <p class="sec-sub">LLM은 수치를 계산하는 게 아니라 <b>①다른 모델 출력 교차검증 ②한국어 설명·작업추천 ③에이전트 오케스트레이션(도구·ML 호출) ④온톨로지 접지(RAG)</b> 역할입니다. 한국어 역량과 <b>상용 라이선스</b>가 결정적입니다.</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Alibaba Qwen3 <span class="lic badge b-ok">Apache-2.0</span></h3>
+      <p class="dim">이 용도의 <b>종합 1순위</b>. 강한 한국어(119개 언어), <b>최고 수준 오픈 도구호출/에이전트</b>(Qwen-Agent), 하이브리드 추론, 완전 상용 허용. 조밀 0.6~32B + MoE(30B-A3B/235B-A22B).</p>
+    </div>
+    <div class="card">
+      <h3>카카오 Kanana-2 <span class="lic badge b-ok">Apache-2.0</span></h3>
+      <p class="dim"><b>한국어 네이티브 + 에이전트 특화 + 상용가능</b>의 삼박자. 멀티턴 도구호출 3배 개선. 한국어 표현 품질이 필요한 <b>설명·작업추천</b>에 최적. (Dec 2025 공개)</p>
+    </div>
+    <div class="card">
+      <h3>DeepSeek-R1 / V3 <span class="lic badge b-ok">MIT</span></h3>
+      <p class="dim">최상급 <b>추론</b>(수학·논리)·완전 무료(MIT). 671B/37B-active MoE라 <b>자가호스팅은 데이터센터급</b>. 무거운 <b>교차검증·상충신호 판정</b>에 선택적 호출. Distill(7~70B)로 경량화 가능.</p>
+    </div>
+    <div class="card">
+      <h3>LG EXAONE 4.0 <span class="lic badge b-no">연구용 · 상용 별도계약</span></h3>
+      <p class="dim">한국어 도메인 품질 <b>최상급</b>(KMMLU 등)이나 <b>상용 불가</b>(LG 협의 필요). 라이선스 확보 시에만 후보. 32B + 1.2B 온디바이스.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>그 외 <span class="lic badge b-sky">참고</span></h3>
+    <p class="dim"><b>Mistral Small 3.x / Magistral</b>(Apache, 효율·유럽어 강·한국어 약) · <b>Google Gemma 3</b>(한국어 양호·다국어, 단 <span class="badge b-warn">커스텀 Gemma 약관</span>) · <b>Microsoft Phi-4</b>(MIT, 소형 추론 강자·한국어 약) · <b>Meta Llama 3.3/4</b>(<span class="badge b-warn">커스텀 커뮤니티 라이선스</span>, 한국어 비공식) · <b>Ai2 OLMo</b>(완전공개·감사용이·한국어 약).</p>
+  </div>
+
+  <div class="plain">
+    <b>권고 조합(한국어·상용·에이전트):</b> 오케스트레이터/도구라우터 = <b>Qwen3 14B~32B</b>, 한국어 설명·작업추천 = <b>Kanana-2</b>(또는 Qwen3-32B), 무거운 교차검증 = <b>DeepSeek-R1</b>(공유 GPU 노드에서 선택 호출), 온톨로지 RAG = 14~32B 롱컨텍스트 모델. <b>Qwen3 + Kanana-2(둘 다 Apache-2.0)</b>가 가장 안전한 상용 한국어 백본입니다.
+  </div>
+  <div class="plain">
+    <b>시계열-LLM 하이브리드:</b> 시계열 파운데이션이 예측(점추정+분위수)을 <b>JSON으로 요약</b> → LLM이 도구호출로 받아 한국어 추천+신뢰도 생성, 온톨로지로 접지. LLM에 <b>원시 장문 시계열을 토큰으로 직접 먹이지 말 것</b> — 시계열 모델이 요약하게 하세요. (TS-Reasoner 등 2025 연구가 이 패턴을 뒷받침.)
+  </div>
+</section>
+
+<!-- ===== ④ 혼합운용 ===== -->
+<section id="mix">
+  <p class="kicker">카테고리 ④ (핵심 질문)</p>
+  <h2 class="sec">혼합운용 — 어떻게 섞어 쓰는가</h2>
+  <p class="sec-sub">"오픈 모델을 어떻게 혼합운용하는지"가 이 리서치의 핵심 질문이었습니다. 6가지 검증된 패턴을 우리 프로젝트 적용과 함께 정리합니다.</p>
+
+  <div class="card">
+    <h3>1. 고전 앙상블 — 부스팅 · 스태킹 · 가중평균</h3>
+    <p class="dim">여러 모델을 합쳐 단일 모델을 능가. 정형 농업데이터에선 보통 <b>부스팅</b>이 우세. <b>스태킹</b>은 베이스 모델들이 <b>서로 다른 실수</b>를 하고 데이터가 충분할 때만 이득 — 소량이면 메타레이어 과적합 위험.</p>
+    <div class="plain">Downstream 예측기(수확·병해·품질)에 적용. <b>먼저 역-RMSE 가중평균</b>부터, 스태킹은 데이터가 쌓인 뒤. (한 연구의 R²=0.98은 단일연구·과대추정 가능 → 수치 약속 금물.)</div>
+  </div>
+
+  <div class="card">
+    <h3>2. 물리 + ML 하이브리드 (가장 가성비 높은 소량데이터 해법)</h3>
+    <p class="dim">기계론적 작물모델(광합성·source–sink)과 ML을 결합 — ML이 잔차 보정하거나, 물리식이 신경망을 제약(PINN). <b>딸기 전용 sink–source 건물중 모델</b>이 실제로 R²=0.97–0.99로 검증됨.</p>
+    <div class="plain"><b>딸기 sink–source 모델을 "물리 사전(prior)"</b>으로 수확 예측기에 투입하고, RL Actor의 <b>월드모델</b>로 활용. 물리 경계를 <b>안전 가드레일</b>로도 사용(물리적으로 불가능한 예측·행동은 자동 플래그). 소량 데이터 한계를 우회하는 최선의 경로.</div>
+  </div>
+
+  <div class="card">
+    <h3>3. 온실 제어를 위한 강화학습(RL) — 현실 점검</h3>
+    <p class="dim">WUR <b>자율온실챌린지</b>(세계 표준 벤치마크)의 우승팀들은 <b>엔드투엔드 RL을 쓰지 않았습니다</b> — 작물균형 제어·비전+최적화가 사람 재배자를 이겼죠. 순수 RL 온실제어는 <b>대부분 시뮬레이션 단계</b>이고, 핵심 난제는 <b>안전</b>(되돌릴 수 없는 설정값으로 작물 손상 가능).</p>
+    <div class="warn"><b>RL Actor는 v1에서 "실행"이 아니라 "제안"만.</b> 물리 월드모델에 대해 안전 범위로 행동공간을 제약하고, 모든 제안을 검증 레이어→사람으로 라우팅. <b>오프라인/모델기반 RL</b> 선호, 안전조건 감지기+규칙기반 폴백. 완전 자동제어는 안전 입증을 전제로 한 3단계 목표.</div>
+  </div>
+
+  <div class="card">
+    <h3>4. LLM + 전문모델 오케스트레이션</h3>
+    <p class="dim">LLM이 수치를 계산하지 않고 전문 모델/도구를 <b>지휘</b>. 라우팅·오케스트레이터-워커 패턴, 도구는 MCP로 노출. <b>MoE ≠ 멀티에이전트</b>(MoE는 모델 내부 구조, 우리에게 필요한 건 <b>멀티에이전트 오케스트레이션</b>). <b>LLM-as-judge</b>는 사람과 80%+ 일치하나 <b>순서·장황함·자기선호 편향</b>이 있어 <b>순서 교환(swap) 평가</b>로 완화. 온톨로지 접지는 <b>GraphRAG</b>, 안전은 <b>가드레일 + 휴먼 인 더 루프</b>.</p>
+    <div class="plain">LLM 오케스트레이터가 (a) 예측기·RL Actor를 <b>도구로 호출</b>, (b) 온톨로지 <b>GraphRAG로 근거 접지</b>, (c) RL 제안을 <b>LLM-judge로 교차검증</b>(편향 보정), (d) 가드레일 통과 후 <b>우선순위 작업목록</b>을 사람에게. LLM은 계산이 아니라 <b>지휘·접지·검증·설명</b>.</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>5. 다중모달 융합 (센서+영상+생육+텍스트)</h3>
+      <p class="dim">early/joint/late 3가지 중 <b>v1은 late fusion</b>: 각 모달 모델(CNN 병해, 시계열 예측, 생육 정형)을 따로 돌려 결정 레이어에서 결합. <b>결측 모달에 강인</b>하고 각 모델이 <b>감사 가능</b>. 데이터가 늘면 intermediate로.</p>
+    </div>
+    <div class="card">
+      <h3>6. 시계열 파운데이션 + 로컬 잔차보정</h3>
+      <p class="dim">제로샷 파운데이션을 <b>단독 신뢰 금지</b>. FM이 베이스라인 예측 → <b>로컬 LightGBM이 잔차 보정</b>, 또는 역-RMSE 가중 블렌드. 소량 도메인에선 <b>파인튜닝된 로컬 모델이 제로샷 FM을 이기는</b> 사례가 일반적.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 계층형 아키텍처 ===== -->
+<section id="arch">
+  <p class="kicker">종합</p>
+  <h2 class="sec">제안: 5계층 참조 아키텍처</h2>
+  <p class="sec-sub"><b>인지 → 예측 → 결정 → 검증 → 실행</b>. 각 층에 어떤 모델이 앉고 어떻게 넘겨주는지. v1에서는 실행 직전에 <b>사람 승인</b>이 필수 게이트입니다.</p>
+
+  <div class="layer">
+    <div class="lnum">1</div>
+    <div class="lbody"><h4>인지 (Perception) <span>원시 → 구조화</span></h4>
+    <p>센서 스트림·잎 영상·작업로그를 <b>통합 피처테이블 + 타입 이벤트</b>로 변환(late fusion 준비).</p>
+    <div class="mods"><span>CNN 영상진단</span><span>시계열 인제스트</span><span>event2vec(=Berry2Vec)</span><span>생육 정형피처</span></div></div>
+  </div>
+  <div class="layer">
+    <div class="lnum">2</div>
+    <div class="lbody"><h4>예측 (Prediction) <span>불확실성 포함</span></h4>
+    <p>수확·병해·품질 예측 + 환경 시계열 예측. <b>물리모델이 예측·타당성 경계</b>를 동시에 제공.</p>
+    <div class="mods"><span>CatBoost/LightGBM</span><span>TabPFN v2</span><span>Chronos-2 + 로컬 잔차보정</span><span>딸기 sink–source 물리모델</span></div></div>
+  </div>
+  <div class="layer">
+    <div class="lnum">3</div>
+    <div class="lbody"><h4>결정 (Decision) <span>제안만, 실행 X</span></h4>
+    <p>RL Actor(오프라인·제약)가 설정값/작업 <b>후보</b>를 물리 월드모델로 평가·생성.</p>
+    <div class="mods"><span>Offline/Model-based RL</span><span>물리 월드모델</span><span>안전 행동공간 제약</span></div></div>
+  </div>
+  <div class="layer">
+    <div class="lnum">4</div>
+    <div class="lbody"><h4>검증 (Validation) <span>접지·판정·가드레일</span></h4>
+    <p>LLM 오케스트레이터가 <b>LLM-judge 교차검증(편향보정)</b> + <b>온톨로지 GraphRAG 접지</b> + 가드레일 + 물리경계 체크 → <b>우선순위 작업목록</b>과 근거 생성.</p>
+    <div class="mods"><span>Qwen3 / Kanana-2</span><span>DeepSeek-R1(선택)</span><span>GraphRAG</span><span>가드레일</span></div></div>
+  </div>
+  <div class="layer">
+    <div class="lnum">5</div>
+    <div class="lbody"><h4>실행 (Action) <span>v1=사람 승인</span></h4>
+    <p>v1: 재배자 승인("점검·추천"). v3: 저위험·가역 설정값만 게이트 자동제어(안전감지기+규칙폴백). 결과는 다시 인지로 <b>폐루프</b>.</p>
+    <div class="mods"><span>휴먼 인 더 루프</span><span>결과 로깅 → event2vec</span></div></div>
+  </div>
+  <div class="plain">계층 간 인계는 <b>불확실성을 담은 타입드 JSON</b>으로. 어느 층이든 "신뢰도 낮음/모달 결측"을 플래그하고 <b>우아하게 성능저하(graceful degrade)</b> 하도록 설계.</div>
+</section>
+
+<!-- ===== 로드맵 ===== -->
+<section id="road">
+  <p class="kicker">실행</p>
+  <h2 class="sec">단계별 로드맵 (MVP → 고도화)</h2>
+  <div class="ladder">
+    <div class="rung"><div class="rank">Phase 0</div><div class="rtext"><b>기반 — 데이터 + 물리사전</b><p>센서·영상·로그 정비, 딸기 <b>온톨로지/지식그래프</b>·이벤트 스키마 구축, sink–source 물리모델 세팅. 산출: 통합 피처스토어.</p></div></div>
+    <div class="rung"><div class="rank">Phase 1 · MVP</div><div class="rtext"><b>자문형 (RL 없음, late fusion)</b><p>LightGBM 예측기 + FM 잔차 블렌드 + CNN 진단 + <b>LLM 오케스트레이터(GraphRAG·가드레일)</b>로 <b>설명된 우선순위 추천</b>. <b>100% 사람 검토</b>, 자동제어 없음. 소량 데이터·안전에 맞는 안전한 v1.</p></div></div>
+    <div class="rung"><div class="rank">Phase 2</div><div class="rtext"><b>제안엔진 추가 (섀도 모드)</b><p>RL Actor를 <b>섀도(제안만, 미실행)</b>로, LLM-judge 교차검증(swap) + 재배자 피드백 수집, 로그로 오프라인 RL 학습 시작.</p></div></div>
+    <div class="rung"><div class="rank">Phase 3</div><div class="rtext"><b>게이트형 준자율</b><p><b>저위험·가역</b> 설정값만 자동제어(안전감지기+규칙폴백+물리경계). 관수·급격한 기후변경 등 <b>고위험·비가역은 사람 승인 유지</b>. sim-to-real 검증하며 확대.</p></div></div>
+  </div>
+</section>
+
+<!-- ===== 라이선스 표 ===== -->
+<section id="lic">
+  <p class="kicker">의사결정 필수</p>
+  <h2 class="sec">라이선스 · 상용 사용 요약</h2>
+  <p class="sec-sub">상용 제품이라면 <b>라이선스가 성능만큼 중요</b>합니다. 아래는 상용 배포 관점의 안전도 요약입니다(최신 릴리스는 배포 전 공식 카드 재확인 권장).</p>
+  <p class="diagram-cap">표 B. 오픈 모델 라이선스 (상용 관점)</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>모델</th><th>구분</th><th>라이선스</th><th>상용</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td class="term">Chronos / Bolt / Chronos-2</td><td>시계열 FM</td><td>Apache-2.0</td><td><span class="badge b-ok">가능</span></td><td>다변량·공변량 지원(2)</td></tr>
+        <tr><td class="term">Toto</td><td>시계열 FM</td><td>Apache-2.0</td><td><span class="badge b-ok">가능</span></td><td>고빈도 IoT 유사</td></tr>
+        <tr><td class="term">TimesFM / Sundial / Time-MoE / Lag-Llama</td><td>시계열 FM</td><td>Apache-2.0</td><td><span class="badge b-ok">가능</span></td><td>주로 단변량</td></tr>
+        <tr><td class="term">OpenTSLM</td><td>시계열 추론</td><td>오픈(CC BY 4.0/MIT 확인)</td><td><span class="badge b-warn">확인</span></td><td>의료도메인·추론용</td></tr>
+        <tr><td class="term">TabPFN v2 / TS</td><td>정형/시계열 FM</td><td>Apache+귀속(가중치 확인)</td><td><span class="badge b-warn">확인</span></td><td>소량데이터 강자</td></tr>
+        <tr><td class="term">Moirai 1.x / MoE</td><td>시계열 FM</td><td>CC-BY-NC-4.0</td><td><span class="badge b-no">불가</span></td><td>비상업 · 2.0 미확인</td></tr>
+        <tr><td class="term">TimeGPT</td><td>시계열 API</td><td>비공개 유료 API</td><td><span class="badge b-warn">호스팅</span></td><td>데이터 외부전송</td></tr>
+        <tr><td class="term">XGBoost / LightGBM / CatBoost</td><td>정형 ML</td><td>Apache / MIT / Apache</td><td><span class="badge b-ok">가능</span></td><td>정형 강자</td></tr>
+        <tr><td class="term">Qwen3</td><td>LLM</td><td>Apache-2.0</td><td><span class="badge b-ok">가능</span></td><td>한국어·에이전트 강</td></tr>
+        <tr><td class="term">Kanana-2 (카카오)</td><td>LLM</td><td>Apache-2.0</td><td><span class="badge b-ok">가능</span></td><td>한국어 네이티브·에이전트</td></tr>
+        <tr><td class="term">DeepSeek V3 / R1</td><td>LLM</td><td>MIT</td><td><span class="badge b-ok">가능</span></td><td>추론 강·초대형</td></tr>
+        <tr><td class="term">Mistral Small / Magistral</td><td>LLM</td><td>Apache-2.0</td><td><span class="badge b-ok">가능</span></td><td>한국어 약</td></tr>
+        <tr><td class="term">Phi-4</td><td>LLM</td><td>MIT</td><td><span class="badge b-ok">가능</span></td><td>소형·한국어 약</td></tr>
+        <tr><td class="term">Gemma 3</td><td>LLM</td><td>Gemma 약관(커스텀)</td><td><span class="badge b-warn">제한</span></td><td>약관 승계 의무</td></tr>
+        <tr><td class="term">Llama 3.3 / 4</td><td>LLM</td><td>커뮤니티(커스텀)</td><td><span class="badge b-warn">조건부</span></td><td>&lt;7억 MAU · EU 제약</td></tr>
+        <tr><td class="term">EXAONE 4.0 (LG)</td><td>LLM</td><td>연구용</td><td><span class="badge b-no">별도계약</span></td><td>한국어 최상급</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 주의/권고 ===== -->
+<section id="caveat">
+  <p class="kicker">결론</p>
+  <h2 class="sec">핵심 권고 & 주의사항</h2>
+  <div class="close">
+    <p style="margin:0;color:var(--text);font-size:16.5px;">이 리서치를 실행 지침 세 갈래로 요약하면:</p>
+    <ul>
+      <li><b>모델 선정</b> — 환경예측 <b>Chronos-2</b>(+베이스라인 비교), 생육/수확 <b>CatBoost·LightGBM + TabPFN v2</b>, 언어·에이전트 <b>Qwen3 + Kanana-2</b>(+선택적 DeepSeek-R1). 전부 <b>상용 가능(Apache/MIT)</b>으로 백본 구성.</li>
+      <li><b>혼합운용</b> — 물리(딸기 sink–source)+ML 하이브리드, late fusion, FM+로컬 잔차보정, LLM 오케스트레이션+GraphRAG 접지, <b>사람 검토 게이트</b>를 5계층으로 결합.</li>
+      <li><b>안전·현실</b> — v1은 <b>자동제어가 아닌 "점검·추천"</b>, RL은 <b>제안만</b>. 소량 데이터에선 파인튜닝된 로컬 모델·물리사전·사람 감독이 대형 제로샷/엔드투엔드 RL보다 낫다는 것이 일관된 결론.</li>
+    </ul>
+  </div>
+
+  <div class="warn" style="margin-top:18px;">
+    <b>표현·검증 주의(대외 문서화 시):</b>
+    <ul style="margin:8px 0 0;padding-left:18px;font-size:14.5px;">
+      <li><b>Berry2Vec</b>는 공개 선행연구가 아닌 <b>내부 명칭</b> — "event2vec 개념"으로 기술.</li>
+      <li><b>OpenTSLM</b>은 <b>의료·추론용</b>이며 농업 검증·수치예측 이력 없음 — "설명 레이어(파인튜닝 필요)"로 위치.</li>
+      <li>인용된 초고성능 수치(예: 물리+ML R²≈0.9995, 스태킹 R²=0.98)는 <b>단일연구·과대추정 가능</b> — 목표수치로 약속 금물.</li>
+      <li>RL 에너지 40~58%↓·수확 +10%대 등은 대부분 <b>시뮬레이션 결과</b>.</li>
+      <li>라이선스는 유동적(예: Moirai 2.0·Gemma 4·EXAONE 최신) — <b>배포 전 공식 모델카드 재확인</b>.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== 출처 ===== -->
+<section>
+  <p class="kicker">참고</p>
+  <h2 class="sec">주요 출처</h2>
+  <details>
+    <summary>① 시계열 파운데이션 모델</summary>
+    <ul>
+      <li>OpenTSLM — <a href="https://arxiv.org/abs/2510.02410">arxiv.org/abs/2510.02410</a> · <a href="https://github.com/StanfordBDHG/OpenTSLM">github.com/StanfordBDHG/OpenTSLM</a></li>
+      <li>Chronos-2 — <a href="https://www.amazon.science/blog/introducing-chronos-2-from-univariate-to-universal-forecasting">amazon.science 블로그</a> · <a href="https://github.com/amazon-science/chronos-forecasting">github</a></li>
+      <li>Moirai / MoE — <a href="https://www.salesforce.com/blog/time-series-morai-moe/">salesforce 블로그</a> · <a href="https://github.com/SalesforceAIResearch/uni2ts">uni2ts</a></li>
+      <li>TimesFM — <a href="https://github.com/google-research/timesfm">github.com/google-research/timesfm</a></li>
+      <li>Toto / BOOM — <a href="https://www.datadoghq.com/blog/ai/toto-boom-unleashed/">datadoghq 블로그</a> · <a href="https://arxiv.org/abs/2505.14766">arxiv 2505.14766</a></li>
+      <li>Sundial — <a href="https://arxiv.org/abs/2502.00816">arxiv 2502.00816</a> · TabPFN-TS — <a href="https://github.com/PriorLabs/tabpfn-time-series">github</a></li>
+    </ul>
+  </details>
+  <details>
+    <summary>② 정형 / 시계열 딥러닝</summary>
+    <ul>
+      <li>트리 &gt; 딥러닝(정형) — <a href="https://openreview.net/forum?id=Fp7__phQszn">Grinsztajn NeurIPS'22</a> · <a href="https://arxiv.org/html/2402.03970v3">Shwartz-Ziv</a></li>
+      <li>TabPFN v2 — <a href="https://github.com/PriorLabs/tabpfn">github</a> · <a href="https://arxiv.org/pdf/2511.08667">TabPFN-2.5</a></li>
+      <li>TFT — <a href="https://arxiv.org/abs/1912.09363">arxiv 1912.09363</a> · iTransformer — <a href="https://ise.thss.tsinghua.edu.cn/~mlong/doc/iTransformer-iclr24.pdf">ICLR'24</a></li>
+      <li>Darts 라이브러리 — <a href="https://github.com/unit8co/darts">github.com/unit8co/darts</a></li>
+      <li>작물수확 ML 리뷰 — <a href="https://www.sciencedirect.com/science/article/pii/S2772375524003228">ScienceDirect</a> · 딸기 XGBoost — <a href="https://doi.org/10.3390/agriculture14060883">Agriculture'24</a></li>
+    </ul>
+  </details>
+  <details>
+    <summary>③ 오픈 LLM</summary>
+    <ul>
+      <li>Qwen3 — <a href="https://qwenlm.github.io/blog/qwen3/">qwenlm 블로그</a> · DeepSeek R1 — <a href="https://arxiv.org/pdf/2501.12948">arxiv 2501.12948</a></li>
+      <li>Kanana-2 — <a href="https://github.com/kakao/kanana">github.com/kakao/kanana</a> · EXAONE 4.0 — <a href="https://github.com/LG-AI-EXAONE/EXAONE-4.0">github</a></li>
+      <li>Mistral Small 3.1 — <a href="https://mistral.ai/news/mistral-small-3-1/">mistral.ai</a> · Gemma 약관 — <a href="https://ai.google.dev/gemma/terms">ai.google.dev</a></li>
+      <li>Llama 4 — <a href="https://ai.meta.com/blog/llama-4-multimodal-intelligence/">ai.meta.com</a> · TS-Reasoner — <a href="https://arxiv.org/pdf/2510.03519">arxiv 2510.03519</a></li>
+    </ul>
+  </details>
+  <details>
+    <summary>④ 혼합운용 · RL · 하이브리드</summary>
+    <ul>
+      <li>딸기 sink–source 물리모델 — <a href="https://www.frontiersin.org/journals/plant-science/articles/10.3389/fpls.2025.1544735/full">Frontiers Plant Sci'25</a></li>
+      <li>WUR 자율온실챌린지 — <a href="https://www.wur.nl/en/research/plant/autonomous-greenhouse-challenge">wur.nl</a> · RL 안전 — <a href="https://arxiv.org/abs/2108.11645">arxiv 2108.11645</a></li>
+      <li>효과적 에이전트(오케스트레이션) — <a href="https://www.anthropic.com/engineering/building-effective-agents">Anthropic</a></li>
+      <li>GraphRAG — <a href="https://arxiv.org/abs/2404.16130">arxiv 2404.16130</a> · LLM-as-judge — <a href="https://arxiv.org/abs/2306.05685">MT-Bench</a> · 편향 — <a href="https://arxiv.org/abs/2410.02736">CALM</a></li>
+      <li>다중모달 융합 — <a href="https://arxiv.org/html/2408.02686v1">arxiv 2408.02686</a> · FM+로컬 하이브리드 — <a href="https://aihorizonforecast.substack.com/p/adapting-time-series-foundation-models">AI Horizon Forecast</a></li>
+    </ul>
+  </details>
+</section>
+
+</div>
+
+<footer>
+  본 문서는 베리디시전 팀의 "목표 기반 농작업 의사결정형 딸기 AI"를 위한 오픈 모델 지형·혼합운용 기술 리서치입니다. 4개 주제(시계열 파운데이션 · 정형/시계열 ML · 오픈 LLM · 혼합운용)를 웹 최신자료로 교차검증해 정리했으며, 모든 성능·라이선스 주장은 배포 전 공식 출처 재확인이 필요합니다. · 2026
+</footer>
+
+</body>
+</html>

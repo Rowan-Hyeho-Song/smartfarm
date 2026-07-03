@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>berry_ai — 전체 예측 파이프라인 흐름도</title>
+<style>
+  :root{
+    --bg:#0d0f14; --line:#2c3242; --text:#e7e9ee; --text-dim:#a4abba; --text-faint:#7b8294;
+    --data:#5cc8ff; --trap:#ff5d73; --algo:#5fd39a; --new:#37c8c3; --valid:#b69bff;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;}
+  .wrap{max-width:1080px;margin:0 auto;padding:44px 18px 90px;}
+  h1.title{text-align:center;font-size:clamp(22px,3.6vw,30px);font-weight:800;margin:0 0 6px;letter-spacing:-.01em;}
+  h1.title .ai{color:var(--data);}
+  .subtitle{text-align:center;color:var(--text-dim);font-size:14.5px;margin:0 0 30px;}
+  .block-label{font-size:14px;font-weight:800;color:var(--text);margin:34px 0 10px;padding-left:14px;
+    border-left:4px solid var(--data);}
+  .block-label.b2{border-left-color:var(--valid);}
+  .diagram{overflow-x:auto;}                         /* 좁은 화면에선 가로 스크롤 */
+  .diagram svg{display:block;width:100%;min-width:720px;height:auto;}
+
+  /* ── SVG 요소 스타일(클래스로 지정) ── */
+  .box{stroke-width:1.6;}
+  .b-data{fill:rgba(92,200,255,.09);stroke:var(--data);}
+  .b-trap{fill:rgba(255,93,115,.09);stroke:var(--trap);}
+  .b-algo{fill:rgba(95,211,154,.09);stroke:var(--algo);}
+  .b-new{fill:rgba(55,200,195,.11);stroke:var(--new);}
+  .b-valid{fill:rgba(182,155,255,.11);stroke:var(--valid);}
+  .b-res-ok{fill:rgba(95,211,154,.06);stroke:rgba(95,211,154,.55);}
+  .b-res-warn{fill:rgba(255,93,115,.06);stroke:rgba(255,93,115,.5);}
+
+  text{font-family:inherit;}
+  .t-title{fill:var(--text);font-weight:750;font-size:15px;}
+  .t-sub{fill:var(--text-dim);font-size:11.5px;}
+  .t-badge{font-weight:800;font-size:10px;letter-spacing:.03em;}
+  .bg-data{fill:var(--data);} .bg-trap{fill:var(--trap);} .bg-algo{fill:var(--algo);}
+  .bg-new{fill:var(--new);} .bg-valid{fill:var(--valid);}
+  .t-strong{fill:var(--text);font-weight:700;}
+
+  /* ── 연결선 ── */
+  .edge{fill:none;stroke:#5c6478;stroke-width:2.2;}
+  .edge.gray{stroke:#6b7488;} .edge.teal{stroke:var(--new);} .edge.green{stroke:var(--algo);}
+  .edge.purple{stroke:var(--valid);} .edge.red{stroke:var(--trap);} .edge.data{stroke:var(--data);}
+
+  /* ── 범례 ── */
+  .legend{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;margin-top:36px;padding-top:22px;border-top:1px solid var(--line);}
+  .legend .item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-dim);}
+  .legend .sw{width:26px;height:15px;border-radius:5px;border:1.6px solid;}
+  .sw-data{border-color:var(--data);background:rgba(92,200,255,.14);}
+  .sw-trap{border-color:var(--trap);background:rgba(255,93,115,.14);}
+  .sw-algo{border-color:var(--algo);background:rgba(95,211,154,.14);}
+  .sw-new{border-color:var(--new);background:rgba(55,200,195,.14);}
+  .sw-valid{border-color:var(--valid);background:rgba(182,155,255,.14);}
+  .note{max-width:780px;margin:26px auto 0;font-size:12.5px;color:var(--text-faint);text-align:center;line-height:1.6;}
+  .note code{color:var(--text-dim);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1 class="title">berry_ai — <span class="ai">전체 예측 파이프라인 흐름도</span></h1>
+  <p class="subtitle">딸기 스마트팜 · 모든 검증은 일반화(누수 차단) + 과적합 여부를 함께 본다</p>
+
+  <!-- ══════════════ 전체 시스템 ══════════════ -->
+  <div class="block-label">■ 전체 시스템 (문제 → 알고리즘)</div>
+  <div class="diagram">
+  <svg viewBox="0 0 1040 388" role="img" aria-label="전체 시스템 흐름도">
+    <defs>
+      <marker id="aGray" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="#6b7488"/></marker>
+      <marker id="aData" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="#5cc8ff"/></marker>
+      <marker id="aAlgo" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="#5fd39a"/></marker>
+      <marker id="aNew" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="#37c8c3"/></marker>
+      <marker id="aValid" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="#b69bff"/></marker>
+      <marker id="aTrap" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="#ff5d73"/></marker>
+    </defs>
+
+    <!-- 연결선 (박스보다 먼저 그려 뒤에 깔리게) -->
+    <!-- root → bus1 → 2 data -->
+    <path class="edge gray" d="M520,72 V104"/>
+    <path class="edge gray" d="M300,104 H740"/>
+    <path class="edge data" d="M300,104 V129" marker-end="url(#aData)"/>
+    <path class="edge data" d="M740,104 V129" marker-end="url(#aData)"/>
+    <!-- 2 data → bus2 → 4 tracks -->
+    <path class="edge gray" d="M300,204 V240"/>
+    <path class="edge gray" d="M740,204 V240"/>
+    <path class="edge gray" d="M134,240 H906"/>
+    <path class="edge green"  d="M134,240 V267" marker-end="url(#aAlgo)"/>
+    <path class="edge teal"   d="M391,240 V267" marker-end="url(#aNew)"/>
+    <path class="edge purple" d="M648,240 V267" marker-end="url(#aValid)"/>
+    <path class="edge green"  d="M906,240 V267" marker-end="url(#aAlgo)"/>
+
+    <!-- ROOT -->
+    <rect class="box b-data" x="400" y="18" width="240" height="54" rx="12"/>
+    <text class="t-badge bg-data" x="520" y="35" text-anchor="middle">데이터</text>
+    <text class="t-title" x="520" y="52" text-anchor="middle">딸기 스마트팜 데이터</text>
+    <text class="t-sub" x="520" y="67" text-anchor="middle">온실 1~4 · 2024-11 ~ 2025-02</text>
+
+    <!-- DATA LEFT -->
+    <rect class="box b-data" x="150" y="132" width="300" height="72" rx="12"/>
+    <text class="t-badge bg-data" x="300" y="151" text-anchor="middle">데이터</text>
+    <text class="t-title" x="300" y="169" text-anchor="middle">생육조사 데이터</text>
+    <text class="t-sub" x="300" y="186" text-anchor="middle">주 1회 · 7항목(초장·착과수 등)</text>
+    <text class="t-sub" x="300" y="200" text-anchor="middle">4,201행 (long)</text>
+
+    <!-- DATA RIGHT -->
+    <rect class="box b-data" x="590" y="132" width="300" height="72" rx="12"/>
+    <text class="t-badge bg-data" x="740" y="151" text-anchor="middle">데이터</text>
+    <text class="t-title" x="740" y="169" text-anchor="middle">환경 데이터</text>
+    <text class="t-sub" x="740" y="186" text-anchor="middle">시간별 · 10지표(온·습도·CO₂·일사…)</text>
+    <text class="t-sub" x="740" y="200" text-anchor="middle">12,292행</text>
+
+    <!-- TRACK 1 -->
+    <rect class="box b-algo" x="20" y="270" width="228" height="98" rx="12"/>
+    <text class="t-badge bg-algo" x="134" y="289" text-anchor="middle">알고리즘 · 채택</text>
+    <text class="t-title" x="134" y="308" text-anchor="middle">① 환경 → 생육</text>
+    <text class="t-sub" x="134" y="326" text-anchor="middle">부스팅트리(LGBM/CatBoost)</text>
+    <text class="t-sub" x="134" y="341" text-anchor="middle">+ 앙상블</text>
+    <text class="t-badge bg-algo" x="134" y="358" text-anchor="middle">← 이번 트랙</text>
+
+    <!-- TRACK 2 -->
+    <rect class="box b-new" x="277" y="270" width="228" height="98" rx="12"/>
+    <text class="t-badge bg-new" x="391" y="289" text-anchor="middle">NEW · 시점</text>
+    <text class="t-title" x="391" y="308" text-anchor="middle">② 발달단계 feature</text>
+    <text class="t-sub" x="391" y="326" text-anchor="middle">재배주차 · 조사회차 · 월</text>
+    <text class="t-sub" x="391" y="344" text-anchor="middle">→ 착과수 예측 강화</text>
+
+    <!-- TRACK 3 -->
+    <rect class="box b-valid" x="534" y="270" width="228" height="98" rx="12"/>
+    <text class="t-badge bg-valid" x="648" y="289" text-anchor="middle">검증</text>
+    <text class="t-title" x="648" y="308" text-anchor="middle">③ 검증전략 매칭</text>
+    <text class="t-sub" x="648" y="326" text-anchor="middle">time(뒤4주) / greenhouse(LOGO)</text>
+    <text class="t-sub" x="648" y="344" text-anchor="middle">타깃 성격에 맞춰 선택</text>
+
+    <!-- TRACK 4 -->
+    <rect class="box b-algo" x="791" y="270" width="228" height="98" rx="12"/>
+    <text class="t-badge bg-algo" x="905" y="289" text-anchor="middle">불확실성 · 구현</text>
+    <text class="t-title" x="905" y="308" text-anchor="middle">④ 예측 구간</text>
+    <text class="t-sub" x="905" y="326" text-anchor="middle">분위수회귀 + Conformal(CQR)</text>
+    <text class="t-sub" x="905" y="344" text-anchor="middle">적중률 54% → 77% (목표 80%)</text>
+  </svg>
+  </div>
+
+  <!-- ══════════════ 상세 트랙 ══════════════ -->
+  <div class="block-label b2">■ 이번에 만든 트랙 상세 : 환경 → 생육 (착과수 / 초장)</div>
+  <div class="diagram">
+  <svg viewBox="0 0 1160 472" role="img" aria-label="상세 트랙 흐름도">
+    <defs>
+      <marker id="bGray" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="#6b7488"/></marker>
+      <marker id="bTrap" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="#ff5d73"/></marker>
+      <marker id="bNew" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="#37c8c3"/></marker>
+      <marker id="bAlgo" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="#5fd39a"/></marker>
+      <marker id="bValid" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="#b69bff"/></marker>
+    </defs>
+
+    <!-- 가로 파이프라인 화살표 -->
+    <path class="edge gray" d="M266,78 H311" marker-end="url(#bGray)"/>
+    <path class="edge teal" d="M554,78 H599" marker-end="url(#bNew)"/>
+    <path class="edge green" d="M842,78 H887" marker-end="url(#bAlgo)"/>
+    <!-- 모델 → 검증 (엘보) -->
+    <path class="edge purple" d="M1012,126 V158 H590 V193" marker-end="url(#bValid)"/>
+    <!-- 검증 → 결과 2개 -->
+    <path class="edge purple" d="M590,260 V290"/>
+    <path class="edge purple" d="M300,290 H880"/>
+    <path class="edge purple" d="M300,290 V317" marker-end="url(#bValid)"/>
+    <path class="edge purple" d="M880,290 V317" marker-end="url(#bValid)"/>
+
+    <!-- 파이프라인 박스 4개 -->
+    <rect class="box b-data" x="30" y="30" width="236" height="96" rx="12"/>
+    <text class="t-badge bg-data" x="148" y="49" text-anchor="middle">데이터</text>
+    <text class="t-title" x="148" y="68" text-anchor="middle">원본 CSV 5개</text>
+    <text class="t-sub" x="148" y="86" text-anchor="middle">생육 1 + 환경 4</text>
+    <text class="t-sub" x="148" y="103" text-anchor="middle">환경 12,292행(시간별)</text>
+
+    <rect class="box b-trap" x="318" y="30" width="236" height="96" rx="12"/>
+    <text class="t-badge bg-trap" x="436" y="49" text-anchor="middle">문제 / 함정</text>
+    <text class="t-title" x="436" y="68" text-anchor="middle">인코딩·누수 진단</text>
+    <text class="t-sub" x="436" y="86" text-anchor="middle">생육 CP949 → UTF-8</text>
+    <text class="t-sub" x="436" y="103" text-anchor="middle">조사일 '당일' 제외(미래 차단)</text>
+
+    <rect class="box b-new" x="606" y="30" width="236" height="96" rx="12"/>
+    <text class="t-badge bg-new" x="724" y="49" text-anchor="middle">NEW · 집계</text>
+    <text class="t-title" x="724" y="68" text-anchor="middle">직전 7일 집계 + 시점</text>
+    <text class="t-sub" x="724" y="86" text-anchor="middle">평균/합/최소·최대 + 발달단계</text>
+    <text class="t-sub" x="724" y="103" text-anchor="middle">600행 × 35열 (feature 25)</text>
+
+    <rect class="box b-algo" x="894" y="30" width="236" height="96" rx="12"/>
+    <text class="t-badge bg-algo" x="1012" y="49" text-anchor="middle">알고리즘</text>
+    <text class="t-title" x="1012" y="68" text-anchor="middle">LGBM + CatBoost</text>
+    <text class="t-sub" x="1012" y="86" text-anchor="middle">앙상블(예측 평균)</text>
+    <text class="t-sub" x="1012" y="103" text-anchor="middle">+ 분위수회귀(불확실성)</text>
+
+    <!-- 검증 -->
+    <rect class="box b-valid" x="400" y="196" width="380" height="66" rx="12"/>
+    <text class="t-badge bg-valid" x="590" y="216" text-anchor="middle">검증</text>
+    <text class="t-title" x="590" y="235" text-anchor="middle">2가지 검증</text>
+    <text class="t-sub" x="590" y="252" text-anchor="middle">time(뒤4주) &nbsp;|&nbsp; greenhouse(온실별 LOGO 4-fold)</text>
+
+    <!-- 결과 좌: 착과수 -->
+    <rect class="box b-res-ok" x="60" y="320" width="480" height="132" rx="12"/>
+    <text class="t-title" x="84" y="346" style="fill:#5fd39a">[OK] 착과수 (fruit_count)</text>
+    <text class="t-sub" x="84" y="370">온실별 LOGO R²:  LGBM <tspan class="t-strong">0.62</tspan> · CatBoost <tspan class="t-strong">0.65</tspan> · <tspan class="t-strong">앙상블 0.66</tspan></text>
+    <text class="t-sub" x="84" y="392">→ 발달단계 feature 작동 · 온실4 검증 시 <tspan class="t-strong">R² 0.67</tspan></text>
+    <text class="t-sub" x="84" y="414" style="fill:#7b8294">단, time 검증(뒤4주)에선 R² 음수 — 데이터 15주 한계(외삽)</text>
+
+    <!-- 결과 우: 초장 & 불확실성 -->
+    <rect class="box b-res-ok" x="640" y="320" width="480" height="132" rx="12"/>
+    <text class="t-title" x="664" y="346" style="fill:#5fd39a">[OK] 불확실성 &amp; 초장</text>
+    <text class="t-sub" x="664" y="370">불확실성 P10~P90: Conformal 후 적중률 <tspan class="t-strong">54%→75~77%</tspan> (목표 80%)</text>
+    <text class="t-sub" x="664" y="392">초장: time 검증 <tspan class="t-strong">R² 0.19</tspan> vs LOGO <tspan class="t-strong">0.06</tspan></text>
+    <text class="t-sub" x="664" y="414" style="fill:#7b8294">→ 구간은 넓어졌지만 '정직한' 불확실성. 초장은 time 검증 권장</text>
+  </svg>
+  </div>
+
+  <!-- ══════════════ 범례 ══════════════ -->
+  <div class="legend">
+    <div class="item"><span class="sw sw-data"></span>데이터</div>
+    <div class="item"><span class="sw sw-trap"></span>문제 / 함정</div>
+    <div class="item"><span class="sw sw-algo"></span>알고리즘</div>
+    <div class="item"><span class="sw sw-new"></span>NEW (집계·시점)</div>
+    <div class="item"><span class="sw sw-valid"></span>검증</div>
+  </div>
+
+  <p class="note">
+    수치는 보유 데이터(온실 1~4, 2024-11~2025-02) 기준 · LOGO = Leave-One-Greenhouse-Out(온실 하나씩 빼고 검증).<br>
+    산출 스크립트: <code>src/data_prep.py</code> · <code>src/train.py</code> · <code>src/train_advanced.py</code> · <code>src/conformal.py</code>
+  </p>
+
+</div>
+</body>
+</html>

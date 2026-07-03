@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>berry_ai 모델 소개 — 어떤 의도로 설계했나 (도표로 보는 쉬운 설명)</title>
+<style>
+  :root{
+    --bg:#0e1014; --card:#1b1f2a; --card-2:#222736; --line:#2c3242;
+    --text:#e7e9ee; --text-dim:#a4abba; --text-faint:#7b8294;
+    --berry:#ff5d73; --berry-soft:#ff8a9c; --leaf:#5fd39a; --gold:#ffc861;
+    --sky:#5cc8ff; --violet:#b69bff; --new:#37c8c3; --radius:16px; --maxw:940px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%, #1d2230 0%, var(--bg) 55%);
+    color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px 120px;}
+  header.hero{max-width:var(--maxw);margin:0 auto;padding:58px 22px 26px;}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.14em;font-weight:700;color:var(--berry-soft);
+    text-transform:uppercase;border:1px solid rgba(255,93,115,.35);border-radius:999px;padding:6px 14px;margin-bottom:20px;background:rgba(255,93,115,.07);}
+  h1.title{font-size:clamp(27px,5vw,42px);line-height:1.2;margin:0 0 16px;font-weight:800;letter-spacing:-.01em;}
+  h1.title .accent{color:var(--berry);}
+  .lede{font-size:clamp(15.5px,2.3vw,18px);color:var(--text-dim);max-width:720px;margin:0;}
+
+  .oneline{background:linear-gradient(135deg,rgba(255,93,115,.14),rgba(182,155,255,.10));
+    border:1px solid rgba(255,93,115,.30);border-radius:var(--radius);padding:22px 26px;margin:26px auto 0;max-width:var(--maxw);}
+  .oneline .k{font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--berry-soft);text-transform:uppercase;margin-bottom:6px;}
+  .oneline p{margin:0;font-size:17.5px;color:#fff;font-weight:600;line-height:1.6;}
+
+  section{margin-top:50px;}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--berry);text-transform:uppercase;margin:0 0 8px;}
+  h2.sec{font-size:clamp(21px,3.4vw,27px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;}
+  .sec-sub{color:var(--text-dim);margin:0 0 22px;font-size:15.5px;}
+  p{margin:0 0 15px;} .dim{color:var(--text-dim);}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;}
+
+  /* SVG 도표 공통 */
+  .fig{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 10px;}
+  .fig svg{display:block;width:100%;height:auto;}
+  .fig.wide svg{min-width:560px;}   /* 가로로 긴 흐름도만: 좁은 화면에서 스크롤 */
+  .cap{font-size:12.5px;color:var(--text-faint);text-align:center;margin:10px 4px 0;}
+  .grid-line{stroke:#242a38;stroke-width:1;}
+  .axis-t{fill:var(--text-faint);font-size:11px;}
+  .bar-lab{fill:var(--text);font-size:13px;font-weight:750;}
+  .cat-lab{fill:var(--text-dim);font-size:12px;}
+  .node-t{fill:var(--text);font-weight:750;font-size:14px;}
+  .node-s{fill:var(--text-dim);font-size:11px;}
+  .badge-t{font-weight:800;font-size:10px;}
+
+  .analogy{border-left:3px solid var(--sky);background:rgba(92,200,255,.07);border-radius:10px;padding:15px 18px;margin:16px 0 0;font-size:15.5px;}
+  .analogy::before{content:"🩺 비유로 말하면";display:block;font-size:12.5px;font-weight:700;color:var(--sky);margin-bottom:6px;}
+  .analogy b{color:var(--sky);}
+
+  .principles{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;}
+  .pr{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;}
+  .pr .ic{font-size:24px;margin-bottom:8px;}
+  .pr h4{margin:0 0 6px;font-size:16.5px;font-weight:750;}
+  .pr.p1 h4{color:var(--leaf);} .pr.p2 h4{color:var(--gold);} .pr.p3 h4{color:var(--violet);}
+  .pr p{margin:0;font-size:14px;color:var(--text-dim);}
+
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;margin:6px 0 0;}
+  table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px;}
+  thead th{background:#23283a;color:var(--berry-soft);text-align:left;font-weight:700;padding:12px 15px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  tbody td{padding:12px 15px;border-bottom:1px solid var(--line);color:var(--text-dim);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:rgba(255,255,255,.018);}
+  tbody td b{color:var(--text);} td.term{color:#fff;font-weight:700;white-space:nowrap;}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:620px){.two{grid-template-columns:1fr;}}
+  .match{border-radius:13px;padding:16px 18px;border:1px solid var(--line);}
+  .match.a{background:rgba(95,211,154,.06);border-color:rgba(95,211,154,.35);}
+  .match.b{background:rgba(92,200,255,.06);border-color:rgba(92,200,255,.35);}
+  .match h4{margin:0 0 6px;font-size:16px;} .match.a h4{color:var(--leaf);} .match.b h4{color:var(--sky);}
+  .match p{margin:0;font-size:13.5px;color:var(--text-dim);}
+  .match .tag{font-size:11px;font-weight:800;padding:2px 8px;border-radius:5px;}
+  .match.a .tag{background:rgba(95,211,154,.16);color:var(--leaf);}
+  .match.b .tag{background:rgba(92,200,255,.16);color:var(--sky);}
+
+  .plain{border-left:3px solid var(--leaf);background:rgba(95,211,154,.07);border-radius:10px;padding:13px 17px;margin:16px 0 0;color:var(--text);font-size:15px;}
+  .plain b{color:var(--leaf);}
+  .plain::before{content:"🍓 한마디로";display:block;font-size:12.5px;font-weight:700;color:var(--leaf);margin-bottom:5px;}
+  .honest{border-left:3px solid var(--gold);background:rgba(255,200,97,.08);border-radius:10px;padding:13px 17px;margin:14px 0 0;color:var(--text);font-size:15px;}
+  .honest::before{content:"⚖️ 정직하게 밝히는 한계";display:block;font-size:12.5px;font-weight:700;color:var(--gold);margin-bottom:5px;}
+
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;}
+  .toc a{font-size:13.5px;color:var(--text-dim);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:7px 12px;text-decoration:none;}
+  .toc a:hover{color:var(--text);border-color:var(--berry);}
+  footer{max-width:var(--maxw);margin:56px auto 0;padding:22px 22px 0;border-top:1px solid var(--line);color:var(--text-faint);font-size:13.5px;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">베리디시전 · 모델 소개</span>
+  <h1 class="title">berry_ai — <span class="accent">어떤 의도로</span><br>설계한 모델인가</h1>
+  <p class="lede">딸기 스마트팜 데이터로 <b style="color:var(--text)">생육을 예측하고, 그 예측을 얼마나 믿을 수 있는지까지</b> 알려주는 AI입니다. 처음 보는 분도 5분 안에 이해하도록, <b style="color:var(--text)">그림과 도표 위주</b>로 정리했습니다.</p>
+  <div class="toc">
+    <a href="#io">입력·출력</a>
+    <a href="#principle">설계 3원칙</a>
+    <a href="#how">작동 4단계</a>
+    <a href="#glossary">용어 풀이</a>
+    <a href="#match">검증방식</a>
+    <a href="#decisions">설계 결정</a>
+    <a href="#perf">성능 도표</a>
+    <a href="#limit">한계</a>
+  </div>
+</header>
+
+<div class="oneline">
+  <div class="k">한 문장 정의</div>
+  <p>"이번 주 온실 환경이 이랬을 때, 다음 조사 시점의 딸기 생육(예: 착과수)이 얼마일지 —<br>그리고 그 예측을 어느 정도 믿어도 되는지 범위까지 — 알려주는 모델."</p>
+</div>
+
+<div class="wrap">
+
+<!-- 입력·출력 도표 -->
+<section id="io">
+  <p class="kicker">Input · Output</p>
+  <h2 class="sec">무엇이 들어가고, 무엇이 나오나</h2>
+  <p class="sec-sub">한 장으로 보는 모델의 입출력.</p>
+  <div class="fig wide">
+    <svg viewBox="0 0 900 300" role="img" aria-label="입력 출력 구조도">
+      <defs>
+        <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="#8b93a7"/></marker>
+      </defs>
+      <!-- 입력 2개 → 모델 (좌측으로 모임) -->
+      <path d="M250,110 H300 V140 H331" fill="none" stroke="#8b93a7" stroke-width="2" marker-end="url(#ar)"/>
+      <path d="M250,210 H300 V180 H331" fill="none" stroke="#8b93a7" stroke-width="2" marker-end="url(#ar)"/>
+      <!-- 모델 → 출력 2개 (우측에서 갈라짐) -->
+      <path d="M567,160 V90 H646" fill="none" stroke="#8b93a7" stroke-width="2" marker-end="url(#ar)"/>
+      <path d="M567,160 V230 H646" fill="none" stroke="#8b93a7" stroke-width="2" marker-end="url(#ar)"/>
+
+      <!-- 입력 2개 -->
+      <rect x="30" y="78" width="220" height="64" rx="12" fill="rgba(92,200,255,.09)" stroke="#5cc8ff" stroke-width="1.5"/>
+      <text class="badge-t" x="46" y="100" fill="#5cc8ff">입력 · 환경</text>
+      <text class="node-s" x="46" y="120">온도·습도·CO₂·일사·급액</text>
+      <text class="node-s" x="46" y="135">(직전 7일 요약)</text>
+
+      <rect x="30" y="178" width="220" height="64" rx="12" fill="rgba(55,200,195,.11)" stroke="#37c8c3" stroke-width="1.5"/>
+      <text class="badge-t" x="46" y="200" fill="#37c8c3">입력 · 발달단계</text>
+      <text class="node-s" x="46" y="220">재배 주차 · 조사 회차 · 월</text>
+      <text class="node-s" x="46" y="235">(작물의 리듬)</text>
+
+      <!-- 모델 -->
+      <rect x="335" y="118" width="232" height="84" rx="14" fill="rgba(255,93,115,.10)" stroke="#ff5d73" stroke-width="1.8"/>
+      <text class="badge-t" x="451" y="142" fill="#ff8a9c" text-anchor="middle">berry_ai 모델</text>
+      <text class="node-t" x="451" y="164" text-anchor="middle">부스팅 트리(LGBM·CatBoost)</text>
+      <text class="node-s" x="451" y="184" text-anchor="middle">+ 앙상블 · Optuna 튜닝</text>
+
+      <!-- 출력 2개 -->
+      <rect x="650" y="58" width="220" height="64" rx="12" fill="rgba(95,211,154,.08)" stroke="#5fd39a" stroke-width="1.5"/>
+      <text class="badge-t" x="666" y="80" fill="#5fd39a">출력 · 예측값</text>
+      <text class="node-s" x="666" y="100">다음 조사 때 착과수·초장</text>
+      <text class="node-s" x="666" y="115">(하나의 숫자)</text>
+
+      <rect x="650" y="198" width="220" height="64" rx="12" fill="rgba(182,155,255,.10)" stroke="#b69bff" stroke-width="1.5"/>
+      <text class="badge-t" x="666" y="220" fill="#b69bff">출력 · 신뢰 구간</text>
+      <text class="node-s" x="666" y="240">"이 정도~저 정도" (P10~P90)</text>
+      <text class="node-s" x="666" y="255">확신도까지 함께</text>
+    </svg>
+  </div>
+  <div class="analogy">이 모델은 딸기의 <b>주치의</b>와 같습니다. 지난 일주일의 '건강 기록(환경)'과 '나이(재배 주차)'를 보고 <b>다음 상태를 예상</b>하되, 확신이 낮으면 "이 정도에서 저 정도 사이"라고 <b>범위로 정직하게</b> 말합니다.</div>
+</section>
+
+<!-- 3원칙 -->
+<section id="principle">
+  <p class="kicker">Design Principles</p>
+  <h2 class="sec">설계 3원칙</h2>
+  <p class="sec-sub">이 모델을 관통하는 세 가지 철학입니다.</p>
+  <div class="principles">
+    <div class="pr p1"><div class="ic">🎯</div><h4>① 정직하게 평가</h4>
+      <p>"실전에서 처음 보는 상황"을 흉내 내 성능을 잽니다. 미래 정보를 훔쳐보는 편법을 구조적으로 차단.</p></div>
+    <div class="pr p2"><div class="ic">🌱</div><h4>② 작물의 리듬 반영</h4>
+      <p>딸기는 '지금 몇 주차인가(화방 발달)'에 크게 좌우 → 발달단계를 입력에 포함.</p></div>
+    <div class="pr p3"><div class="ic">📏</div><h4>③ 확신도까지 제공</h4>
+      <p>값 하나가 아니라 '범위'를 냅니다. 그 범위가 약속(80%)만큼 맞도록 Conformal 보정.</p></div>
+  </div>
+</section>
+
+<!-- 작동 4단계 -->
+<section id="how">
+  <p class="kicker">How</p>
+  <h2 class="sec">어떻게 작동하나 — 4단계 흐름</h2>
+  <p class="sec-sub">복잡해 보여도 흐름은 단순합니다.</p>
+  <div class="fig wide">
+    <svg viewBox="0 0 940 170" role="img" aria-label="작동 4단계 흐름도">
+      <defs>
+        <marker id="ar2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="#8b93a7"/></marker>
+      </defs>
+      <path d="M222,80 H247" fill="none" stroke="#8b93a7" stroke-width="2" marker-end="url(#ar2)"/>
+      <path d="M452,80 H477" fill="none" stroke="#8b93a7" stroke-width="2" marker-end="url(#ar2)"/>
+      <path d="M682,80 H707" fill="none" stroke="#8b93a7" stroke-width="2" marker-end="url(#ar2)"/>
+
+      <g>
+        <rect x="12" y="34" width="210" height="92" rx="12" fill="rgba(92,200,255,.09)" stroke="#5cc8ff" stroke-width="1.5"/>
+        <circle cx="40" cy="62" r="14" fill="#ff5d73"/><text x="40" y="67" text-anchor="middle" fill="#fff" font-weight="800" font-size="14">1</text>
+        <text class="node-t" x="62" y="60">데이터 합치기</text>
+        <text class="node-s" x="30" y="86">환경(시간별) + 생육(주1회)</text>
+        <text class="node-s" x="30" y="104">→ 직전 7일 환경 요약</text>
+        <text class="node-s" x="30" y="120">"이런 환경이면 이만큼 자람"</text>
+      </g>
+      <g>
+        <rect x="248" y="34" width="204" height="92" rx="12" fill="rgba(55,200,195,.11)" stroke="#37c8c3" stroke-width="1.5"/>
+        <circle cx="276" cy="62" r="14" fill="#ff5d73"/><text x="276" y="67" text-anchor="middle" fill="#fff" font-weight="800" font-size="14">2</text>
+        <text class="node-t" x="298" y="60">작물 리듬 추가</text>
+        <text class="node-s" x="266" y="86">재배 주차·조사 회차·월</text>
+        <text class="node-s" x="266" y="104">→ 착과수의 '주기'를</text>
+        <text class="node-s" x="266" y="120">모델이 알게 함</text>
+      </g>
+      <g>
+        <rect x="478" y="34" width="204" height="92" rx="12" fill="rgba(95,211,154,.09)" stroke="#5fd39a" stroke-width="1.5"/>
+        <circle cx="506" cy="62" r="14" fill="#ff5d73"/><text x="506" y="67" text-anchor="middle" fill="#fff" font-weight="800" font-size="14">3</text>
+        <text class="node-t" x="528" y="60">예측 + 튜닝</text>
+        <text class="node-s" x="496" y="86">LGBM·CatBoost 앙상블</text>
+        <text class="node-s" x="496" y="104">Optuna로 설정 자동 최적화</text>
+        <text class="node-s" x="496" y="120">→ 정확도(R²) 향상</text>
+      </g>
+      <g>
+        <rect x="708" y="34" width="220" height="92" rx="12" fill="rgba(182,155,255,.10)" stroke="#b69bff" stroke-width="1.5"/>
+        <circle cx="736" cy="62" r="14" fill="#ff5d73"/><text x="736" y="67" text-anchor="middle" fill="#fff" font-weight="800" font-size="14">4</text>
+        <text class="node-t" x="758" y="60">확신 범위 계산</text>
+        <text class="node-s" x="726" y="86">P10~P90 예측 구간</text>
+        <text class="node-s" x="726" y="104">Conformal 보정으로</text>
+        <text class="node-s" x="726" y="120">적중률 80%에 맞춤</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- 용어 풀이 -->
+<section id="glossary">
+  <p class="kicker">Glossary</p>
+  <h2 class="sec">쓴 기술은 무엇이고, 왜 썼나</h2>
+  <p class="sec-sub">발표에서 "이건 뭐예요?"라고 물어보기 쉬운 용어들을 쉬운 말로.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>용어</th><th>쉽게 말하면</th><th>왜 썼나</th></tr></thead>
+      <tbody>
+        <tr><td class="term">부스팅 트리</td><td>여러 개의 '예/아니오 질문 나무(결정트리)'를 순서대로 쌓아, 앞 나무의 실수를 다음 나무가 보완하며 조금씩 정답에 다가가는 방식.</td><td>우리 데이터처럼 <b>표(엑셀형)</b>에서 가장 정확·빠른 계열. 딥러닝보다 적은 데이터로도 잘 됨.</td></tr>
+        <tr><td class="term">LightGBM · CatBoost</td><td>부스팅 트리를 빠르고 강력하게 만든 대표 라이브러리 2종.</td><td>둘 다 정형데이터 강자인데 <b>방식이 조금 달라</b>, 합치면(앙상블) 서로의 실수를 메움.</td></tr>
+        <tr><td class="term">앙상블</td><td>여러 모델의 예측을 <b>평균</b> 내어 하나로 합치는 것.</td><td>한 모델의 우연한 실수를 상쇄해 더 안정적. (착과수 R² 0.62 → 0.66)</td></tr>
+        <tr><td class="term">Optuna</td><td>모델 설정값(트리 깊이·학습률 등) 조합을 <b>자동으로 여러 번 시도</b>해 최적을 찾는 도구.</td><td>손으로 하나씩 바꾸는 것보다 빠르고 체계적. (0.66 → 0.73)</td></tr>
+        <tr><td class="term">분위수 회귀</td><td>'평균'이 아니라 <b>하위 10%·상위 90% 지점</b>을 예측해 '범위(구간)'를 만드는 방법.</td><td>값 하나가 아니라 <b>불확실성을 범위로</b> 표현하려고.</td></tr>
+        <tr><td class="term">Conformal (CQR)</td><td>예측 범위가 실제로 <b>약속(80%)만큼 맞도록</b>, 빗나간 양을 재서 구간을 넓혀 보정.</td><td>분위수 구간이 과신(54%)이라 → 정직한 ~80%로 교정.</td></tr>
+        <tr><td class="term">교차검증 (LOGO)</td><td>온실 하나씩 빼고 나머지로 학습 → 뺀 온실로 시험 (Leave-One-Greenhouse-Out).</td><td>실전에서 <b>새 온실</b>을 만나는 상황을 정직하게 흉내.</td></tr>
+        <tr><td class="term">데이터 누수</td><td>예측 시점엔 알 수 없는 <b>미래 정보</b>가 실수로 입력에 섞이는 것.</td><td>점수를 가짜로 높임 → <b>조사 당일 환경 제외</b>로 원천 차단.</td></tr>
+        <tr><td class="term">R² · 적중률</td><td>R²=예측값이 실제를 얼마나 설명하나(1=완벽, 0=평균찍기). 적중률=실제가 예측 '범위' 안에 든 비율.</td><td>R²는 <b>점 예측의 정확도</b>, 적중률은 <b>구간의 신뢰도</b> — 서로 다른 지표.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="plain">한 줄 정리: <b>부스팅 트리</b>로 정확히 예측하고, <b>앙상블·Optuna</b>로 더 끌어올리고, <b>분위수+Conformal</b>로 확신도를 정직하게, <b>LOGO 검증</b>으로 실전처럼 평가 — 이게 전부입니다.</div>
+</section>
+
+<!-- 검증방식 매칭 -->
+<section id="match">
+  <p class="kicker">Validation</p>
+  <h2 class="sec">타깃에 따라 '평가 방식'을 다르게</h2>
+  <p class="sec-sub">같은 데이터·모델이어도, 평가 방식을 성격에 맞추지 않으면 잘못된 결론이 납니다.</p>
+  <div class="two">
+    <div class="match a">
+      <span class="tag">착과수 → 온실별 검증(LOGO)</span>
+      <h4 style="margin-top:8px">온실 하나를 통째로 빼서 검증</h4>
+      <p>착과수는 '재배 주차'가 중요 → 모든 주차가 학습에 들어가야 함. 그래서 <b>온실을 기준</b>으로 나눕니다. (온실 1~3 학습 → 온실 4 예측)</p>
+    </div>
+    <div class="match b">
+      <span class="tag">초장 → 시간분할 검증</span>
+      <h4 style="margin-top:8px">앞 기간 학습 → 뒤 기간 예측</h4>
+      <p>초장은 환경 따라 서서히 변함 → '과거로 미래를 맞히는' <b>시간 순서</b>로 나눕니다. (앞 11주 학습 → 뒤 4주 예측)</p>
+    </div>
+  </div>
+</section>
+
+<!-- 설계 결정 표 -->
+<section id="decisions">
+  <p class="kicker">Key Decisions</p>
+  <h2 class="sec">핵심 설계 결정 — "왜 그렇게 했나"</h2>
+  <p class="sec-sub">발표에서 질문받기 쉬운 지점들.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>결정</th><th>왜 그렇게 했나</th></tr></thead>
+      <tbody>
+        <tr><td class="term">직전 7일 환경 요약</td><td>환경(시간별)·생육(주1회)의 시간 단위를 맞추고, <b>조사 당일 제외</b>로 '미래 훔쳐보기' 차단.</td></tr>
+        <tr><td class="term">발달단계 feature</td><td>착과수는 환경보다 <b>재배 주차(화방 주기)</b>에 좌우 → 없으면 예측 자체가 불가능.</td></tr>
+        <tr><td class="term">타깃별 검증방식</td><td>착과수=<b>온실별</b>, 초장=<b>시간분할</b>. 안 맞추면 "예측 불가"라는 잘못된 결론.</td></tr>
+        <tr><td class="term">앙상블 + Optuna</td><td>단일모델·기본설정의 우연을 줄이고 <b>정확도를 안정적으로 향상</b>.</td></tr>
+        <tr><td class="term">Conformal 불확실성</td><td>의사결정엔 '값'뿐 아니라 <b>'확신도'</b>가 필요. 구간이 약속(80%)만큼 실제로 맞게 보정.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 성능 도표 -->
+<section id="perf">
+  <p class="kicker">Performance</p>
+  <h2 class="sec">성능 — 도표로</h2>
+  <p class="sec-sub">R²=예측 정확도(1이면 완벽, 0이면 평균 찍기). 적중률=예측 '범위'가 실제를 담은 비율.</p>
+
+  <div class="two">
+    <!-- R² bar chart -->
+    <div>
+      <div class="fig">
+        <svg viewBox="0 0 460 300" role="img" aria-label="착과수 R2 향상 막대그래프">
+          <!-- gridlines & y labels (0~0.8) -->
+          <line class="grid-line" x1="70" y1="30"  x2="440" y2="30"/>
+          <line class="grid-line" x1="70" y1="75"  x2="440" y2="75"/>
+          <line class="grid-line" x1="70" y1="120" x2="440" y2="120"/>
+          <line class="grid-line" x1="70" y1="165" x2="440" y2="165"/>
+          <line class="grid-line" x1="70" y1="210" x2="440" y2="210"/>
+          <text class="axis-t" x="60" y="34"  text-anchor="end">0.8</text>
+          <text class="axis-t" x="60" y="79"  text-anchor="end">0.6</text>
+          <text class="axis-t" x="60" y="124" text-anchor="end">0.4</text>
+          <text class="axis-t" x="60" y="169" text-anchor="end">0.2</text>
+          <text class="axis-t" x="60" y="214" text-anchor="end">0</text>
+          <!-- bars: baseline .62, 앙상블 .66, 튜닝 .67, 온실4 .73 -->
+          <rect x="92"  y="70.5" width="60" height="139.5" rx="5" fill="#5c6478"/>
+          <rect x="182" y="61.5" width="60" height="148.5" rx="5" fill="#37c8c3"/>
+          <rect x="272" y="59.2" width="60" height="150.8" rx="5" fill="#5fd39a"/>
+          <rect x="362" y="45.7" width="60" height="164.3" rx="5" fill="#5fd39a"/>
+          <text class="bar-lab" x="122" y="62"   text-anchor="middle">0.62</text>
+          <text class="bar-lab" x="212" y="53"   text-anchor="middle">0.66</text>
+          <text class="bar-lab" x="302" y="51"   text-anchor="middle">0.67</text>
+          <text class="bar-lab" x="392" y="37"   text-anchor="middle" fill="#5fd39a">0.73</text>
+          <text class="cat-lab" x="122" y="228" text-anchor="middle">baseline</text>
+          <text class="cat-lab" x="212" y="228" text-anchor="middle">앙상블</text>
+          <text class="cat-lab" x="302" y="228" text-anchor="middle">튜닝</text>
+          <text class="cat-lab" x="392" y="228" text-anchor="middle">튜닝·온실4</text>
+          <text class="cat-lab" x="122" y="244" text-anchor="middle" fill="#7b8294">단일</text>
+          <text class="cat-lab" x="212" y="244" text-anchor="middle" fill="#7b8294">LGBM+Cat</text>
+          <text class="cat-lab" x="302" y="244" text-anchor="middle" fill="#7b8294">LOGO</text>
+          <text class="cat-lab" x="392" y="244" text-anchor="middle" fill="#7b8294">홀드아웃</text>
+        </svg>
+      </div>
+      <p class="cap">착과수 R² — baseline 0.62 → Optuna 튜닝 0.67~0.73 (높을수록 정확)</p>
+    </div>
+
+    <!-- coverage bar chart -->
+    <div>
+      <div class="fig">
+        <svg viewBox="0 0 460 300" role="img" aria-label="예측구간 적중률 개선 막대그래프">
+          <line class="grid-line" x1="70" y1="30"  x2="440" y2="30"/>
+          <line class="grid-line" x1="70" y1="75"  x2="440" y2="75"/>
+          <line class="grid-line" x1="70" y1="120" x2="440" y2="120"/>
+          <line class="grid-line" x1="70" y1="165" x2="440" y2="165"/>
+          <line class="grid-line" x1="70" y1="210" x2="440" y2="210"/>
+          <text class="axis-t" x="60" y="34"  text-anchor="end">100%</text>
+          <text class="axis-t" x="60" y="79"  text-anchor="end">75</text>
+          <text class="axis-t" x="60" y="124" text-anchor="end">50</text>
+          <text class="axis-t" x="60" y="169" text-anchor="end">25</text>
+          <text class="axis-t" x="60" y="214" text-anchor="end">0</text>
+          <!-- target line 80% -> y = 210 - 0.8*180 = 66 -->
+          <line x1="70" y1="66" x2="440" y2="66" stroke="#ffc861" stroke-width="1.6" stroke-dasharray="6 5"/>
+          <text class="axis-t" x="436" y="60" text-anchor="end" fill="#ffc861">목표 80%</text>
+          <!-- bars: 보정전 54% -> y=210-.54*180=112.8 h=97.2 ; 보정후 77% -> y=71.4 h=138.6 -->
+          <rect x="120" y="112.8" width="80" height="97.2"  rx="5" fill="#5c6478"/>
+          <rect x="300" y="71.4"  width="80" height="138.6" rx="5" fill="#b69bff"/>
+          <text class="bar-lab" x="160" y="104" text-anchor="middle">54%</text>
+          <text class="bar-lab" x="340" y="63"  text-anchor="middle" fill="#b69bff">77%</text>
+          <text class="cat-lab" x="160" y="228" text-anchor="middle">보정 전</text>
+          <text class="cat-lab" x="340" y="228" text-anchor="middle">Conformal 후</text>
+          <text class="cat-lab" x="160" y="244" text-anchor="middle" fill="#7b8294">순수 분위수</text>
+          <text class="cat-lab" x="340" y="244" text-anchor="middle" fill="#7b8294">보정</text>
+        </svg>
+      </div>
+      <p class="cap">예측 구간 적중률 — 과신(54%) → 보정 후 77% (목표 80%에 근접)</p>
+    </div>
+  </div>
+
+  <div class="plain">착과수는 <b>처음 보는 온실</b>에서도 변동의 약 <b>70%를 설명</b>합니다(R² 0.67~0.73). 예측 '범위'는 Conformal 보정으로 과신(54%)에서 <b>약속에 가까운 77%</b>로 교정했습니다.</div>
+</section>
+
+<!-- 한계 -->
+<section id="limit">
+  <p class="kicker">Honesty</p>
+  <h2 class="sec">정직한 한계</h2>
+  <div class="card">
+    <div class="honest">
+      <b>데이터가 15주뿐</b> → 착과수를 '먼 미래 주차'로 외삽하긴 아직 어렵습니다(그래서 온실별 검증 사용).<br>
+      <b>초장</b>은 검증방식에 민감 → 시간분할 0.19 vs 온실별 0.06. 용도에 맞는 검증을 골라 씀.<br>
+      <b>구간 적중률</b>은 목표 80%에 근접(77%)했지만 아직 약간 아래 → 데이터가 늘면 안정화.
+    </div>
+    <p class="dim" style="margin-top:15px">이 한계를 <b style="color:var(--text)">숨기지 않고 밝히는 것</b>이 이 모델의 설계 철학(정직한 평가)입니다. 온실·기간이 늘수록 자연스럽게 개선되는 구조입니다.</p>
+  </div>
+</section>
+
+<footer>
+  베리디시전 · berry_ai 모델 소개(설계 의도) &nbsp;·&nbsp; 대상: 딸기 생육 예측(착과수·초장 등) &nbsp;·&nbsp; 근거 데이터: 온실 1~4, 2024-11~2025-02<br>
+  성능 수치는 보유 데이터 기준이며 데이터 확대 시 변동. 상세 흐름은 파이프라인 흐름도 문서 참고.
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>실험 — 7개 생육 지표 & 집계 창 길이 비교</title>
+<style>
+  :root{
+    --bg:#0e1014; --card:#1b1f2a; --card-2:#222736; --line:#2c3242;
+    --text:#e7e9ee; --text-dim:#a4abba; --text-faint:#7b8294;
+    --berry:#ff5d73; --berry-soft:#ff8a9c; --leaf:#5fd39a; --gold:#ffc861;
+    --sky:#5cc8ff; --violet:#b69bff; --radius:16px; --maxw:940px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%, #1d2230 0%, var(--bg) 55%);
+    color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px 120px;}
+  header.hero{max-width:var(--maxw);margin:0 auto;padding:58px 22px 26px;}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.14em;font-weight:700;color:var(--berry-soft);
+    text-transform:uppercase;border:1px solid rgba(255,93,115,.35);border-radius:999px;padding:6px 14px;margin-bottom:20px;background:rgba(255,93,115,.07);}
+  h1.title{font-size:clamp(26px,5vw,40px);line-height:1.2;margin:0 0 16px;font-weight:800;letter-spacing:-.01em;}
+  h1.title .accent{color:var(--berry);}
+  .lede{font-size:clamp(15.5px,2.3vw,18px);color:var(--text-dim);max-width:720px;margin:0;}
+
+  .tldr{background:linear-gradient(135deg,rgba(255,93,115,.14),rgba(182,155,255,.10));
+    border:1px solid rgba(255,93,115,.30);border-radius:var(--radius);padding:22px 26px;margin:26px auto 0;max-width:var(--maxw);}
+  .tldr h2{margin:0 0 12px;font-size:16px;color:var(--berry-soft);letter-spacing:.02em;}
+  .tldr ul{margin:0;padding-left:20px;} .tldr li{margin:7px 0;font-size:15.5px;color:var(--text);} .tldr b{color:#fff;}
+
+  section{margin-top:48px;}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--berry);text-transform:uppercase;margin:0 0 8px;}
+  h2.sec{font-size:clamp(20px,3.4vw,26px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;}
+  .sec-sub{color:var(--text-dim);margin:0 0 22px;font-size:15.5px;}
+  p{margin:0 0 15px;} .dim{color:var(--text-dim);}
+
+  .fig{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 12px;}
+  .fig svg{display:block;width:100%;min-width:520px;height:auto;}
+  .cap{font-size:12.5px;color:var(--text-faint);text-align:center;margin:10px 4px 0;}
+  .grid-line{stroke:#242a38;stroke-width:1;}
+  .axis-t{fill:var(--text-faint);font-size:11px;}
+  .row-lab{fill:var(--text);font-size:13px;font-weight:700;}
+  .val-lab{font-size:12.5px;font-weight:750;}
+
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;margin:6px 0 0;}
+  table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px;}
+  thead th{background:#23283a;color:var(--berry-soft);text-align:left;font-weight:700;padding:12px 15px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  tbody td{padding:11px 15px;border-bottom:1px solid var(--line);color:var(--text-dim);vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:rgba(255,255,255,.018);}
+  tbody td b{color:var(--text);} td.term{color:#fff;font-weight:700;white-space:nowrap;}
+  .pos{color:var(--leaf);font-weight:700;} .neg{color:var(--berry-soft);} .best{background:rgba(95,211,154,.10);}
+  .pill{font-size:11px;font-weight:800;padding:2px 9px;border-radius:6px;white-space:nowrap;}
+  .pill.gh{background:rgba(95,211,154,.16);color:var(--leaf);}
+  .pill.tm{background:rgba(92,200,255,.16);color:var(--sky);}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:640px){.two{grid-template-columns:1fr;}}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;}
+  .box h4{margin:0 0 8px;font-size:16px;}
+  .box.gh h4{color:var(--leaf);} .box.tm h4{color:var(--sky);}
+  .box p{margin:0;font-size:14px;color:var(--text-dim);}
+  .box b{color:var(--text);}
+
+  .plain{border-left:3px solid var(--leaf);background:rgba(95,211,154,.07);border-radius:10px;padding:13px 17px;margin:16px 0 0;color:var(--text);font-size:15px;}
+  .plain b{color:var(--leaf);}
+  .plain::before{content:"🍓 결론";display:block;font-size:12.5px;font-weight:700;color:var(--leaf);margin-bottom:5px;}
+
+  footer{max-width:var(--maxw);margin:56px auto 0;padding:22px 22px 0;border-top:1px solid var(--line);color:var(--text-faint);font-size:13.5px;}
+  code{background:var(--card-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-family:Consolas,monospace;font-size:12.5px;color:var(--sky);}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">베리디시전 · 실험 보고</span>
+  <h1 class="title">7개 생육 지표 &amp; <span class="accent">집계 창 길이</span> 비교</h1>
+  <p class="lede">"왜 착과수·초장만 봤나", "왜 하필 7일인가" 같은 질문에 <b style="color:var(--text)">데이터로</b> 답하기 위한 실험입니다. 7개 생육 지표를 두 검증방식으로 모두 평가하고, 집계 창(3·7·14일)을 바꿔 성능 변화를 봤습니다.</p>
+</header>
+
+<div class="tldr">
+  <h2>핵심 결론 3가지</h2>
+  <ul>
+    <li><b>지표는 두 부류</b> — '발달·온실 특성' 지배(착과수·관부직경·엽수)는 <b>온실별 검증</b>, '환경 서서히 반영'(엽병장·엽폭·초장·엽장)은 <b>시간분할 검증</b>이 맞습니다.</li>
+    <li><b>착과수는 창이 길수록 유리</b> — 3일 0.61 → 7일 0.62 → <b>14일 0.66</b>. 반면 초장·엽병장은 <b>7일이 최적</b>이고 14일에선 급락.</li>
+    <li><b>실무 권장</b> — 지표마다 <b>검증방식·집계 창을 다르게</b>. 착과수=온실별·14일, 크기 지표=시간분할·7일.</li>
+  </ul>
+</div>
+
+<div class="wrap">
+
+<!-- ① 7개 지표 -->
+<section id="targets">
+  <p class="kicker">Experiment 1</p>
+  <h2 class="sec">① 7개 생육 지표 — 어느 검증에서 잘 맞나</h2>
+  <p class="sec-sub">집계 창 7일 고정 · 같은 모델 설정 · R²는 높을수록 정확(0=평균 찍기 수준).</p>
+
+  <div class="fig">
+    <svg viewBox="0 0 700 300" role="img" aria-label="7개 생육 지표 최고 R2 막대그래프">
+      <!-- gridlines 0 ~ 0.7 (x: 0->100, 0.2->260, 0.4->420, 0.6->580) -->
+      <line class="grid-line" x1="100" y1="20" x2="100" y2="252"/>
+      <line class="grid-line" x1="260" y1="20" x2="260" y2="252"/>
+      <line class="grid-line" x1="420" y1="20" x2="420" y2="252"/>
+      <line class="grid-line" x1="580" y1="20" x2="580" y2="252"/>
+      <text class="axis-t" x="100" y="268" text-anchor="middle">0</text>
+      <text class="axis-t" x="260" y="268" text-anchor="middle">0.2</text>
+      <text class="axis-t" x="420" y="268" text-anchor="middle">0.4</text>
+      <text class="axis-t" x="580" y="268" text-anchor="middle">0.6</text>
+      <text class="axis-t" x="700" y="268" text-anchor="end">R² (최고값)</text>
+
+      <!-- rows: 착과수0.621(gh) 관부직경0.426(gh) 엽병장0.223(tm) 엽폭0.206(tm) 초장0.175(tm) 엽수0.094(gh) 엽장0.060(tm) -->
+      <!-- len = R²*800 ; y step 32 from 45 -->
+      <g>
+        <text class="row-lab" x="92" y="49" text-anchor="end">착과수</text>
+        <rect x="100" y="35" width="497" height="20" rx="4" fill="#5fd39a"/>
+        <text class="val-lab" x="605" y="49" fill="#5fd39a">0.621</text>
+      </g>
+      <g>
+        <text class="row-lab" x="92" y="81" text-anchor="end">관부직경</text>
+        <rect x="100" y="67" width="341" height="20" rx="4" fill="#5fd39a"/>
+        <text class="val-lab" x="449" y="81" fill="#5fd39a">0.426</text>
+      </g>
+      <g>
+        <text class="row-lab" x="92" y="113" text-anchor="end">엽병장</text>
+        <rect x="100" y="99" width="178" height="20" rx="4" fill="#5cc8ff"/>
+        <text class="val-lab" x="286" y="113" fill="#5cc8ff">0.223</text>
+      </g>
+      <g>
+        <text class="row-lab" x="92" y="145" text-anchor="end">엽폭</text>
+        <rect x="100" y="131" width="165" height="20" rx="4" fill="#5cc8ff"/>
+        <text class="val-lab" x="273" y="145" fill="#5cc8ff">0.206</text>
+      </g>
+      <g>
+        <text class="row-lab" x="92" y="177" text-anchor="end">초장</text>
+        <rect x="100" y="163" width="140" height="20" rx="4" fill="#5cc8ff"/>
+        <text class="val-lab" x="248" y="177" fill="#5cc8ff">0.175</text>
+      </g>
+      <g>
+        <text class="row-lab" x="92" y="209" text-anchor="end">엽수</text>
+        <rect x="100" y="195" width="75" height="20" rx="4" fill="#5fd39a"/>
+        <text class="val-lab" x="183" y="209" fill="#5fd39a">0.094</text>
+      </g>
+      <g>
+        <text class="row-lab" x="92" y="241" text-anchor="end">엽장</text>
+        <rect x="100" y="227" width="48" height="20" rx="4" fill="#5cc8ff"/>
+        <text class="val-lab" x="156" y="241" fill="#5cc8ff">0.060</text>
+      </g>
+      <!-- 범례 (우하단 빈 공간) -->
+      <rect x="450" y="221" width="13" height="13" rx="3" fill="#5fd39a"/><text class="axis-t" x="469" y="232">온실별 검증</text>
+      <rect x="565" y="221" width="13" height="13" rx="3" fill="#5cc8ff"/><text class="axis-t" x="584" y="232">시간분할 검증</text>
+    </svg>
+  </div>
+  <p class="cap">각 지표를 '더 잘 맞는 검증방식'으로 평가한 최고 R². 색 = 그 지표에 맞는 검증.</p>
+
+  <div class="tbl-wrap" style="margin-top:18px">
+    <table>
+      <thead><tr><th>생육 지표</th><th>시간분할 R²</th><th>온실별 R²</th><th>추천 검증</th><th>성격</th></tr></thead>
+      <tbody>
+        <tr><td class="term">착과수</td><td class="neg">−3.06</td><td class="pos best">0.62</td><td><span class="pill gh">온실별</span></td><td>화방 발달주기 지배</td></tr>
+        <tr><td class="term">관부직경</td><td class="neg">−2.72</td><td class="pos best">0.43</td><td><span class="pill gh">온실별</span></td><td>세력(vigor) 지표</td></tr>
+        <tr><td class="term">엽병장</td><td class="pos best">0.22</td><td class="neg">−0.06</td><td><span class="pill tm">시간분할</span></td><td>환경 신호 가장 뚜렷(웃자람)</td></tr>
+        <tr><td class="term">엽폭</td><td class="pos best">0.21</td><td class="neg">−0.26</td><td><span class="pill tm">시간분할</span></td><td>잎 크기</td></tr>
+        <tr><td class="term">초장</td><td class="pos best">0.18</td><td class="neg">−0.01</td><td><span class="pill tm">시간분할</span></td><td>전체 세력·웃자람</td></tr>
+        <tr><td class="term">엽수</td><td class="neg">−0.29</td><td class="pos best">0.09</td><td><span class="pill gh">온실별</span></td><td>잎 발생 리듬(약함)</td></tr>
+        <tr><td class="term">엽장</td><td class="pos best">0.06</td><td class="neg">−0.02</td><td><span class="pill tm">시간분할</span></td><td>잎 길이(약함)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="two" style="margin-top:16px">
+    <div class="box gh"><h4>온실별 검증이 맞는 지표</h4>
+      <p><b>착과수 · 관부직경 · 엽수</b> — '재배 주차·온실 고유 특성'에 좌우돼, 모든 주차가 학습에 들어가는 온실별 검증에서만 잘 맞습니다.</p></div>
+    <div class="box tm"><h4>시간분할 검증이 맞는 지표</h4>
+      <p><b>엽병장 · 엽폭 · 초장 · 엽장</b> — 환경 따라 서서히 변하는 '크기' 계열. 과거→미래 시간분할에서 잘 맞습니다.</p></div>
+  </div>
+</section>
+
+<!-- ② 창 길이 -->
+<section id="window">
+  <p class="kicker">Experiment 2</p>
+  <h2 class="sec">② 집계 창 길이 — 직전 며칠을 볼까</h2>
+  <p class="sec-sub">각 지표를 '추천 검증'으로 평가 · 창 3 / 7 / 14일 비교 (R²).</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>집계 창</th><th>착과수 (온실별)</th><th>초장 (시간분할)</th><th>엽병장 (시간분할)</th></tr></thead>
+      <tbody>
+        <tr><td class="term">직전 3일</td><td>0.609</td><td>0.169</td><td>0.219</td></tr>
+        <tr><td class="term">직전 7일</td><td>0.621</td><td class="pos best">0.175</td><td class="pos best">0.223</td></tr>
+        <tr><td class="term">직전 14일</td><td class="pos best">0.662</td><td>0.155</td><td class="neg">−0.057</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="two" style="margin-top:16px">
+    <div class="box gh"><h4>착과수 → 창이 길수록 좋다</h4>
+      <p>3일 0.61 → 7일 0.62 → <b>14일 0.66</b>. 열매는 <b>2주치 누적 환경</b>이 더 잘 설명합니다. 착과수 모델은 <b>14일 창</b> 권장.</p></div>
+    <div class="box tm"><h4>크기 지표 → 7일이 최적</h4>
+      <p>초장·엽병장은 <b>7일</b>에서 가장 좋고 14일에선 급락(엽병장 0.22 → <b>−0.06</b>). 크기 계열은 <b>7일 창</b>이 맞습니다.</p></div>
+  </div>
+
+  <div class="plain">집계 창은 '정답'이 하나가 아닙니다. <b>착과수는 14일, 크기 지표는 7일</b>이 최적 — 지표 성격에 맞춰 창을 다르게 두는 게 최선입니다. (<code>data_prep.py</code>의 <code>WINDOW_DAYS</code> 한 줄로 조정)</div>
+</section>
+
+<!-- 결론 -->
+<section id="conclusion">
+  <p class="kicker">Takeaway</p>
+  <h2 class="sec">그래서 어떻게 쓰나</h2>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>용도</th><th>예측 대상</th><th>검증방식</th><th>집계 창</th></tr></thead>
+      <tbody>
+        <tr><td class="term">수확량 예측</td><td>착과수</td><td><span class="pill gh">온실별</span></td><td>14일</td></tr>
+        <tr><td class="term">세력 관리</td><td>관부직경</td><td><span class="pill gh">온실별</span></td><td>7~14일</td></tr>
+        <tr><td class="term">웃자람 감시</td><td>엽병장 · 초장</td><td><span class="pill tm">시간분할</span></td><td>7일</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="dim" style="margin-top:15px">즉 하나의 만능 설정이 아니라, <b style="color:var(--text)">"무엇을 왜 예측하느냐"에 따라 검증·창을 맞추는 것</b>이 이 모델의 접근입니다. 발표에서 "왜 착과수·초장만?"이라는 질문엔 — <b style="color:var(--text)">7개를 다 봤고, 성격별로 나뉘며, 대표로 두 개를 골랐다</b>고 답하면 됩니다.</p>
+</section>
+
+<footer>
+  베리디시전 · 실험 보고(생육 지표 · 집계 창) &nbsp;·&nbsp; 산출: <code>src/compare_experiments.py</code> &nbsp;·&nbsp; 데이터: 온실 1~4, 2024-11~2025-02<br>
+  R²는 보유 데이터 기준의 상대 비교값. 데이터가 늘면 절대값은 달라질 수 있음.
+</footer>
+
+</div>
+</body>
+</html>

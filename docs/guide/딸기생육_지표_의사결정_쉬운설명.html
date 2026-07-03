@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>딸기는 지표에 따라 어떻게 자라나 — 데이터로 읽는 생육 & 의사결정</title>
+<style>
+  :root{
+    --bg:#0e1014; --bg-soft:#161922; --card:#1b1f2a; --card-2:#222736;
+    --line:#2c3242; --text:#e7e9ee; --text-dim:#a4abba; --text-faint:#7b8294;
+    --berry:#ff5d73; --berry-soft:#ff8a9c; --leaf:#5fd39a; --gold:#ffc861;
+    --sky:#5cc8ff; --violet:#b69bff; --radius:16px; --maxw:960px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%, #1d2230 0%, var(--bg) 55%);
+    color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px 120px;}
+  header.hero{max-width:var(--maxw);margin:0 auto;padding:60px 22px 34px;}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.14em;font-weight:700;color:var(--berry-soft);
+    text-transform:uppercase;border:1px solid rgba(255,93,115,.35);border-radius:999px;padding:6px 14px;margin-bottom:20px;background:rgba(255,93,115,.07);}
+  h1.title{font-size:clamp(27px,5vw,42px);line-height:1.2;margin:0 0 16px;font-weight:800;letter-spacing:-.01em;}
+  h1.title .accent{color:var(--berry);}
+  .lede{font-size:clamp(15.5px,2.3vw,18.5px);color:var(--text-dim);max-width:730px;margin:0;}
+  .meta{margin-top:24px;display:flex;flex-wrap:wrap;gap:10px;}
+  .chip{font-size:13px;color:var(--text-dim);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 13px;}
+  .chip b{color:var(--text);font-weight:700;}
+
+  .tldr{background:linear-gradient(135deg,rgba(255,93,115,.14),rgba(182,155,255,.10));
+    border:1px solid rgba(255,93,115,.30);border-radius:var(--radius);padding:24px 28px;margin:6px auto 0;max-width:var(--maxw);}
+  .tldr h2{margin:0 0 12px;font-size:17px;color:var(--berry-soft);letter-spacing:.02em;}
+  .tldr ul{margin:0;padding-left:20px;} .tldr li{margin:7px 0;font-size:16px;color:var(--text);} .tldr b{color:#fff;}
+
+  section{margin-top:54px;}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--berry);text-transform:uppercase;margin:0 0 8px;}
+  h2.sec{font-size:clamp(21px,3.4vw,27px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;}
+  .sec-sub{color:var(--text-dim);margin:0 0 24px;font-size:15.5px;}
+  p{margin:0 0 15px;} .dim{color:var(--text-dim);}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;margin-bottom:16px;}
+  .card h3{margin:0 0 10px;font-size:18px;font-weight:750;}
+
+  .plain{border-left:3px solid var(--leaf);background:rgba(95,211,154,.07);border-radius:10px;padding:13px 17px;margin:14px 0 0;color:var(--text);font-size:15px;}
+  .plain b{color:var(--leaf);}
+  .plain::before{content:"🍓 쉽게 말하면";display:block;font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--leaf);margin-bottom:5px;}
+  .warn{border-left:3px solid var(--gold);background:rgba(255,200,97,.08);border-radius:10px;padding:13px 17px;margin:14px 0 0;color:var(--text);font-size:15px;}
+  .warn b{color:var(--gold);}
+  .warn::before{content:"⚠️ 이럴 땐 조심";display:block;font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--gold);margin-bottom:5px;}
+  .decide{border-left:3px solid var(--sky);background:rgba(92,200,255,.07);border-radius:10px;padding:13px 17px;margin:14px 0 0;color:var(--text);font-size:15px;}
+  .decide b{color:var(--sky);}
+  .decide::before{content:"🎯 의사결정";display:block;font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--sky);margin-bottom:5px;}
+
+  .badge{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:6px;white-space:nowrap;}
+  .b-veg{background:rgba(95,211,154,.16);color:var(--leaf);}
+  .b-gen{background:rgba(255,93,115,.16);color:var(--berry-soft);}
+
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;margin:6px 0 0;}
+  table{border-collapse:collapse;width:100%;min-width:620px;font-size:14px;}
+  thead th{background:#23283a;color:var(--berry-soft);text-align:left;font-weight:700;padding:12px 15px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  tbody td{padding:12px 15px;border-bottom:1px solid var(--line);color:var(--text-dim);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:rgba(255,255,255,.018);}
+  tbody td b{color:var(--text);}
+  td.term{color:#fff;font-weight:700;white-space:nowrap;}
+
+  /* 두 갈래 카드 */
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;}
+  .split{border-radius:14px;padding:20px 22px;border:1px solid var(--line);}
+  .split.veg{background:rgba(95,211,154,.06);border-color:rgba(95,211,154,.3);}
+  .split.gen{background:rgba(255,93,115,.06);border-color:rgba(255,93,115,.3);}
+  .split h4{margin:0 0 8px;font-size:17px;}
+  .split.veg h4{color:var(--leaf);} .split.gen h4{color:var(--berry-soft);}
+  .split ul{margin:8px 0 0;padding-left:18px;} .split li{font-size:14.5px;margin:5px 0;color:var(--text-dim);}
+
+  /* 착과수 바차트 */
+  .chart{margin:8px 0 0;}
+  .chart .row{display:flex;align-items:center;gap:10px;margin:3px 0;}
+  .chart .lab{flex:0 0 74px;font-size:12px;color:var(--text-faint);text-align:right;font-variant-numeric:tabular-nums;}
+  .chart .barwrap{flex:1;background:rgba(255,255,255,.04);border-radius:5px;height:19px;position:relative;}
+  .chart .bar{height:19px;border-radius:5px;background:linear-gradient(90deg,var(--berry-soft),var(--berry));}
+  .chart .val{position:absolute;top:0;height:19px;display:flex;align-items:center;font-size:11.5px;color:var(--text);padding-left:7px;font-variant-numeric:tabular-nums;}
+  .phase{font-size:11px;color:var(--text-faint);margin-left:6px;}
+  .caption{font-size:13px;color:var(--text-faint);margin:12px 4px 0;}
+
+  .kv{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 0;}
+  .kv .b{background:var(--card-2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:120px;}
+  .kv .b .n{font-size:20px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;}
+  .kv .b .t{font-size:12px;color:var(--text-faint);margin-top:2px;}
+
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;}
+  .toc a{font-size:13.5px;color:var(--text-dim);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:7px 12px;text-decoration:none;}
+  .toc a:hover{color:var(--text);border-color:var(--berry);}
+  footer{max-width:var(--maxw);margin:56px auto 0;padding:22px 22px 0;border-top:1px solid var(--line);color:var(--text-faint);font-size:13.5px;}
+  code.inl{background:var(--card-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-family:Consolas,monospace;font-size:13px;color:var(--sky);}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">베리디시전 · 생육 이해</span>
+  <h1 class="title">딸기는 <span class="accent">지표에 따라</span><br>어떻게 자라나</h1>
+  <p class="lede">보유한 4개 온실의 <b style="color:var(--text)">실제 환경·생육 데이터(2024-11 ~ 2025-02)</b>를 근거로, 각 지표가 딸기를 어떻게 키우고, 어떤 값을 보면 어떤 결정을 내려야 하는지 쉽게 정리했습니다. 의사결정 AI가 “왜 그렇게 판단하는가”의 밑그림입니다.</p>
+  <div class="meta">
+    <span class="chip">근거 <b>24_생육정보 · 24_환경정보 (온실1~4)</b></span>
+    <span class="chip">기간 <b>2024-11-01 ~ 2025-02-03 (겨울작)</b></span>
+    <span class="chip">성격 <b>지표→생육→의사결정 해설</b></span>
+  </div>
+  <div class="toc">
+    <a href="#big">① 큰 그림</a>
+    <a href="#story">② 데이터 속 성장 스토리</a>
+    <a href="#env">③ 환경 지표 → 생육</a>
+    <a href="#growth">④ 생육 지표 읽는 법</a>
+    <a href="#rules">⑤ 의사결정 규칙</a>
+    <a href="#climate">⑥ 이상기후 관점</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+<div class="tldr">
+  <h2>한 문단 요약</h2>
+  <ul>
+    <li>딸기는 늘 <b>“잎을 키울까(영양생장) vs 열매를 키울까(생식생장)”</b> 사이에서 자원을 배분합니다. 우리 일은 <b>지표를 보고 이 저울을 원하는 쪽으로 기울이는 것</b>.</li>
+    <li>실제 데이터에서 <b>초장 24→28cm·관부직경 1.8→2.4cm</b>로 세력은 꾸준히 커졌지만, <b>겨울(12~1월) 저광·저온</b>에 잎·엽병 성장이 정체됐고, <b>착과수는 12월초 7.6개 피크 → 수확 → 재상승</b>하는 화방 사이클을 그렸습니다.</li>
+    <li>환경 지표는 <b>온도·광량이 “엔진”, CO₂·습도(VPD)·급액이 “조절 밸브”</b>. 생육 지표는 <b>초장·엽병장이 웃자람 경보, 관부직경이 세력, 착과수가 수확 예측</b>.</li>
+    <li>겨울작의 최대 변수는 <b>외기온 급락(-5℃)에 따른 난방·저온장해</b> 와 <b>고습(평균 83%)에 따른 곰팡이병 위험</b>입니다.</li>
+  </ul>
+</div>
+
+<!-- ① 큰 그림 -->
+<section id="big">
+  <p class="kicker">Concept</p>
+  <h2 class="sec">① 딸기 생육의 큰 그림 — 저울 하나면 이해된다</h2>
+  <p class="sec-sub">복잡한 지표도 결국 이 저울의 한쪽을 누르는 행위입니다.</p>
+  <div class="grid2">
+    <div class="split veg">
+      <h4>영양생장 <span class="badge b-veg">잎·뿌리·세력</span></h4>
+      <p class="dim" style="margin:0">식물이 <b style="color:var(--text)">몸집(잎·크라운·뿌리)</b>을 키우는 모드. 광합성 공장을 늘리는 투자.</p>
+      <ul>
+        <li>촉진: 질소↑(EC↑), 온도↑, 야간온도↑, 광량↑</li>
+        <li>너무 강하면 → <b>웃자람(초장·엽병장만 길어짐)</b>, 열매가 안 달림</li>
+      </ul>
+    </div>
+    <div class="split gen">
+      <h4>생식생장 <span class="badge b-gen">꽃·열매</span></h4>
+      <p class="dim" style="margin:0">식물이 <b style="color:var(--text)">꽃눈·열매</b>에 자원을 쏟는 모드. 수확으로 이어지는 산출.</p>
+      <ul>
+        <li>촉진: 낮밤 온도차(DIF)↑, 적정 저온, 광량 충분, 양분 균형</li>
+        <li>너무 강하면 → <b>세력 저하(잎 작고 관부 가늘어짐)</b>, 열매가 작아짐</li>
+      </ul>
+    </div>
+  </div>
+  <div class="plain">딸기 재배 = <b>이 저울을 계절·생육단계에 맞게 계속 미세조정</b>하는 일. 초기엔 영양생장으로 몸을 만들고, 화방이 오면 생식생장으로 기울여 열매에 힘을 몰아줍니다. <b>모든 환경 제어는 “지금 저울을 어디로 밀지”의 수단</b>이에요.</div>
+</section>
+
+<!-- ② 데이터 속 성장 스토리 -->
+<section id="story">
+  <p class="kicker">Our Data</p>
+  <h2 class="sec">② 실제 데이터가 보여준 4개월</h2>
+  <p class="sec-sub">온실 1~4 평균. 숫자에 이야기가 있습니다.</p>
+
+  <div class="card">
+    <h3>몸집은 커졌지만 겨울에 브레이크가 걸렸다</h3>
+    <div class="kv">
+      <div class="b"><div class="n">24.4→27.9</div><div class="t">초장 (cm) · 완만↑</div></div>
+      <div class="b"><div class="n">1.8→2.4</div><div class="t">관부직경 (cm) · 세력↑</div></div>
+      <div class="b"><div class="n">6.1→7.0</div><div class="t">엽수 (개) · 거의 정체</div></div>
+      <div class="b"><div class="n">14.1→16.8</div><div class="t">엽병장 (cm) · 11월↑후 정체</div></div>
+    </div>
+    <p class="dim" style="margin-top:15px">11월엔 잎·엽병이 쭉쭉 자라다가, <b style="color:var(--text)">12~1월 들어 초장·엽장·엽수·엽병장이 거의 멈췄습니다.</b> 반면 <b style="color:var(--text)">관부직경(세력의 척도)은 꾸준히 굵어졌죠.</b> 겨울 저광·저온에서 잎 신장은 멈추되 뿌리·크라운에 힘을 저장하는, 전형적인 겨울작 패턴입니다.</p>
+  </div>
+
+  <div class="card">
+    <h3>착과수 곡선 = 화방(꽃송이) 사이클 그 자체</h3>
+    <div class="chart">
+      <div class="row"><div class="lab">11-01</div><div class="barwrap"><div class="bar" style="width:4%"></div><div class="val">0.3</div></div></div>
+      <div class="row"><div class="lab">11-04</div><div class="barwrap"><div class="bar" style="width:4%"></div><div class="val">0.3</div></div></div>
+      <div class="row"><div class="lab">11-11</div><div class="barwrap"><div class="bar" style="width:11%"></div><div class="val">0.9</div></div></div>
+      <div class="row"><div class="lab">11-18</div><div class="barwrap"><div class="bar" style="width:20%"></div><div class="val">1.6</div></div></div>
+      <div class="row"><div class="lab">11-25</div><div class="barwrap"><div class="bar" style="width:61%"></div><div class="val">4.9</div></div></div>
+      <div class="row"><div class="lab">12-02</div><div class="barwrap"><div class="bar" style="width:90%"></div><div class="val">7.2</div></div></div>
+      <div class="row"><div class="lab">12-09</div><div class="barwrap"><div class="bar" style="width:95%"></div><div class="val">7.6 <span class="phase">← 1화방 피크</span></div></div></div>
+      <div class="row"><div class="lab">12-16</div><div class="barwrap"><div class="bar" style="width:73%"></div><div class="val">5.8</div></div></div>
+      <div class="row"><div class="lab">12-23</div><div class="barwrap"><div class="bar" style="width:60%"></div><div class="val">4.8 <span class="phase">← 수확 진행</span></div></div></div>
+      <div class="row"><div class="lab">12-30</div><div class="barwrap"><div class="bar" style="width:45%"></div><div class="val">3.6</div></div></div>
+      <div class="row"><div class="lab">01-06</div><div class="barwrap"><div class="bar" style="width:29%"></div><div class="val">2.3 <span class="phase">← 화방 사이 골</span></div></div></div>
+      <div class="row"><div class="lab">01-13</div><div class="barwrap"><div class="bar" style="width:56%"></div><div class="val">4.5</div></div></div>
+      <div class="row"><div class="lab">01-20</div><div class="barwrap"><div class="bar" style="width:54%"></div><div class="val">4.3</div></div></div>
+      <div class="row"><div class="lab">01-31</div><div class="barwrap"><div class="bar" style="width:71%"></div><div class="val">5.7 <span class="phase">← 2화방 상승</span></div></div></div>
+      <div class="row"><div class="lab">02-03</div><div class="barwrap"><div class="bar" style="width:66%"></div><div class="val">5.3</div></div></div>
+    </div>
+    <p class="caption">표본당 평균 착과수 (온실 1~4 평균). 값 옆 라벨은 해석.</p>
+    <div class="plain">착과수는 계속 늘어나는 값이 아니라 <b>“달렸다가 → 수확되며 줄고 → 다음 화방에서 다시 오르는” 파도</b>입니다. 이 곡선을 보면 <b>1화방 수확 피크(12월초)와, 화방과 화방 사이의 수확 공백(1월초 골)</b>이 그대로 읽힙니다. 의사결정 AI의 핵심 타깃 중 하나가 바로 <b>“다음 파도가 언제, 얼마나 올까(수확량 예측)”</b>예요.</div>
+  </div>
+</section>
+
+<!-- ③ 환경 지표 → 생육 -->
+<section id="env">
+  <p class="kicker">Levers</p>
+  <h2 class="sec">③ 환경 지표는 어떻게 생육을 움직이나</h2>
+  <p class="sec-sub">우리 환경파일 컬럼 순서대로. 괄호 안은 이번 데이터의 실제 값(온실1 기준).</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>지표</th><th>딸기에 하는 일</th><th>우리 데이터</th><th>적정 감각*</th></tr></thead>
+      <tbody>
+        <tr><td class="term">내부온도</td><td>성장 속도의 “엔진”. <b>주간</b>은 광합성, <b>야간</b>은 열매로 양분 이동. 낮밤 차이(DIF)가 꽃·열매를 좌우.</td><td>평균 15.4℃ · 주간 19.3 / 야간 12.8</td><td>주간 18~23 / 야간 8~12</td></tr>
+        <tr><td class="term">외부일사량</td><td>광합성의 원료. <b>누적광량(DLI)</b>이 곧 그날의 “생산 예산”. 겨울엔 이게 최대 제약.</td><td>평균 81 · 최대 809 W/㎡</td><td>많을수록 유리 (겨울 부족)</td></tr>
+        <tr><td class="term">내부CO₂</td><td>광합성의 또 다른 원료. <b>낮에 빛이 있을 때</b> 높여줘야 효과. 밤엔 호흡으로 저절로 쌓임.</td><td>평균 458 · 야간 최대 1946ppm</td><td>주간 700~1000 (시비 시)</td></tr>
+        <tr><td class="term">내부습도</td><td>너무 높으면 곰팡이병·증산 저하, 너무 낮으면 잎 마름. <b>VPD(수증기압차)</b>로 보는 게 정확.</td><td>평균 83% · 최대 99.9%</td><td>60~85% (야간 과습 주의)</td></tr>
+        <tr><td class="term">급액EC</td><td>양분 농도. <b>높이면 생식생장·당도↑, 낮추면 영양생장</b>. 세력 조절의 주 수단.</td><td>평균 1.11 (최대 4.3)</td><td>0.8~1.4 (단계별 조정)</td></tr>
+        <tr><td class="term">급액PH</td><td>양분 흡수 효율. 벗어나면 특정 원소 결핍/과잉.</td><td>평균 6.3</td><td>5.5~6.5</td></tr>
+        <tr><td class="term">외부온도</td><td>난방 부하·저온장해 위험의 원천. 실내 제어의 “외란”.</td><td>-5.4 ~ 24.2℃ (1월 평균 0.8)</td><td>실내 방어 대상</td></tr>
+        <tr><td class="term">외부풍향·풍속</td><td>환기·열손실·틈새 침입 냉기에 영향. 강풍 시 보온·환기 판단.</td><td>—</td><td>제어 보조 변수</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="caption">*적정 감각은 겨울 촉성재배의 일반 범위이며, 품종·생육단계·지역에 따라 달라집니다. 최종 기준은 재배 목표로 확정하세요.</p>
+  <div class="warn">지표는 <b>따로 놀지 않습니다.</b> 예: CO₂를 올려도 <b>빛(일사)이 없으면 소용없고</b>, 온도를 올리면 <b>습도·VPD가 따라 바뀝니다.</b> 그래서 “한 지표 규칙”이 아니라 <b>여러 지표를 함께 보는 모델</b>이 필요한 거예요.</div>
+</section>
+
+<!-- ④ 생육 지표 읽는 법 -->
+<section id="growth">
+  <p class="kicker">Read</p>
+  <h2 class="sec">④ 생육 지표 읽는 법 — 식물이 보내는 신호</h2>
+  <p class="sec-sub">환경이 “입력”이면, 생육 지표는 식물의 “대답”입니다. 우리 생육파일 7개 항목.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>생육 지표</th><th>무엇을 말하나</th><th>이렇게 읽는다</th></tr></thead>
+      <tbody>
+        <tr><td class="term">초장</td><td>줄기+잎의 키. 전반적 세력과 웃자람 여부.</td><td>급증 &amp; 엽병장 동반 증가 → <b>웃자람(영양과잉)</b> 신호</td></tr>
+        <tr><td class="term">엽병장</td><td>잎자루 길이. <b>웃자람에 가장 민감한 경보등.</b></td><td>같은 광량인데 길어지면 → 야온↑·질소↑ 의심</td></tr>
+        <tr><td class="term">엽장·엽폭</td><td>잎 크기 = 광합성 면적.</td><td>작아지면 세력 저하·저온·양분부족</td></tr>
+        <tr><td class="term">엽수</td><td>잎 발생 속도 = 활력의 리듬.</td><td>정체(우리 겨울 데이터) → 저광·저온 한계</td></tr>
+        <tr><td class="term">관부직경</td><td><b>세력의 대표 지표(굵을수록 힘 있음).</b></td><td>가늘어지면 → 생식과잉/과착과, 세력 회복 필요</td></tr>
+        <tr><td class="term">착과수</td><td>현재 달린 열매 수 = <b>수확량·부하의 직접 신호.</b></td><td>피크 후 세력 떨어지면 → 적과·양분보강</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="plain">가장 중요한 <b>“균형 읽기”</b>: <b>관부직경(세력)</b> 과 <b>착과수(부하)</b> 를 같이 보세요. 세력은 굵은데 착과가 적으면 → 열매 쪽으로 밀어야 하고, 착과는 많은데 관부가 가늘어지면 → 식물이 <b>지치는 중</b>이라 세력을 회복시켜야 합니다.</div>
+</section>
+
+<!-- ⑤ 의사결정 규칙 -->
+<section id="rules">
+  <p class="kicker">Decisions</p>
+  <h2 class="sec">⑤ 의사결정 규칙 — “이 신호면 이렇게”</h2>
+  <p class="sec-sub">AI가 배워야 할 규칙의 사람 버전. 실제 상황은 조합이지만, 감을 잡는 출발점입니다.</p>
+
+  <div class="card">
+    <h3>상황 A · 웃자란다 <span class="dim" style="font-size:13px">(초장·엽병장 급증, 착과 부진)</span></h3>
+    <div class="decide"><b>저울을 생식생장으로.</b> 야간온도를 낮춰 DIF↑, 급액 EC 소폭↑(양분 농도로 도장 억제), 질소 비중↓. 광량 대비 온도가 과한지 점검.</div>
+  </div>
+  <div class="card">
+    <h3>상황 B · 세력이 약하다 <span class="dim" style="font-size:13px">(관부 가늘어짐, 잎 작아짐, 과착과)</span></h3>
+    <div class="decide"><b>저울을 영양생장으로.</b> 착과 부하를 줄이고(적과), 야온 소폭↑, EC 낮춰 흡수 촉진, 광량 충분 시 CO₂ 시비로 광합성 여력 확보.</div>
+  </div>
+  <div class="card">
+    <h3>상황 C · 습도가 높다 <span class="dim" style="font-size:13px">(야간 90%+, 우리 데이터 최대 99.9%)</span></h3>
+    <div class="warn">잿빛곰팡이·흰가루 위험 구간. <b>야간 난방+환기로 제습</b>(온도 살짝 올려 상대습도↓), 순환팬으로 정체공기 해소. VPD를 관리 지표로.</div>
+  </div>
+  <div class="card">
+    <h3>상황 D · 낮인데 CO₂가 낮다 <span class="dim" style="font-size:13px">(일사 있고 CO₂ 400대)</span></h3>
+    <div class="decide"><b>광합성 여력 낭비 중.</b> 일사가 충분한 낮에 CO₂ 시비(700~1000ppm)로 생산 예산↑. 단, <b>빛이 약하면 시비해도 무의미</b>하니 일사와 함께 판단.</div>
+  </div>
+</section>
+
+<!-- ⑥ 이상기후 -->
+<section id="climate">
+  <p class="kicker">Risk</p>
+  <h2 class="sec">⑥ 이상기후 관점 — 겨울작의 진짜 변수</h2>
+  <p class="sec-sub">5회 대회 주제이자, 우리 데이터에서도 가장 크게 흔들린 부분.</p>
+  <div class="card">
+    <div class="kv">
+      <div class="b"><div class="n">21.7→12.4</div><div class="t">내부온도 월평균 (9월→1월)</div></div>
+      <div class="b"><div class="n">-5.4℃</div><div class="t">외기온 최저 · 난방 최대부하</div></div>
+      <div class="b"><div class="n">349~458</div><div class="t">온실별 CO₂ 편차 → 관리차</div></div>
+    </div>
+    <p class="dim" style="margin-top:15px">외기온이 <b style="color:var(--text)">9월 21℃대에서 1월 0.8℃</b>로 떨어지면서 내부온도 유지에 난방 부담이 급증했고, 이게 <b>생육 정체(엽수·초장 멈춤)</b>로 이어졌습니다. 4개 온실의 평균 온도·CO₂·EC가 서로 다른 것도(온실3은 CO₂ 349로 낮음) 결국 <b>생육 편차의 원인</b>이 됩니다.</p>
+    <div class="plain">이상기후 대응의 요지: <b>외부기상(급락·한파·흐림 연속)을 미리 읽고</b>, 저온장해가 오기 전에 보온·난방·커튼을 선제 가동하며, 흐린 날 연속이면 <b>광량 부족을 전제로 CO₂·온도 전략을 낮춰 잡는 것.</b> 우리 AI가 외부온도·일사 예보를 입력으로 받아야 하는 이유입니다.</div>
+  </div>
+</section>
+
+<footer>
+  베리디시전 · 데이터로 읽는 딸기 생육 &amp; 의사결정 해설 &nbsp;·&nbsp; 근거: 24_생육정보 / 24_환경정보(온실1~4), 2024-11 ~ 2025-02<br>
+  실제 값은 위 데이터에서 산출. 적정범위·규칙은 겨울 촉성재배 일반 기준으로, 품종·단계·목표에 맞춰 확정 필요.
+</footer>
+
+</div>
+</body>
+</html>

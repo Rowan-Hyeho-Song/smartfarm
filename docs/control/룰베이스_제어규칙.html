@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>룰 베이스 제어 규칙 — 데이터 상관관계 기반</title>
+<style>
+  :root{
+    --bg:#0e1014; --card:#1b1f2a; --card-2:#222736; --line:#2c3242;
+    --text:#e7e9ee; --text-dim:#a4abba; --text-faint:#7b8294;
+    --berry:#ff5d73; --berry-soft:#ff8a9c; --leaf:#5fd39a; --gold:#ffc861;
+    --sky:#5cc8ff; --violet:#b69bff; --radius:16px; --maxw:940px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%, #1d2230 0%, var(--bg) 55%);
+    color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px 120px;}
+  header.hero{max-width:var(--maxw);margin:0 auto;padding:58px 22px 26px;}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.14em;font-weight:700;color:var(--berry-soft);
+    text-transform:uppercase;border:1px solid rgba(255,93,115,.35);border-radius:999px;padding:6px 14px;margin-bottom:20px;background:rgba(255,93,115,.07);}
+  h1.title{font-size:clamp(26px,5vw,40px);line-height:1.2;margin:0 0 16px;font-weight:800;letter-spacing:-.01em;}
+  h1.title .accent{color:var(--berry);}
+  .lede{font-size:clamp(15.5px,2.3vw,18px);color:var(--text-dim);max-width:730px;margin:0;}
+
+  .tldr{background:linear-gradient(135deg,rgba(255,93,115,.14),rgba(182,155,255,.10));
+    border:1px solid rgba(255,93,115,.30);border-radius:var(--radius);padding:22px 26px;margin:26px auto 0;max-width:var(--maxw);}
+  .tldr h2{margin:0 0 12px;font-size:16px;color:var(--berry-soft);letter-spacing:.02em;}
+  .tldr ul{margin:0;padding-left:20px;} .tldr li{margin:7px 0;font-size:15.5px;color:var(--text);} .tldr b{color:#fff;}
+
+  section{margin-top:48px;}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--berry);text-transform:uppercase;margin:0 0 8px;}
+  h2.sec{font-size:clamp(20px,3.4vw,26px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;}
+  .sec-sub{color:var(--text-dim);margin:0 0 22px;font-size:15.5px;}
+  p{margin:0 0 15px;} .dim{color:var(--text-dim);}
+
+  .fig{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 12px;}
+  .fig svg{display:block;width:100%;min-width:520px;height:auto;}
+  .cap{font-size:12.5px;color:var(--text-faint);text-align:center;margin:10px 4px 0;}
+  .grid-line{stroke:#242a38;stroke-width:1;} .axis-t{fill:var(--text-faint);font-size:11px;}
+  .row-lab{fill:var(--text);font-size:13px;font-weight:700;} .val-lab{font-size:12px;font-weight:750;}
+
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;margin:6px 0 0;}
+  table{border-collapse:collapse;width:100%;min-width:620px;font-size:14px;}
+  thead th{background:#23283a;color:var(--berry-soft);text-align:left;font-weight:700;padding:12px 15px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  tbody td{padding:12px 15px;border-bottom:1px solid var(--line);color:var(--text-dim);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:rgba(255,255,255,.018);}
+  tbody td b{color:var(--text);} td.term{color:#fff;font-weight:700;white-space:nowrap;}
+  .s-strong{color:var(--leaf);font-weight:700;} .s-mid{color:var(--gold);font-weight:700;} .s-weak{color:var(--text-faint);}
+
+  .warn{border-left:3px solid var(--gold);background:rgba(255,200,97,.08);border-radius:10px;padding:14px 18px;margin:16px 0 0;color:var(--text);font-size:15px;}
+  .warn b{color:var(--gold);}
+  .warn::before{content:"⚠️ 함정 — 그대로 룰로 쓰면 안 됨";display:block;font-size:12.5px;font-weight:700;color:var(--gold);margin-bottom:5px;}
+  .plain{border-left:3px solid var(--leaf);background:rgba(95,211,154,.07);border-radius:10px;padding:13px 17px;margin:16px 0 0;color:var(--text);font-size:15px;}
+  .plain b{color:var(--leaf);}
+  .plain::before{content:"🍓 그래서 이렇게";display:block;font-size:12.5px;font-weight:700;color:var(--leaf);margin-bottom:5px;}
+  .honest{border-left:3px solid var(--berry);background:rgba(255,93,115,.07);border-radius:10px;padding:13px 17px;margin:16px 0 0;color:var(--text);font-size:15px;}
+  .honest::before{content:"⚖️ 정직한 한계";display:block;font-size:12.5px;font-weight:700;color:var(--berry-soft);margin-bottom:5px;}
+
+  footer{max-width:var(--maxw);margin:56px auto 0;padding:22px 22px 0;border-top:1px solid var(--line);color:var(--text-faint);font-size:13.5px;}
+  code{background:var(--card-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-family:Consolas,monospace;font-size:12.5px;color:var(--sky);}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">베리디시전 · 룰 베이스 제어</span>
+  <h1 class="title">데이터 상관관계로 지정한<br><span class="accent">룰 베이스 제어 규칙</span></h1>
+  <p class="lede">보유 데이터의 <b style="color:var(--text)">환경↔생육 상관</b>과 <b style="color:var(--text)">환경 지표 간 상관</b>을 근거로, "이런 조건이면 이렇게 제어한다"는 규칙을 정리했습니다. 단, <b style="color:var(--text)">계절 교란</b>을 걷어낸 '진짜 신호'만 규칙으로 채택했습니다.</p>
+</header>
+
+<div class="tldr">
+  <h2>핵심 4가지</h2>
+  <ul>
+    <li><b>가장 강한 레버 = CO₂</b> — 발달단계를 제거한 뒤에도 <b>CO₂ ↑ → 잎·줄기 생장 ↑</b>(초장 +0.40, 엽병장 +0.39). 룰 1순위.</li>
+    <li><b>복합(다변량)이 진실</b> — 다른 변수를 통제한 부분상관을 보면 <b>CO₂만 독립 레버</b>로 살아남고(+0.26), <b>VPD·습도는 CO₂·온도에 딸린 그림자</b>(부분상관 ≈0). 짝 상관만 믿으면 오판.</li>
+    <li><b>제어는 서로 얽힌다</b> — 난방→온도↑→습도↓·VPD↑, 환기→온도↓·CO₂↓. 한 밸브만 돌리면 다른 게 딸려옴.</li>
+    <li><b>정직하게</b> — <b>착과수·관부직경은 단기 환경제어로 조절이 약함</b>(발달단계 지배) → 환경 룰보다 적과·재배관리로.</li>
+  </ul>
+</div>
+
+<div class="wrap">
+
+<!-- 함정 -->
+<section id="trap">
+  <p class="kicker">Caution</p>
+  <h2 class="sec">먼저 — 원시 상관은 함정이다</h2>
+  <div class="warn">
+    원시 데이터에서 "내부온도 ↑ → 착과수 ↓"(−0.52)처럼 보입니다. 하지만 이건 <b>온도가 착과를 줄여서가 아닙니다.</b>
+    겨울작이라 <b>시간이 갈수록 (a) 식물이 자라고 (b) 날이 추워지기</b> 때문에 생기는 <b>가짜 상관(계절 교란)</b>입니다.
+    이대로 "온도를 낮추면 착과가 는다"는 룰을 만들면 <b>농업적으로 틀린 제어</b>가 됩니다.
+  </div>
+  <div class="plain">그래서 <b>발달단계(조사회차)를 제거</b>하고 — 즉 '같은 재배 주차에서 온실 간 차이'만 봐서 — 순수한 환경 효과만 남긴 상관을 규칙의 근거로 씁니다.</div>
+</section>
+
+<!-- 검증된 상관 -->
+<section id="signal">
+  <p class="kicker">Signal</p>
+  <h2 class="sec">① 발달단계를 걷어낸 '진짜' 환경 → 생장 상관</h2>
+  <p class="sec-sub">초장 기준 (엽병장도 거의 동일). 오른쪽(+)=높을수록 생장↑, 왼쪽(−)=생장↓.</p>
+  <div class="fig">
+    <svg viewBox="0 0 720 250" role="img" aria-label="발달단계 제거 후 환경-초장 상관 다이버징 막대">
+      <!-- center axis at x=360 (r=0); scale 560px per 1.0 → x=360+r*560 -->
+      <line class="grid-line" x1="136" y1="30" x2="136" y2="212"/>
+      <line class="grid-line" x1="248" y1="30" x2="248" y2="212"/>
+      <line x1="360" y1="30" x2="360" y2="212" stroke="#4a5266" stroke-width="1.5"/>
+      <line class="grid-line" x1="472" y1="30" x2="472" y2="212"/>
+      <line class="grid-line" x1="584" y1="30" x2="584" y2="212"/>
+      <text class="axis-t" x="136" y="228" text-anchor="middle">−0.4</text>
+      <text class="axis-t" x="248" y="228" text-anchor="middle">−0.2</text>
+      <text class="axis-t" x="360" y="228" text-anchor="middle">0</text>
+      <text class="axis-t" x="472" y="228" text-anchor="middle">+0.2</text>
+      <text class="axis-t" x="584" y="228" text-anchor="middle">+0.4</text>
+
+      <!-- rows: 내부CO2 +0.40, 내부습도(min) +0.25, VPD(max) -0.22, 내부온도 -0.32 -->
+      <g>
+        <text class="row-lab" x="352" y="55" text-anchor="end">내부 CO₂</text>
+        <rect x="360" y="43" width="224" height="22" rx="4" fill="#5fd39a"/>
+        <text class="val-lab" x="590" y="59" fill="#5fd39a">+0.40</text>
+      </g>
+      <g>
+        <text class="row-lab" x="352" y="99" text-anchor="end">내부 습도</text>
+        <rect x="360" y="87" width="140" height="22" rx="4" fill="#5fd39a"/>
+        <text class="val-lab" x="506" y="103" fill="#5fd39a">+0.25</text>
+      </g>
+      <g>
+        <text class="row-lab" x="368" y="143" text-anchor="start">VPD(건조)</text>
+        <rect x="237" y="131" width="123" height="22" rx="4" fill="#ff5d73"/>
+        <text class="val-lab" x="231" y="147" text-anchor="end" fill="#ff8a9c">−0.22</text>
+      </g>
+      <g>
+        <text class="row-lab" x="368" y="187" text-anchor="start">내부 온도</text>
+        <rect x="181" y="175" width="179" height="22" rx="4" fill="#ff5d73"/>
+        <text class="val-lab" x="175" y="191" text-anchor="end" fill="#ff8a9c">−0.32</text>
+      </g>
+    </svg>
+  </div>
+  <p class="cap">발달단계(조사회차) 제거 후 Spearman 상관 · 초장 기준. CO₂가 가장 강한 양(+) 신호.</p>
+
+  <div class="tbl-wrap" style="margin-top:16px">
+    <table>
+      <thead><tr><th>환경 요인</th><th>초장</th><th>엽병장</th><th>착과수</th><th>관부직경</th><th>해석</th></tr></thead>
+      <tbody>
+        <tr><td class="term">내부 CO₂</td><td class="s-strong">+0.40</td><td class="s-strong">+0.39</td><td class="s-weak">약함</td><td class="s-weak">약함</td><td>광합성 원료 → 잎·줄기 생장 촉진</td></tr>
+        <tr><td class="term">내부 온도</td><td class="s-mid">−0.32</td><td class="s-mid">−0.33</td><td class="s-weak">약함</td><td class="s-weak">약함</td><td>같은 단계선 저온 쪽이 신장 큼(도장 관점)</td></tr>
+        <tr><td class="term">VPD(건조)</td><td class="s-mid">−0.22</td><td class="s-mid">−0.23</td><td class="s-weak">약함</td><td class="s-weak">약함</td><td>너무 건조하면 증산 억제 → 생장 저해</td></tr>
+        <tr><td class="term">급액 PH</td><td class="s-weak">—</td><td class="s-weak">—</td><td class="s-mid">−0.23</td><td class="s-weak">—</td><td>PH 벗어나면 흡수 저하</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="honest">착과수·관부직경은 발달단계를 걷어내면 <b>환경 상관이 거의 사라집니다</b>(|r|&lt;0.2). 즉 <b>단기 환경제어로 착과수를 직접 늘리기는 어렵고</b>, 발달단계·적과·양분으로 관리하는 게 맞습니다. 룰로 과장하지 않습니다.</div>
+</section>
+
+<!-- 복합 상관 -->
+<section id="compound">
+  <p class="kicker">Multivariate</p>
+  <h2 class="sec">② 복합(다변량) 상관 — 짝 상관을 넘어</h2>
+  <p class="sec-sub">"CO₂만 올리면 되나?" 아닙니다. 변수들이 서로 얽혀 있어, <b>다른 변수를 통제한 부분상관</b>과 <b>상호작용</b>을 봐야 진짜 레버가 보입니다.</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>환경 요인</th><th>단순 r</th><th>부분 r (통제 후)</th><th>통제변수</th><th>판정</th></tr></thead>
+      <tbody>
+        <tr><td class="term">내부 CO₂</td><td>+0.40</td><td class="s-strong">+0.26</td><td>온도·일사</td><td>통제해도 살아남음 → <b>독립 레버</b></td></tr>
+        <tr><td class="term">내부 온도</td><td>−0.32</td><td class="s-mid">−0.20</td><td>CO₂·습도</td><td>약해지지만 유효</td></tr>
+        <tr><td class="term">VPD</td><td>−0.16</td><td class="s-weak">−0.08</td><td>CO₂</td><td>거의 사라짐 → <b>CO₂의 그림자</b></td></tr>
+        <tr><td class="term">내부 습도</td><td>+0.13</td><td class="s-weak">+0.06</td><td>온도</td><td>사라짐 → <b>온도의 그림자</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card" style="border-left:3px solid var(--sky);margin-top:14px;font-size:15px">
+    <b style="color:var(--sky)">해석 —</b> VPD·습도는 '독립적으로' 생장을 움직이는 게 아니라, <b style="color:var(--text)">CO₂·온도가 바뀌면 딸려 움직이는 값</b>이었습니다. 짝 상관(−0.22)만 보고 "VPD를 생장 레버로" 쓰면 헛다리 — <b style="color:var(--text)">생장 목적엔 CO₂를 직접 제어</b>하고, VPD는 병해·안전용으로 둡니다.
+  </div>
+
+  <div class="tbl-wrap" style="margin-top:16px">
+    <table>
+      <thead><tr><th>상호작용 (조건부)</th><th>관계</th><th>제어 함의</th></tr></thead>
+      <tbody>
+        <tr><td class="term">CO₂ × 빛</td><td>저광 <b>+0.44</b> / 고광 <b>+0.36</b></td><td>CO₂ 효과는 <b>광과 무관하게 견고</b> → 밀폐 시간대면 시비 유효</td></tr>
+        <tr><td class="term">온도 × 습도</td><td>저습 −0.28 / 고습 <b>−0.35</b></td><td>온도 억제 효과는 <b>습할 때 더 큼</b> → 고습일수록 야온 관리 강화</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 상호작용 -->
+<section id="coupling">
+  <p class="kicker">Coupling</p>
+  <h2 class="sec">③ 제어 레버는 서로 얽혀 있다</h2>
+  <p class="sec-sub">시간별 환경 지표 간 상관(온실1~4). 한 밸브를 돌리면 다른 값이 딸려옵니다.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>제어 행동</th><th>직접 효과</th><th>딸려오는 변화 (상관 근거)</th></tr></thead>
+      <tbody>
+        <tr><td class="term">난방 ↑</td><td>내부온도 ↑</td><td>습도 ↓ (온도-습도 −0.48) · <b>VPD ↑</b> (온도-VPD +0.59) → 공기가 건조해짐</td></tr>
+        <tr><td class="term">환기 ↑</td><td>내부온도 ↓</td><td><b>CO₂ ↓</b> (온도-CO₂ −0.52, 외기 유입) · 습도 ↑</td></tr>
+        <tr><td class="term">CO₂ 시비</td><td>내부CO₂ ↑</td><td>환기하면 빠져나감 → <b>밀폐(저광·저온 시간대)</b>에 시비해야 효과</td></tr>
+        <tr><td class="term">관수(EC/PH)</td><td>양분·산도</td><td>기후와 <b>거의 독립</b>(상관 ≈ 0) → 온·습도와 따로 조절 가능</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="plain">핵심 상충: <b>CO₂ 시비 ↔ 환기</b>가 반대로 움직입니다. 그래서 "낮이지만 환기 최소인 시간대(광 있고 온도 안정)"에 밀폐+시비하는 게 최적입니다.</div>
+</section>
+
+<!-- 룰 세트 -->
+<section id="rules">
+  <p class="kicker">Rule Set</p>
+  <h2 class="sec">④ 룰 베이스 제어 규칙</h2>
+  <p class="sec-sub">위 상관에 농업 안전범위를 결합. '강도'는 데이터가 뒷받침하는 정도.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>목표</th><th>조건 (IF)</th><th>제어 (THEN)</th><th>근거</th><th>강도</th></tr></thead>
+      <tbody>
+        <tr><td class="term">생장 촉진 <b>(핵심)</b></td><td>낮 · 광 있음 · 환기 최소</td><td>CO₂ <b>700~900ppm</b> 시비(밀폐)</td><td>부분상관 +0.26 <b>(독립 레버)</b></td><td class="s-strong">강</td></tr>
+        <tr><td class="term">도장 억제·충실</td><td>야간, <b>특히 고습일 때</b></td><td>저온장해 하한 지키며 <b>야간 과난방 자제</b> (고습 시 강화)</td><td>부분상관 −0.20 · 고습서 −0.35</td><td class="s-mid">중·조건부</td></tr>
+        <tr><td class="term">과습·병해 방지</td><td>야간 습도 &gt;90% 또는 VPD &lt;0.4</td><td>제습·순환팬으로 <b>VPD 0.5~1.2</b></td><td>안전 목적(VPD 독립효과 미미 −0.08)</td><td class="s-mid">중</td></tr>
+        <tr><td class="term">저온장해 방어</td><td>외기온 &lt; 0℃ (한파)</td><td>내부 <b>야간 하한 8℃</b> 사수 · 보온커튼 선제</td><td>안전규칙(상관 아님)</td><td class="s-strong">필수</td></tr>
+        <tr><td class="term">양분·산도</td><td>상시</td><td>EC <b>0.8~1.4</b> · PH <b>5.5~6.5</b> 유지</td><td>EC 기후독립 · PH-착과 −0.23</td><td class="s-mid">중</td></tr>
+        <tr><td class="term">착과수</td><td>—</td><td>환경 룰 지양 → <b>적과·발달단계 관리</b></td><td>환경 상관 미미</td><td class="s-weak">해당없음</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="plain">이 규칙들은 <b>예측 모델(berry_ai)과 짝</b>을 이룹니다 — 모델이 "이대로면 생장이 이 정도"를 예측하면, 이 룰이 "그럼 CO₂·VPD·온도를 이렇게 조정"하는 <b>행동</b>을 정합니다. 룰이 폐루프 제어의 '손발'입니다.</div>
+</section>
+
+<!-- 한계 -->
+<section id="limit">
+  <p class="kicker">Honesty</p>
+  <h2 class="sec">한계와 다음 단계</h2>
+  <div class="honest">
+    상관은 <b>인과가 아닙니다</b> — 특히 온도 음(−) 신호는 계절 교란을 완전히 배제하지 못했을 수 있어, '주의' 등급으로 뒀습니다.<br>
+    데이터가 <b>4온실 · 겨울 15주</b>뿐이라 규칙의 임계값(예: 700~900ppm)은 <b>농업 표준범위를 참고로 결합</b>한 값입니다.<br>
+    다음 단계: <b>A/B 제어 실험</b>(CO₂ 시비 온실 vs 대조)으로 룰의 인과 효과를 실측 검증.
+  </div>
+</section>
+
+<footer>
+  베리디시전 · 룰 베이스 제어 규칙(데이터 상관 기반) &nbsp;·&nbsp; 근거: 발달단계 제거 후 Spearman 상관 · 환경 지표 간 상관 &nbsp;·&nbsp; 데이터: 온실 1~4, 2024-11~2025-02<br>
+  상관은 인과의 근거가 아니라 가설. 임계값은 농업 표준범위와 결합한 초기값이며 실증으로 보정 필요.
+</footer>
+
+</div>
+</body>
+</html>

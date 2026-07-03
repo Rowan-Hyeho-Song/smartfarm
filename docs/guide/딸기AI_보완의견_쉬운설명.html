@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>농작업 의사결정형 딸기 AI — 쉽게 풀어 쓴 보완 의견</title>
+<style>
+  :root{
+    --bg:#0e1014;
+    --bg-soft:#161922;
+    --card:#1b1f2a;
+    --card-2:#222736;
+    --line:#2c3242;
+    --text:#e7e9ee;
+    --text-dim:#a4abba;
+    --text-faint:#7b8294;
+    --berry:#ff5d73;
+    --berry-soft:#ff8a9c;
+    --leaf:#5fd39a;
+    --gold:#ffc861;
+    --sky:#5cc8ff;
+    --violet:#b69bff;
+    --radius:16px;
+    --maxw:880px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:radial-gradient(1200px 600px at 80% -10%, #1d2230 0%, var(--bg) 55%);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+    line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px 120px;}
+
+  /* ---------- Hero ---------- */
+  header.hero{
+    max-width:var(--maxw);margin:0 auto;padding:64px 22px 40px;
+  }
+  .eyebrow{
+    display:inline-block;font-size:13px;letter-spacing:.14em;font-weight:700;
+    color:var(--berry-soft);text-transform:uppercase;
+    border:1px solid rgba(255,93,115,.35);border-radius:999px;
+    padding:6px 14px;margin-bottom:22px;background:rgba(255,93,115,.07);
+  }
+  h1.title{
+    font-size:clamp(28px,5vw,44px);line-height:1.2;margin:0 0 18px;
+    font-weight:800;letter-spacing:-.01em;
+  }
+  h1.title .accent{color:var(--berry);}
+  .lede{font-size:clamp(16px,2.3vw,19px);color:var(--text-dim);max-width:680px;margin:0;}
+  .meta{
+    margin-top:28px;display:flex;flex-wrap:wrap;gap:10px;
+  }
+  .chip{
+    font-size:13px;color:var(--text-dim);background:var(--card);
+    border:1px solid var(--line);border-radius:999px;padding:6px 13px;
+  }
+  .chip b{color:var(--text);font-weight:700;}
+
+  /* ---------- TL;DR ---------- */
+  .tldr{
+    background:linear-gradient(135deg,rgba(255,93,115,.14),rgba(182,155,255,.10));
+    border:1px solid rgba(255,93,115,.30);border-radius:var(--radius);
+    padding:26px 28px;margin:8px auto 0;max-width:var(--maxw);
+  }
+  .tldr h2{margin:0 0 10px;font-size:18px;color:var(--berry-soft);}
+  .tldr p{margin:0;color:var(--text);font-size:16.5px;}
+  .tldr strong{color:#fff;}
+
+  /* ---------- Sections ---------- */
+  section{margin-top:56px;}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--berry);text-transform:uppercase;margin:0 0 8px;}
+  h2.sec{font-size:clamp(22px,3.4vw,28px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;}
+  .sec-sub{color:var(--text-dim);margin:0 0 26px;font-size:16px;}
+
+  p{margin:0 0 16px;}
+  .dim{color:var(--text-dim);}
+
+  /* ---------- Cards ---------- */
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:24px 26px;margin-bottom:18px;
+  }
+  .card h3{margin:0 0 10px;font-size:18.5px;font-weight:750;}
+
+  /* analogy / plain-talk callout */
+  .plain{
+    border-left:3px solid var(--leaf);
+    background:rgba(95,211,154,.07);
+    border-radius:10px;padding:14px 18px;margin:14px 0 0;
+    color:var(--text);font-size:15.5px;
+  }
+  .plain b{color:var(--leaf);}
+  .plain::before{
+    content:"🌱 쉽게 말하면";display:block;font-size:12.5px;font-weight:700;
+    letter-spacing:.04em;color:var(--leaf);margin-bottom:5px;
+  }
+
+  /* ---------- Flow steps ---------- */
+  .flow{display:flex;flex-direction:column;gap:0;counter-reset:step;}
+  .step{
+    position:relative;display:flex;gap:18px;padding:16px 0;
+    border-bottom:1px dashed var(--line);
+  }
+  .step:last-child{border-bottom:none;}
+  .step .num{
+    flex:0 0 38px;height:38px;border-radius:11px;
+    background:linear-gradient(135deg,var(--berry),#d94d63);
+    color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;
+    font-size:16px;box-shadow:0 4px 14px rgba(255,93,115,.25);
+  }
+  .step .body h4{margin:5px 0 4px;font-size:16.5px;font-weight:700;}
+  .step .body p{margin:0;color:var(--text-dim);font-size:15px;}
+
+  /* ---------- Data grid ---------- */
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;}
+  .dcard{background:var(--card-2);border:1px solid var(--line);border-radius:14px;padding:20px 20px 18px;}
+  .dcard .tag{font-size:12.5px;font-weight:700;letter-spacing:.05em;padding:4px 10px;border-radius:999px;display:inline-block;margin-bottom:12px;}
+  .t-env{background:rgba(92,200,255,.14);color:var(--sky);}
+  .t-root{background:rgba(182,155,255,.14);color:var(--violet);}
+  .t-grow{background:rgba(95,211,154,.14);color:var(--leaf);}
+  .t-work{background:rgba(255,200,97,.16);color:var(--gold);}
+  .dcard ul{margin:0;padding-left:0;list-style:none;}
+  .dcard li{padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:15px;}
+  .dcard li:last-child{border-bottom:none;}
+  .dcard li b{color:var(--text);}
+  .dcard li span{color:var(--text-faint);display:block;font-size:13.5px;margin-top:1px;}
+
+  /* ---------- Output types ---------- */
+  .otypes{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;}
+  .otype{border:1px solid var(--line);border-radius:14px;padding:18px 16px;background:var(--card);text-align:left;}
+  .otype .ico{font-size:22px;}
+  .otype h4{margin:8px 0 5px;font-size:15.5px;}
+  .otype p{margin:0;font-size:13.5px;color:var(--text-dim);line-height:1.55;}
+
+  /* ---------- Decision items ---------- */
+  .decision{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;margin-bottom:16px;}
+  .decision .dh{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+  .decision .dh .pill{font-size:12px;font-weight:800;color:#0e1014;background:var(--berry-soft);border-radius:7px;padding:3px 9px;}
+  .decision .dh h3{margin:0;font-size:18px;}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px;}
+  .two .col{background:var(--bg-soft);border:1px solid var(--line);border-radius:12px;padding:14px 16px;}
+  .two .col h5{margin:0 0 8px;font-size:14px;display:flex;align-items:center;gap:7px;}
+  .two .col.lo h5{color:var(--sky);}
+  .two .col.hi h5{color:var(--berry-soft);}
+  .two .col ul{margin:0;padding-left:18px;}
+  .two .col li{font-size:14px;color:var(--text-dim);padding:2px 0;}
+  @media(max-width:560px){.two{grid-template-columns:1fr;}}
+
+  /* ---------- Priority ladder ---------- */
+  .ladder{display:flex;flex-direction:column;gap:10px;}
+  .rung{display:flex;align-items:center;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px 18px;}
+  .rung .rank{font-size:22px;font-weight:800;color:var(--berry);min-width:34px;}
+  .rung .rtext b{font-size:15.5px;}
+  .rung .rtext p{margin:2px 0 0;font-size:13.5px;color:var(--text-dim);}
+
+  /* ---------- Glossary ---------- */
+  .gloss{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+  .gitem{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px 18px;}
+  .gitem dt{font-weight:750;font-size:15.5px;margin-bottom:5px;color:#fff;}
+  .gitem dd{margin:0;font-size:14px;color:var(--text-dim);line-height:1.6;}
+
+  /* ---------- Compare bars (event vs goal) ---------- */
+  .vs{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch;margin-top:6px;}
+  .vs .side{border-radius:14px;padding:20px;border:1px solid var(--line);}
+  .vs .old{background:rgba(123,130,148,.10);}
+  .vs .new{background:linear-gradient(135deg,rgba(255,93,115,.13),rgba(95,211,154,.10));border-color:rgba(255,93,115,.30);}
+  .vs .side h4{margin:0 0 8px;font-size:15px;}
+  .vs .old h4{color:var(--text-faint);}
+  .vs .new h4{color:var(--berry-soft);}
+  .vs .side p{margin:0;font-size:14.5px;color:var(--text-dim);}
+  .vs .arrow{display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--berry);}
+  @media(max-width:560px){.vs{grid-template-columns:1fr;}.vs .arrow{transform:rotate(90deg);}}
+
+  /* ---------- closing ---------- */
+  .close{background:linear-gradient(135deg,rgba(182,155,255,.12),rgba(255,93,115,.10));border:1px solid var(--line);border-radius:var(--radius);padding:28px 30px;}
+  .close ul{margin:14px 0 0;padding-left:20px;}
+  .close li{margin:8px 0;font-size:16px;}
+
+  footer{max-width:var(--maxw);margin:60px auto 0;padding:24px 22px 0;border-top:1px solid var(--line);color:var(--text-faint);font-size:13.5px;}
+
+  a.anchor{color:var(--berry-soft);text-decoration:none;}
+
+  /* ---------- diagram caption ---------- */
+  .diagram-cap{font-size:13px;font-weight:700;color:var(--text-faint);margin:2px 4px 10px;letter-spacing:.02em;}
+  svg{display:block;}
+
+  /* ---------- tables ---------- */
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;margin:6px 0 0;}
+  table{border-collapse:collapse;width:100%;min-width:520px;font-size:14.5px;}
+  thead th{
+    background:#23283a;color:var(--berry-soft);text-align:left;font-weight:700;
+    padding:13px 16px;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  tbody td{padding:13px 16px;border-bottom:1px solid var(--line);color:var(--text-dim);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:rgba(255,255,255,.018);}
+  tbody td b{color:var(--text);}
+  td.term{color:#fff;font-weight:700;white-space:nowrap;}
+  .badge{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:6px;}
+  .b-now{background:rgba(255,93,115,.16);color:var(--berry-soft);}
+  .b-low{background:rgba(92,200,255,.16);color:var(--sky);}
+  .b-high{background:rgba(255,200,97,.16);color:var(--gold);}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">베리디시전 · 보완 의견 쉬운 풀이</span>
+  <h1 class="title">상태만 알려주는 AI를 넘어,<br><span class="accent">"오늘 무슨 일을 할지"</span> 결정해 주는 딸기 AI</h1>
+  <p class="lede">이 문서는 딸기 재배 AI 모델 초안에 대한 보완 의견을, AI나 농업 데이터 용어를 잘 모르는 사람도 이해할 수 있도록 쉬운 말로 다시 정리한 것입니다.</p>
+  <div class="meta">
+    <span class="chip">팀 <b>베리디시전</b></span>
+    <span class="chip">주제 <b>목표 기반 농작업 의사결정 AI</b></span>
+    <span class="chip">작물 <b>딸기 🍓</b></span>
+    <span class="chip">성격 <b>초안 보완 의견</b></span>
+  </div>
+</header>
+
+<div class="tldr">
+  <h2>한 줄 요약</h2>
+  <p><strong>"지금 위험해요"라고 알려 주는 데서 멈추지 말고, "그래서 오늘은 이 작업을 이 순서로 하세요"까지 알려 주는 AI로 만들자</strong>는 제안입니다. 핵심은 농작업을 단순 기록이 아니라, <strong>작물을 원하는 방향으로 키우는 '조절 수단'</strong>으로 보는 관점입니다.</p>
+</div>
+
+<div class="wrap">
+
+<!-- ===== 1. 무엇을 바꾸자는 것인가 ===== -->
+<section>
+  <p class="kicker">큰 그림</p>
+  <h2 class="sec">무엇을 바꾸자는 제안인가요?</h2>
+  <p class="sec-sub">초안의 방향(데이터 수집, 이벤트 정의, 전문가 보정형 시작)에는 동의합니다. 다만 AI가 내놓는 '최종 결과물'을 한 단계 더 발전시키자는 의견입니다.</p>
+
+  <div class="vs">
+    <div class="side old">
+      <h4>지금까지의 AI (이벤트 감지형)</h4>
+      <p>"습도가 높습니다", "병해 위험이 있습니다" 처럼 <b>현재 상태와 위험을 설명</b>하는 데서 끝납니다.</p>
+    </div>
+    <div class="arrow">→</div>
+    <div class="side new">
+      <h4>제안하는 AI (의사결정형)</h4>
+      <p>현재 상태에 더해 <b>"목표에 가려면 오늘 무슨 작업을, 어떤 순서로 하면 되는지"</b>까지 실행 가능한 계획을 제시합니다.</p>
+    </div>
+  </div>
+
+  <div class="plain">
+    내비게이션에 비유하면, 기존 AI는 <b>"지금 길이 막혀요"</b>라고 알려 주는 교통정보입니다. 제안하는 AI는 <b>"그러니 다음 사거리에서 우회전하세요"</b>라고 경로까지 안내하는 내비게이션입니다.
+  </div>
+
+  <div class="card" style="margin-top:18px;">
+    <h3>'농작업'을 보는 관점이 핵심</h3>
+    <p class="dim">잎 따기, 물 주기, 수확 같은 농작업을 단순히 '한 일을 적어 두는 기록'으로 보지 않습니다. 작물의 성장을 원하는 방향으로 <b style="color:var(--text)">밀고 당기는 조절 장치(제어 수단)</b>로 봅니다.</p>
+    <div class="plain">
+      잎을 따는 것은 그냥 노동이 아니라, 식물에게 <b>"이제 몸집 키우기보다 열매에 집중해"</b>라고 방향을 바꿔 주는 신호입니다. 같은 작업도 '왜 하는지'를 알면 타이밍과 양이 달라집니다.
+    </div>
+  </div>
+</section>
+
+<!-- ===== 1.5 초안이 담은 것 ===== -->
+<section>
+  <p class="kicker">바탕이 되는 초안 (PDF)</p>
+  <h2 class="sec">초안(베리디시전 제안서)은 이미 무엇을 담고 있나요?</h2>
+  <p class="sec-sub">보완 의견은 '빈 종이에서 시작'한 게 아니라, 아래 초안 위에 한 단계를 더 얹자는 제안입니다. 초안이 가진 토대를 먼저 봅니다.</p>
+
+  <p class="diagram-cap">표 0. 초안이 이미 가진 것 vs 보완 의견이 더하자는 것</p>
+  <div class="tbl-wrap" style="margin-bottom:22px;">
+    <table>
+      <thead><tr><th>구분</th><th>초안(PDF)이 이미 가진 것</th><th>보완 의견이 더하자는 것</th></tr></thead>
+      <tbody>
+        <tr><td class="term">목표</td><td>목표형(다수확·품질·절충) 기반 폐루프</td><td>동의 — 그대로 활용</td></tr>
+        <tr><td class="term">최종 출력</td><td>위험·확인 항목 제시 (점검 권고)</td><td><b>실행 가능한 농작업 목록 + 우선순위</b></td></tr>
+        <tr><td class="term">농작업 정의</td><td>제어(환기·관수·양액 등) 중심</td><td>농작업 = 생육을 조절하는 <b>제어 수단</b>으로 확장</td></tr>
+        <tr><td class="term">현실 조건</td><td>안전(PHI 등) 반영</td><td>일손·날씨에 따른 <b>즉시/예약/대체/보류</b> 분류</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="font-size:17px;margin:0 0 12px;">① 재배 목표는 3가지 중 선택</h3>
+  <div class="otypes" style="margin-bottom:24px;">
+    <div class="otype"><div class="ico">📦</div><h4>다수확형</h4><p>양 우선 — 많이 따는 것이 목표</p></div>
+    <div class="otype"><div class="ico">💎</div><h4>품질형</h4><p>당도·크기 등 품질 우선</p></div>
+    <div class="otype"><div class="ico">⚖️</div><h4>절충형</h4><p>수확량과 품질의 균형</p></div>
+  </div>
+
+  <h3 style="font-size:17px;margin:0 0 6px;">② 현재 상태는 3가지 방법으로 진단</h3>
+  <div class="grid2" style="margin-bottom:8px;">
+    <div class="dcard">
+      <span class="tag t-root">💧 함수율 모니터링</span>
+      <p style="margin:0;font-size:14.5px;color:var(--text-dim);">배지가 물을 머금고 마르는 하루 리듬(관수 후 오르는 속도, 이후 빠지는 속도)을 보고 <b style="color:var(--text)">물 주기가 적절한지·식물이 목마른지</b>를 추정합니다.</p>
+    </div>
+    <div class="dcard">
+      <span class="tag t-root">🧪 배액 모니터링</span>
+      <p style="margin:0;font-size:14.5px;color:var(--text-dim);">준 물 대비 <b style="color:var(--text)">빠져나온 물의 양·농도(EC/pH) 변화</b>를 보고 식물이 양분을 잘 먹었는지, 뿌리 환경이 괜찮은지 진단합니다. '먹고 남긴 것'을 보는 셈입니다.</p>
+    </div>
+    <div class="dcard" style="grid-column:1/-1;">
+      <span class="tag t-grow">📷 영상 진단 (CNN) — 핵심 모듈</span>
+      <p style="margin:0;font-size:14.5px;color:var(--text-dim);">잎 사진을 AI(CNN, 이미지를 알아보는 AI)가 분석해 <b style="color:var(--text)">몸집 키우기(영양생장) ↔ 열매 맺기(생식생장) 균형을 숫자로</b> 바꿔 줍니다. 단순 모니터링을 넘어, 사람 눈으로 보던 '식물 상태'를 정량화하는 부분입니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 1.6 영상 진단 기준 ===== -->
+<section>
+  <p class="kicker">초안의 핵심 기술</p>
+  <h2 class="sec">AI는 '잎 사진'을 어떻게 읽나요?</h2>
+  <p class="sec-sub">잎의 각도·굵기·꽃대·색을 보고 식물이 지금 어느 방향으로 자라는지 읽어 냅니다.</p>
+
+  <!-- 잎 각도 도식 -->
+  <div class="card" style="padding:18px;">
+    <div class="diagram-cap">그림 4. 잎 각도로 읽는 성장 방향 (수직 기준)</div>
+    <svg viewBox="0 0 700 220" width="100%" role="img" aria-label="잎 각도가 약 45도면 영양생장, 약 60도면 생식생장 신호임을 보여주는 도식">
+      <!-- left: 45도 영양생장 -->
+      <g>
+        <line x1="180" y1="180" x2="180" y2="50" stroke="#3a4152" stroke-width="2" stroke-dasharray="5 5"/>
+        <text x="180" y="42" text-anchor="middle" fill="#7b8294" font-size="11">수직</text>
+        <line x1="180" y1="180" x2="271" y2="89" stroke="#5fd39a" stroke-width="9" stroke-linecap="round"/>
+        <path d="M180,120 A60,60 0 0 1 207,98" fill="none" stroke="#5fd39a" stroke-width="1.6"/>
+        <text x="214" y="120" fill="#5fd39a" font-size="13" font-weight="700">≈45°</text>
+        <text x="180" y="205" text-anchor="middle" fill="#5fd39a" font-size="13.5" font-weight="700">🌿 영양생장 신호</text>
+      </g>
+      <!-- divider -->
+      <line x1="350" y1="40" x2="350" y2="190" stroke="#2c3242" stroke-width="1"/>
+      <!-- right: 60도 생식생장 -->
+      <g>
+        <line x1="500" y1="180" x2="500" y2="50" stroke="#3a4152" stroke-width="2" stroke-dasharray="5 5"/>
+        <text x="500" y="42" text-anchor="middle" fill="#7b8294" font-size="11">수직</text>
+        <line x1="500" y1="180" x2="613" y2="115" stroke="#ff8a9c" stroke-width="9" stroke-linecap="round"/>
+        <path d="M500,120 A60,60 0 0 1 543,103" fill="none" stroke="#ff8a9c" stroke-width="1.6"/>
+        <text x="548" y="128" fill="#ff8a9c" font-size="13" font-weight="700">≈60°</text>
+        <text x="500" y="205" text-anchor="middle" fill="#ff8a9c" font-size="13.5" font-weight="700">🍓 생식생장 신호</text>
+      </g>
+    </svg>
+  </div>
+
+  <p class="diagram-cap" style="margin-top:18px;">표 2. 영상으로 읽는 신호와 해석</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>보는 항목</th><th>해석 기준</th></tr></thead>
+      <tbody>
+        <tr><td class="term">잎 각도(엽각)</td><td>수직 기준 약 45°(전개각 20~30°) → <b>영양생장</b> 신호 / 약 60° → <b>생식생장</b> 신호</td></tr>
+        <tr><td class="term">초세 (잎·꽃대 굵기)</td><td>굵고 영양생장형이면 꽃대가 잘 안 나옴 / 꽃대가 길면 영양생장형</td></tr>
+        <tr><td class="term">꽃대 거동</td><td>꽃대가 미리 처지면 생식생장으로 전환이 빠른 상태</td></tr>
+        <tr><td class="term">잎 색·크기 분포</td><td>잎색, 큰잎·작은잎 차이, 생장 방향으로 생육 균형·활력 판단 / 병반·응애 조기 탐지</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 2. AI 판단 흐름 ===== -->
+<section>
+  <p class="kicker">작동 원리</p>
+  <h2 class="sec">AI는 어떤 순서로 생각하나요?</h2>
+  <p class="sec-sub">사람 농부가 머릿속으로 하던 판단을, AI가 8단계로 따라가며 '작업 추천'까지 도달합니다. 이 과정은 한 번 하고 끝이 아니라 <b style="color:var(--text)">계속 도는 순환(폐루프)</b>입니다.</p>
+
+  <!-- 폐루프 도식 -->
+  <div class="card" style="padding:18px 18px 10px;">
+    <div class="diagram-cap">그림 1. 목표를 향해 계속 도는 의사결정 순환</div>
+    <svg viewBox="0 0 760 230" width="100%" role="img" aria-label="목표 설정에서 현재 진단, 차이 분석, 작업 실행을 거쳐 다시 도는 순환 도식">
+      <defs>
+        <marker id="ah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#ff5d73"/>
+        </marker>
+      </defs>
+      <!-- nodes -->
+      <g font-family="inherit" text-anchor="middle">
+        <g>
+          <rect x="20" y="85" width="150" height="60" rx="13" fill="#222736" stroke="#2c3242"/>
+          <text x="95" y="110" fill="#ffc861" font-size="14" font-weight="700">🎯 목표 설정</text>
+          <text x="95" y="130" fill="#a4abba" font-size="12">다수확 / 품질형</text>
+        </g>
+        <g>
+          <rect x="215" y="85" width="150" height="60" rx="13" fill="#222736" stroke="#2c3242"/>
+          <text x="290" y="110" fill="#5cc8ff" font-size="14" font-weight="700">🔍 현재 진단</text>
+          <text x="290" y="130" fill="#a4abba" font-size="12">지금 작물 상태</text>
+        </g>
+        <g>
+          <rect x="410" y="85" width="150" height="60" rx="13" fill="#222736" stroke="#2c3242"/>
+          <text x="485" y="110" fill="#b69bff" font-size="14" font-weight="700">📐 차이 분석</text>
+          <text x="485" y="130" fill="#a4abba" font-size="12">목표 − 현재</text>
+        </g>
+        <g>
+          <rect x="600" y="85" width="150" height="60" rx="13" fill="#26202a" stroke="#ff5d73"/>
+          <text x="675" y="110" fill="#ff8a9c" font-size="14" font-weight="700">🧰 작업 실행</text>
+          <text x="675" y="130" fill="#a4abba" font-size="12">우선순위대로</text>
+        </g>
+      </g>
+      <!-- arrows forward -->
+      <g stroke="#ff5d73" stroke-width="2" fill="none">
+        <line x1="170" y1="115" x2="208" y2="115" marker-end="url(#ah)"/>
+        <line x1="365" y1="115" x2="403" y2="115" marker-end="url(#ah)"/>
+        <line x1="560" y1="115" x2="593" y2="115" marker-end="url(#ah)"/>
+      </g>
+      <!-- feedback loop -->
+      <path d="M675,85 C675,30 95,30 95,82" stroke="#5fd39a" stroke-width="2" fill="none" stroke-dasharray="6 5" marker-end="url(#ah)"/>
+      <text x="385" y="28" text-anchor="middle" fill="#5fd39a" font-size="12.5" font-weight="700">결과를 측정해 다시 반영 (반복 학습)</text>
+    </svg>
+  </div>
+
+  <div class="card flow">
+    <div class="step"><div class="num">1</div><div class="body"><h4>현재 작물 상태 진단</h4><p>지금 딸기가 어떤 상태인지 데이터로 파악합니다.</p></div></div>
+    <div class="step"><div class="num">2</div><div class="body"><h4>재배 목표 확인</h4><p>이 농장이 '많이 수확'을 원하는지, '높은 품질'을 원하는지 목표를 확인합니다.</p></div></div>
+    <div class="step"><div class="num">3</div><div class="body"><h4>현재와 목표의 차이 분석</h4><p>목표 지점과 지금 상태가 얼마나 벌어져 있는지 계산합니다.</p></div></div>
+    <div class="step"><div class="num">4</div><div class="body"><h4>필요한 성장 방향 결정</h4><p>차이를 메우려면 식물을 어느 쪽으로 키워야 하는지 방향을 정합니다.</p></div></div>
+    <div class="step"><div class="num">5</div><div class="body"><h4>농작업 후보 뽑기</h4><p>그 방향을 만들 수 있는 작업들(잎 따기, 물 조절 등)을 후보로 모읍니다.</p></div></div>
+    <div class="step"><div class="num">6</div><div class="body"><h4>실행 가능성 평가</h4><p>날씨·일손·비용·작업 가능 시간을 따져 '지금 정말 할 수 있는지' 봅니다.</p></div></div>
+    <div class="step"><div class="num">7</div><div class="body"><h4>작업 우선순위 제시</h4><p>무엇을 먼저 할지 순서를 매겨 농부에게 알려 줍니다.</p></div></div>
+    <div class="step"><div class="num">8</div><div class="body"><h4>결과 확인 &amp; 전문가 보정값 쌓기</h4><p>작업 후 결과를 보고, 전문가가 고쳐 준 판단을 데이터로 모아 AI가 점점 똑똑해집니다.</p></div></div>
+  </div>
+  <div class="plain">
+    핵심은 <b>'목표 → 현재 → 차이 → 작업'</b>의 반복입니다. 마치 체중 목표를 정하고, 지금 몸무게를 재고, 차이를 본 뒤, 식단·운동을 조절하는 것과 같은 흐름입니다.
+  </div>
+</section>
+
+<!-- ===== 3. AI가 보는 데이터 ===== -->
+<section>
+  <p class="kicker">입력 정보</p>
+  <h2 class="sec">AI는 무엇을 보고 판단하나요?</h2>
+  <p class="sec-sub">네 종류의 데이터를 동시에 봅니다. 용어가 낯설어도 옆의 쉬운 설명을 보면 됩니다.</p>
+
+  <div class="grid2">
+    <div class="dcard">
+      <span class="tag t-env">🌤️ 환경 데이터</span>
+      <ul>
+        <li><b>온도 · 습도 · 광(빛)</b><span>온실 공기의 상태</span></li>
+        <li><b>CO₂</b><span>광합성에 쓰이는 이산화탄소 농도</span></li>
+        <li><b>누적광량</b><span>하루 동안 받은 빛의 총량</span></li>
+      </ul>
+    </div>
+    <div class="dcard">
+      <span class="tag t-root">🪴 근권(뿌리) 데이터</span>
+      <ul>
+        <li><b>공급 EC · pH</b><span>뿌리에 주는 물의 양분 농도와 산도</span></li>
+        <li><b>배액 EC · pH · 배액률</b><span>흙 밖으로 빠져나온 물의 상태와 비율</span></li>
+        <li><b>함수율</b><span>배지(흙 역할)가 머금은 물의 양</span></li>
+      </ul>
+    </div>
+    <div class="dcard">
+      <span class="tag t-grow">🌿 생육(성장) 데이터</span>
+      <ul>
+        <li><b>초세 · 생육 방향성</b><span>식물의 기세, 몸집 키우기/열매 맺기 중 어디로 가는지</span></li>
+        <li><b>엽면적지수(LAI)</b><span>잎이 빛을 받는 면적이 충분한지</span></li>
+        <li><b>착과부담 · 병해위험</b><span>달고 있는 열매의 부담, 병에 걸릴 위험</span></li>
+      </ul>
+    </div>
+    <div class="dcard">
+      <span class="tag t-work">🧰 작업 · 실행 조건</span>
+      <ul>
+        <li><b>작업이력 · 예정 작업</b><span>지금까지 한 일과 앞으로 할 일</span></li>
+        <li><b>수확량 · 품질</b><span>결과로 나타나는 성과</span></li>
+        <li><b>날씨 · 인력 · 비용 · 시간 · 농약안전기간</b><span>실제로 작업을 할 수 있는지 판단하는 현실 조건</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 4. 출력 방식 ===== -->
+<section>
+  <p class="kicker">결과물</p>
+  <h2 class="sec">작업을 다섯 가지로 나눠 알려 줍니다</h2>
+  <p class="sec-sub">"무조건 지금 하세요"가 아니라, 상황에 맞춰 작업을 분류해 제시합니다. 현실(일손·날씨)을 반영하는 게 포인트입니다.</p>
+
+  <div class="otypes">
+    <div class="otype"><div class="ico">⚡</div><h4>즉시 실행</h4><p>지금 바로 해야 하는 작업</p></div>
+    <div class="otype"><div class="ico">🔀</div><h4>조건부 실행</h4><p>특정 조건이 맞으면 하는 작업</p></div>
+    <div class="otype"><div class="ico">📅</div><h4>예약 작업</h4><p>나중으로 미뤄 일정에 넣어 두는 작업</p></div>
+    <div class="otype"><div class="ico">🔄</div><h4>대체 작업</h4><p>지금 못 하니 대신 하는 다른 작업</p></div>
+    <div class="otype"><div class="ico">⏸️</div><h4>보류 작업</h4><p>지금은 멈추고 기다리는 작업</p></div>
+  </div>
+
+  <div class="plain">
+    예를 들어 <b>일손이 없으면</b> 잎 따기를 무리하게 시키지 않고 '예약 작업'으로 넣어 둡니다. <b>비가 오거나 약이 잘 마르지 않는 날</b>이면 방제(약 치기)를 강행하지 않고 '대체 작업'이나 '예약 작업'으로 바꿔 제시합니다.
+  </div>
+
+  <!-- 분류 흐름 도식 -->
+  <div class="card" style="margin-top:18px;padding:18px;">
+    <div class="diagram-cap">그림 3. AI가 '잎 따기' 한 작업을 상황에 따라 분류하는 방식 (예시)</div>
+    <svg viewBox="0 0 760 250" width="100%" role="img" aria-label="작업 하나가 일손과 날씨 조건에 따라 즉시 실행, 예약, 대체로 나뉘는 흐름도">
+      <defs>
+        <marker id="ah2" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7b8294"/></marker>
+      </defs>
+      <g text-anchor="middle" font-family="inherit">
+        <!-- start -->
+        <rect x="20" y="100" width="140" height="50" rx="12" fill="#26202a" stroke="#ff5d73"/>
+        <text x="90" y="123" fill="#ff8a9c" font-size="13.5" font-weight="700">작업 후보</text>
+        <text x="90" y="140" fill="#a4abba" font-size="11.5">예: 잎 따기</text>
+        <!-- Q1 -->
+        <polygon points="280,125 340,90 400,125 340,160" fill="#222736" stroke="#2c3242"/>
+        <text x="340" y="122" fill="#e7e9ee" font-size="12.5" font-weight="700">일손이</text>
+        <text x="340" y="138" fill="#e7e9ee" font-size="12.5" font-weight="700">있는가?</text>
+        <!-- Q2 -->
+        <polygon points="540,60 600,28 660,60 600,92" fill="#222736" stroke="#2c3242"/>
+        <text x="600" y="57" fill="#e7e9ee" font-size="12" font-weight="700">날씨·약</text>
+        <text x="600" y="72" fill="#e7e9ee" font-size="12" font-weight="700">조건 OK?</text>
+        <!-- outcomes -->
+        <rect x="540" y="120" width="200" height="42" rx="11" fill="#2a2024" stroke="#ff5d73"/>
+        <text x="640" y="146" fill="#ff8a9c" font-size="13" font-weight="700">📅 예약 작업으로</text>
+        <rect x="690" y="18" width="70" height="36" rx="10" fill="#1e2a24" stroke="#5fd39a"/>
+        <text x="725" y="41" fill="#5fd39a" font-size="12.5" font-weight="700">⚡즉시</text>
+        <rect x="540" y="178" width="200" height="42" rx="11" fill="#1e2630" stroke="#5cc8ff"/>
+        <text x="640" y="204" fill="#5cc8ff" font-size="13" font-weight="700">🔄 대체 작업으로</text>
+      </g>
+      <!-- arrows -->
+      <g stroke="#7b8294" stroke-width="1.8" fill="none">
+        <line x1="160" y1="125" x2="277" y2="125" marker-end="url(#ah2)"/>
+        <!-- 일손 없음 -> 예약 -->
+        <path d="M340,160 L340,141 L537,141" marker-end="url(#ah2)"/>
+        <!-- 일손 있음 -> Q2 -->
+        <path d="M400,125 L470,125 L470,60 L537,60" marker-end="url(#ah2)"/>
+        <!-- Q2 yes -> 즉시 -->
+        <path d="M660,52 L685,40" marker-end="url(#ah2)"/>
+        <!-- Q2 no -> 대체 -->
+        <path d="M600,92 L600,160 L600,176" marker-end="url(#ah2)"/>
+      </g>
+      <g font-size="11" font-weight="700" font-family="inherit">
+        <text x="430" y="135" fill="#ff8a9c">아니오</text>
+        <text x="455" y="95" fill="#5fd39a">예</text>
+        <text x="672" y="33" fill="#5fd39a">예</text>
+        <text x="610" y="135" fill="#5cc8ff">아니오</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- ===== 5. 대표 의사결정 항목 ===== -->
+<section>
+  <p class="kicker">실제 판단 예시</p>
+  <h2 class="sec">AI가 내리는 대표적인 5가지 결정</h2>
+  <p class="sec-sub">각 항목은 '무엇을 보고, 어떻게 조절할지'를 보여 줍니다.</p>
+
+  <!-- 5-1 LAI -->
+  <div class="decision">
+    <div class="dh"><span class="pill">1</span><h3>잎의 양(엽면적지수, LAI) 조절</h3></div>
+    <p class="dim">잎은 식물의 '태양광 패널'입니다. 너무 적으면 빛을 못 받고, 너무 많으면 서로 가리고 바람이 안 통해 병이 생깁니다.</p>
+    <div class="two">
+      <div class="col lo">
+        <h5>🔻 잎이 부족할 때 → 잎 늘리기</h5>
+        <ul>
+          <li>잎 따기 완화</li>
+          <li>빛 확보</li>
+          <li>물·양분 공급 조절</li>
+          <li>습도 관리</li>
+          <li>열매 부담 줄이기</li>
+        </ul>
+      </div>
+      <div class="col hi">
+        <h5>🔺 잎이 과다할 때 → 잎 줄이기</h5>
+        <ul>
+          <li>잎 따기(적엽)</li>
+          <li>아래쪽 잎 제거</li>
+          <li>통풍 개선 · 호흡 소모 감소</li>
+          <li>병해 위험 감소</li>
+          <li>약제 도달률 향상</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5-2 영양생장 과다 -->
+  <div class="decision">
+    <div class="dh"><span class="pill">2</span><h3>'몸집만 키우는' 성장이 과할 때 대응</h3></div>
+    <p class="dim">식물이 잎·줄기 키우기(영양생장)에만 에너지를 쏟으면 꽃과 열매가 늦어집니다. 이때 열매 맺기(생식생장) 쪽으로 방향을 틀어 줍니다.</p>
+
+    <!-- 균형 저울 도식 -->
+    <div style="margin:6px 0 4px;">
+      <div class="diagram-cap">그림 2. 식물의 에너지는 '몸집 키우기 ↔ 열매 맺기' 사이의 저울</div>
+      <svg viewBox="0 0 700 170" width="100%" role="img" aria-label="영양생장과 생식생장의 균형을 나타내는 저울 도식. 현재는 영양생장 쪽으로 기운 상태">
+        <!-- base -->
+        <rect x="335" y="60" width="30" height="90" rx="4" fill="#2c3242"/>
+        <rect x="300" y="148" width="100" height="10" rx="5" fill="#2c3242"/>
+        <!-- tilted beam (영양생장으로 기움) -->
+        <g transform="rotate(-9 350 60)">
+          <rect x="120" y="55" width="460" height="9" rx="4.5" fill="#5fd39a"/>
+          <!-- left pan (영양생장, heavy) -->
+          <line x1="160" y1="60" x2="160" y2="92" stroke="#5fd39a" stroke-width="2"/>
+          <rect x="95" y="92" width="130" height="44" rx="11" fill="#1e2a24" stroke="#5fd39a"/>
+          <text x="160" y="112" text-anchor="middle" fill="#5fd39a" font-size="13.5" font-weight="700">🌿 영양생장</text>
+          <text x="160" y="128" text-anchor="middle" fill="#a4abba" font-size="11.5">과다 (지금)</text>
+          <!-- right pan (생식생장, light) -->
+          <line x1="540" y1="60" x2="540" y2="80" stroke="#ff8a9c" stroke-width="2"/>
+          <rect x="475" y="80" width="130" height="44" rx="11" fill="#2a2024" stroke="#ff8a9c"/>
+          <text x="540" y="100" text-anchor="middle" fill="#ff8a9c" font-size="13.5" font-weight="700">🍓 생식생장</text>
+          <text x="540" y="116" text-anchor="middle" fill="#a4abba" font-size="11.5">부족</text>
+        </g>
+        <text x="350" y="22" text-anchor="middle" fill="#ffc861" font-size="13" font-weight="700">목표 = 균형 또는 생식생장 쪽으로 이동 ➜</text>
+      </svg>
+    </div>
+
+    <div class="plain">
+      식물의 에너지를 '예산'이라고 보면, 지금 <b>몸집 키우기에 돈을 다 쓰고 있는</b> 상황입니다. 환경과 양·수분을 조절해 <b>열매 맺기로 예산을 옮기는</b> 겁니다. 잎이 너무 많으면 '잎 따기'를 예정 목록에 넣고, 곧 약을 칠 계획이 있으면 약이 잘 닿도록 잎 따기 순서를 앞당깁니다. 단, 일손·날씨·작물 스트레스를 보고 즉시 할지·미룰지·보류할지 정합니다.
+    </div>
+  </div>
+
+  <!-- 5-3 광/스크린 -->
+  <div class="decision">
+    <div class="dh"><span class="pill">3</span><h3>빛 · 스크린(커튼) 조절</h3></div>
+    <p class="dim">스크린(차광·보온 커튼)을 여닫는 일은 단순히 '그늘 만들기'가 아닙니다. 광합성, 잎 온도, 수분 증발, 성장 방향을 한꺼번에 조절하는 작업입니다.</p>
+    <div class="plain">
+      목표가 <b>광합성을 늘리는 것</b>인지, <b>몸집을 키우는 것</b>인지, <b>너무 강한 빛을 피하는 것</b>인지에 따라 답이 달라집니다. 빛이 일정 수준(광포화점)을 넘으면 더 줘도 광합성이 늘지 않으며, 낮의 호흡과 밤의 호흡은 따로 봐야 합니다.
+    </div>
+  </div>
+
+  <!-- 5-4 관수/EC -->
+  <div class="decision">
+    <div class="dh"><span class="pill">4</span><h3>물 주기 · 양분 농도(EC) 조절</h3></div>
+    <p class="dim">물 주기는 단순 급수가 아니라 뿌리 주변의 수분·양분 농도·산도·뿌리 활력·양분 흡수를 함께 조절하는 작업입니다.</p>
+    <div class="plain">
+      누적광량, 빠져나온 물의 양과 농도, 공급 물의 농도·산도, 배지 수분, 열매 부담을 함께 봐서 <b>'언제, 얼마나, 몇 번 물을 줄지, 양분 농도를 바꿀지'</b>를 제안합니다. 한마디로 식물에게 맞춤 식단을 짜 주는 일입니다.
+    </div>
+  </div>
+
+  <!-- 5-5 수확 -->
+  <div class="decision">
+    <div class="dh"><span class="pill">5</span><h3>수확도 '성장을 조절하는 작업'이다</h3></div>
+    <p class="dim">수확은 단순히 다 익은 열매를 거두는 기록이 아니라, 열매 부담과 식물 기세(초세)를 조절하는 농작업입니다.</p>
+    <ul style="color:var(--text-dim);font-size:15px;margin:6px 0 0;padding-left:20px;">
+      <li>수확을 미루면 품질은 좋아질 수 있지만, 열매 부담이 커집니다.</li>
+      <li>열매 부담이 큰데 저온 전략까지 쓰면 성장이 느려지고 기세가 떨어질 수 있습니다.</li>
+      <li>일찍 수확하면 열매 부담이 줄어 기세 유지에 도움이 됩니다.</li>
+    </ul>
+    <div class="plain">
+      그래서 수확도 그냥 '결과'가 아니라, <b>언제 딸지를 전략적으로 정하는 작업</b>으로 보고 작업 계획에 포함시킵니다.
+    </div>
+  </div>
+
+  <!-- 5가지 의사결정 한눈에 비교 -->
+  <p class="diagram-cap" style="margin-top:22px;">표 1. 5가지 의사결정 한눈에 비교</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr><th>의사결정</th><th>무엇을 보나</th><th>핵심 작업</th><th>한 줄 비유</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="term">잎의 양 (LAI)</td><td>잎이 빛 받는 면적, 통풍, 병해</td><td>잎 따기 / 잎 확보</td><td>태양광 패널 면적 맞추기</td></tr>
+        <tr><td class="term">성장 방향</td><td>영양생장 vs 생식생장 균형</td><td>환경·양수분으로 방향 전환</td><td>에너지 예산 옮기기</td></tr>
+        <tr><td class="term">빛·스크린</td><td>광합성, 잎 온도, 강광 여부</td><td>커튼 여닫기</td><td>커튼으로 빛·온도 조율</td></tr>
+        <tr><td class="term">물·양분 (EC)</td><td>수분, 양분 농도, 뿌리 활력</td><td>관수 시각·양·횟수 조정</td><td>맞춤 식단 짜기</td></tr>
+        <tr><td class="term">수확</td><td>착과부담, 초세, 품질</td><td>수확 시점 결정</td><td>부담 덜어 기세 지키기</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 5.5 AI 모델 구성 ===== -->
+<section>
+  <p class="kicker">초안의 엔진</p>
+  <h2 class="sec">AI 모델은 어떤 부품으로 이루어지나요?</h2>
+  <p class="sec-sub">초안은 여러 AI 모듈을 조합합니다. 이름은 낯설어도 '무슨 일을 하는지'만 보면 됩니다.</p>
+
+  <!-- 파이프라인 도식 -->
+  <div class="card" style="padding:18px;">
+    <div class="diagram-cap">그림 5. 데이터가 '작업 추천'이 되기까지의 흐름</div>
+    <svg viewBox="0 0 760 120" width="100%" role="img" aria-label="센서와 영상 데이터가 학습 모듈을 거쳐 예측과 제어 후보, 전문가 검증으로 이어지는 흐름">
+      <defs><marker id="ah3" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#ff5d73"/></marker></defs>
+      <g text-anchor="middle" font-family="inherit" font-size="12.5" font-weight="700">
+        <rect x="10" y="42" width="120" height="46" rx="11" fill="#1e2630" stroke="#5cc8ff"/><text x="70" y="62" fill="#5cc8ff">센서·영상</text><text x="70" y="78" fill="#a4abba" font-size="11">데이터 수집</text>
+        <rect x="170" y="42" width="130" height="46" rx="11" fill="#222736" stroke="#2c3242"/><text x="235" y="62" fill="#e7e9ee">학습 모듈</text><text x="235" y="78" fill="#a4abba" font-size="11">시계열·영상·이벤트</text>
+        <rect x="340" y="42" width="120" height="46" rx="11" fill="#222736" stroke="#2c3242"/><text x="400" y="62" fill="#e7e9ee">예측</text><text x="400" y="78" fill="#a4abba" font-size="11">수확·병해·편차</text>
+        <rect x="500" y="42" width="120" height="46" rx="11" fill="#26202a" stroke="#ff5d73"/><text x="560" y="62" fill="#ff8a9c">제어 후보</text><text x="560" y="78" fill="#a4abba" font-size="11">RL Actor</text>
+        <rect x="655" y="42" width="100" height="46" rx="11" fill="#1e2a24" stroke="#5fd39a"/><text x="705" y="62" fill="#5fd39a">검증</text><text x="705" y="78" fill="#a4abba" font-size="11">LLM·전문가</text>
+      </g>
+      <g stroke="#ff5d73" stroke-width="2" fill="none">
+        <line x1="130" y1="65" x2="167" y2="65" marker-end="url(#ah3)"/>
+        <line x1="300" y1="65" x2="337" y2="65" marker-end="url(#ah3)"/>
+        <line x1="460" y1="65" x2="497" y2="65" marker-end="url(#ah3)"/>
+        <line x1="620" y1="65" x2="652" y2="65" marker-end="url(#ah3)"/>
+      </g>
+    </svg>
+  </div>
+
+  <p class="diagram-cap" style="margin-top:18px;">표 3. AI 모델 구성요소와 역할</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>구성요소</th><th>쉽게 말하면, 이런 일을 합니다</th></tr></thead>
+      <tbody>
+        <tr><td class="term">OpenTSLM</td><td>온도·습도·EC·pH·급액량처럼 <b>시간에 따라 변하는 숫자의 흐름·패턴</b>을 읽는 AI</td></tr>
+        <tr><td class="term">영상 진단 (CNN)</td><td>잎 사진으로 잎 각도·초세·꽃대·병반을 보고 <b>생육·병해를 진단</b></td></tr>
+        <tr><td class="term">딸기 생육 온톨로지</td><td>생육단계·환경·작업·병해·품질의 관계를 정리한 <b>'딸기 백과사전'</b> (AI가 참고하는 지식)</td></tr>
+        <tr><td class="term">Berry2Vec</td><td>재배 상황(이벤트)을 <b>숫자열로 바꿔 학습</b>해 편차·위험을 예측</td></tr>
+        <tr><td class="term">Downstream Task</td><td>수확량·병해 위험·품질 저하, 생식↔영양 편차 등 <b>구체적 결과를 예측</b></td></tr>
+        <tr><td class="term">RL Actor</td><td>가능한 <b>제어(작업) 후보를 만들고</b> 실행 가능성·비용을 평가</td></tr>
+        <tr><td class="term">LLM 교차검증 + 전문가 검토</td><td>AI 판단의 근거를 <b>검증하고 계속 개선</b> (사람이 함께 확인)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 5.6 제어 레버 ===== -->
+<section>
+  <p class="kicker">목표 도달 수단</p>
+  <h2 class="sec">차이를 메우는 '제어 레버'</h2>
+  <p class="sec-sub">목표와 현재의 차이를 줄이려고 AI가 당기는 조절 손잡이들입니다.</p>
+  <p class="diagram-cap">표 4. 제어 레버와 판단 기준</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>제어 레버</th><th>판단 기준 (쉬운 설명)</th></tr></thead>
+      <tbody>
+        <tr><td class="term">주야 평균온도 · DIF</td><td>하루 평균온도(ADT)로 <b>자라는 속도·수확 시기</b>를 조절하고, 낮밤 온도차(DIF)로 <b>몸집형↔열매형 방향</b>을 조절</td></tr>
+        <tr><td class="term">함수율 조절</td><td>배지 수분만으로는 한계 → 수분을 먼저 맞춘 뒤 <b>양분 제어와 함께</b> 조절</td></tr>
+        <tr><td class="term">EC↓ + pH 제어</td><td>양분 농도(EC)를 낮추면서 산도(pH)로 <b>양분 흡수를 정밀 조절</b> (품질·열매 맺기 유도)</td></tr>
+        <tr><td class="term">VPD 제어</td><td>목표 VPD(약 0.8~1.2kPa)로 <b>증산·기공·병 위험을 동시에</b> 관리 ※VPD=공기의 건조한 정도</td></tr>
+        <tr><td class="term">환기 · 난방 · 차광</td><td>바깥 기온·습도·바람·햇빛·<b>에너지 비용</b>을 함께 고려</td></tr>
+        <tr><td class="term">방제 · 점검 권고</td><td>습도·잎 상태·병반/응애 영상·<b>과거 발생 이력</b>을 바탕으로 권고</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 5.7 데이터 활용 ===== -->
+<section>
+  <p class="kicker">데이터 → 결과</p>
+  <h2 class="sec">어떤 데이터로 무엇을 만들어 내나요?</h2>
+  <p class="sec-sub">초안의 데이터 활용계획을 '넣는 것 → 나오는 것'으로 정리했습니다.</p>
+  <p class="diagram-cap">표 5. 데이터 활용계획</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>구분</th><th>넣는 데이터</th><th>나오는 결과</th></tr></thead>
+      <tbody>
+        <tr><td class="term">환경·제어</td><td>온습도·CO₂·일사·VPD·관수·양액 EC/pH</td><td>환경 위험 경보, 환기·관수·양액·커튼 점검 권고</td></tr>
+        <tr><td class="term">생육·착과</td><td>초장·엽수·관부직경·개화율·착과율</td><td>생육단계·초세 진단, 착과 리스크, 수확량 예측</td></tr>
+        <tr><td class="term">병해충·방제</td><td>병반 사진·끈끈이트랩·예찰기록·방제이력</td><td>병해충 위험 알림, 예찰 우선순위, 방제 점검 권고</td></tr>
+        <tr><td class="term">생산·품질·에너지</td><td>수확량·과중·당도·상품과율·에너지 사용량</td><td>생산성·품질·경제성 평가, 모델 개선</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="plain">
+    초안은 여기에 더해 <b>본선 실증(실제 온실에 적용)</b> 계획과 <b>리스크 관리</b>도 담고 있습니다. 센서가 고장 나면 최근 정상값 유지·대체 센서 활용으로 대응하고, 1차 버전은 <b>자동 제어 대신 '확인·점검 권고'로 제한</b>해 오작동에 의한 피해를 막으며, 방제 권고에는 농약안전사용기간(PHI)을 반영합니다.
+  </div>
+</section>
+
+<!-- ===== 6. MVP 우선순위 ===== -->
+<section>
+  <p class="kicker">개발 순서</p>
+  <h2 class="sec">먼저 만들 기능 (MVP 우선순위)</h2>
+  <p class="sec-sub">한 번에 다 만들지 않고, 효과가 크고 명확한 것부터 차례로 구현하자는 제안입니다.</p>
+  <div class="ladder">
+    <div class="rung"><div class="rank">1</div><div class="rtext"><b>잎의 양(LAI) 조절 의사결정</b><p>가장 먼저 구현</p></div></div>
+    <div class="rung"><div class="rank">2</div><div class="rtext"><b>빛 · 스크린 의사결정</b></div></div>
+    <div class="rung"><div class="rank">3</div><div class="rtext"><b>물·양분 제어 (공급 EC, pH) 의사결정</b></div></div>
+    <div class="rung"><div class="rank">4</div><div class="rtext"><b>수확 의사결정</b></div></div>
+  </div>
+</section>
+
+<!-- ===== 7. 전문가 역할 ===== -->
+<section>
+  <p class="kicker">사람의 역할</p>
+  <h2 class="sec">농업 전문가는 무엇을 해 주나요?</h2>
+  <p class="sec-sub">AI 혼자 다 하는 게 아니라, 전문가가 '판단 기준'을 제공해 AI를 똑똑하게 만들고 검증합니다.</p>
+  <div class="card">
+    <ul style="margin:0;padding-left:20px;color:var(--text-dim);font-size:15.5px;line-height:1.9;">
+      <li>생육단계별로 무엇을 봐야 하는지 판단 항목 정의</li>
+      <li>각 농작업이 식물에 주는 생리적 의미 정리</li>
+      <li>데이터를 어떻게 해석할지 기준 제공</li>
+      <li>작업별 기대 효과와 부작용 정리</li>
+      <li>작업 우선순위를 정하는 기준 제공</li>
+      <li>AI 판단을 사람이 고쳐 주는 '보정 기준' 제공</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== 8. 핵심 정리 ===== -->
+<section>
+  <p class="kicker">결론</p>
+  <h2 class="sec">핵심 정리</h2>
+  <div class="close">
+    <p style="margin:0;color:var(--text);font-size:16.5px;">이번 보완 의견이 말하는 바를 세 문장으로 줄이면:</p>
+    <ul>
+      <li>이벤트 감지형(위험 알림)도 필요하지만, <b>목표 기반 의사결정형</b>이 더 발전된 방향입니다.</li>
+      <li>현재 상태를 '설명'하는 데서 멈추지 말고, <b>목표에 도달하기 위한 작업 계획</b>까지 제시해야 합니다.</li>
+      <li>AI의 최종 출력은 <b>실행 가능한 농작업 목록과 우선순위</b>여야 합니다.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== 용어 사전 ===== -->
+<section>
+  <p class="kicker">참고</p>
+  <h2 class="sec">한눈에 보는 용어 사전</h2>
+  <p class="sec-sub">본문에 나온 농업·AI 용어를 쉬운 말로 모았습니다.</p>
+  <dl class="gloss">
+    <div class="gitem"><dt>영양생장</dt><dd>식물이 잎·줄기 등 '몸집'을 키우는 데 에너지를 쓰는 성장.</dd></div>
+    <div class="gitem"><dt>생식생장</dt><dd>식물이 꽃과 열매를 맺는 데 에너지를 쓰는 성장. 영양생장과 균형이 중요.</dd></div>
+    <div class="gitem"><dt>초세(草勢)</dt><dd>식물의 기세·활력. 굵고 튼튼한 정도.</dd></div>
+    <div class="gitem"><dt>엽면적지수(LAI)</dt><dd>잎이 바닥 면적 대비 얼마나 빛을 받는지를 나타내는 값. 식물의 '태양광 패널' 면적.</dd></div>
+    <div class="gitem"><dt>적엽(摘葉)</dt><dd>잎을 일부러 따 내는 작업. 통풍·빛·열매 집중을 위해 함.</dd></div>
+    <div class="gitem"><dt>착과부담</dt><dd>식물이 동시에 달고 있는 열매의 무게·개수에서 오는 부담.</dd></div>
+    <div class="gitem"><dt>근권(根圈)</dt><dd>뿌리가 자리한 영역. 뿌리 주변의 물·양분 상태를 말함.</dd></div>
+    <div class="gitem"><dt>EC</dt><dd>물에 녹은 양분의 농도(전기전도도). 높을수록 양분이 진함.</dd></div>
+    <div class="gitem"><dt>pH</dt><dd>물의 산도. 양분이 잘 녹고 흡수되는지에 영향을 줌.</dd></div>
+    <div class="gitem"><dt>배액 · 배액률</dt><dd>배지 밖으로 빠져나온 물(배액)과 그 비율. 양분 흡수 상태를 진단하는 단서.</dd></div>
+    <div class="gitem"><dt>함수율</dt><dd>배지(흙 역할을 하는 재배 재료)가 머금은 물의 양.</dd></div>
+    <div class="gitem"><dt>누적광량</dt><dd>하루 동안 식물이 받은 빛의 총량.</dd></div>
+    <div class="gitem"><dt>광포화점</dt><dd>이보다 빛이 강해도 광합성이 더 늘지 않는 한계점.</dd></div>
+    <div class="gitem"><dt>순광합성</dt><dd>광합성으로 얻은 양분에서 호흡으로 쓴 양을 뺀, 실제 남는 양.</dd></div>
+    <div class="gitem"><dt>스크린(커튼)</dt><dd>온실의 차광·보온 커튼. 빛·온도·증산을 조절함.</dd></div>
+    <div class="gitem"><dt>방제(防除)</dt><dd>병해충을 막기 위한 작업. 보통 약제 살포를 뜻함.</dd></div>
+    <div class="gitem"><dt>농약안전사용기간(PHI)</dt><dd>농약을 친 뒤 수확까지 반드시 지켜야 하는 대기 기간.</dd></div>
+    <div class="gitem"><dt>이벤트 감지형 AI</dt><dd>위험·이상 상황을 알려 주는 데 초점을 둔 AI.</dd></div>
+    <div class="gitem"><dt>목표 기반 의사결정형 AI</dt><dd>목표와 현재의 차이를 메우는 '작업 계획'까지 제안하는 AI.</dd></div>
+    <div class="gitem"><dt>MVP</dt><dd>최소 기능 제품. 핵심 기능부터 먼저 만들어 검증하는 개발 방식.</dd></div>
+    <div class="gitem"><dt>폐루프(closed-loop)</dt><dd>목표→현재→차이→조절을 끝없이 반복하는 순환 구조.</dd></div>
+    <div class="gitem"><dt>CNN</dt><dd>이미지를 분석하는 AI 기술. 사진 속 패턴(잎 각도·색·병반)을 알아봄.</dd></div>
+    <div class="gitem"><dt>VPD</dt><dd>공기가 얼마나 건조한지를 나타내는 값. 식물의 수분 증발·기공·병 위험과 직결됨.</dd></div>
+    <div class="gitem"><dt>ADT / DIF</dt><dd>ADT=하루 평균온도(자라는 속도). DIF=낮과 밤 온도차(성장 형태 조절).</dd></div>
+    <div class="gitem"><dt>온톨로지</dt><dd>개념들의 관계를 정리한 지식 사전. AI가 참고하는 '딸기 백과사전' 역할.</dd></div>
+    <div class="gitem"><dt>RL Actor</dt><dd>강화학습 기반으로 가능한 작업 후보를 만들고 평가하는 AI 부분.</dd></div>
+    <div class="gitem"><dt>착과(着果)</dt><dd>꽃이 열매로 맺히는 것. 착과율은 그 비율.</dd></div>
+    <div class="gitem"><dt>예찰(豫察)</dt><dd>병해충이 생기는지 미리 살펴보는 점검 활동.</dd></div>
+  </dl>
+</section>
+
+<footer>
+  본 문서는 베리디시전 팀의 '농작업 의사결정형 딸기 AI 모델 보완 의견'을 비전문가도 이해할 수 있도록 쉬운 말로 재구성한 설명 자료입니다. · 2026
+</footer>
+
+</div>
+</body>
+</html>
