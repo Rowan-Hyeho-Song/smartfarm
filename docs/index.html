@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>berry_ai — 딸기 스마트팜 예측·제어 (프로젝트 인덱스)</title>
+<style>
+  :root{
+    --bg:#0d0f14; --card:#1b1f2a; --card-2:#222736; --line:#2c3242;
+    --text:#e7e9ee; --text-dim:#a4abba; --text-faint:#7b8294;
+    --berry:#ff5d73; --berry-soft:#ff8a9c; --leaf:#5fd39a; --gold:#ffc861;
+    --sky:#5cc8ff; --violet:#b69bff; --new:#37c8c3; --radius:16px; --maxw:1000px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:radial-gradient(1200px 640px at 82% -12%, #1e2432 0%, var(--bg) 55%);
+    color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+    line-height:1.7;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px 110px;}
+
+  /* ── HERO ── */
+  header.hero{max-width:var(--maxw);margin:0 auto;padding:70px 22px 20px;}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.16em;font-weight:700;color:var(--berry-soft);
+    text-transform:uppercase;border:1px solid rgba(255,93,115,.35);border-radius:999px;padding:6px 15px;margin-bottom:22px;background:rgba(255,93,115,.07);}
+  h1.title{font-size:clamp(32px,6vw,54px);line-height:1.08;margin:0 0 18px;font-weight:850;letter-spacing:-.02em;}
+  h1.title .accent{color:var(--berry);}
+  .lede{font-size:clamp(16px,2.4vw,19px);color:var(--text-dim);max-width:680px;margin:0 0 26px;}
+  .cta{display:flex;flex-wrap:wrap;gap:12px;}
+  .cta a{font-size:14.5px;font-weight:700;border-radius:11px;padding:11px 18px;border:1px solid var(--line);}
+  .cta .primary{background:linear-gradient(135deg,var(--berry),#d94d63);color:#fff;border-color:transparent;}
+  .cta .ghost{background:var(--card);color:var(--text);}
+  .cta a:hover{transform:translateY(-1px);border-color:var(--berry);}
+
+  /* ── STAT TILES ── */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:40px 0 0;}
+  @media(max-width:720px){.stats{grid-template-columns:repeat(2,1fr);}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px;}
+  .stat .n{font-size:30px;font-weight:850;letter-spacing:-.01em;font-variant-numeric:tabular-nums;line-height:1;}
+  .stat.s1 .n{color:var(--leaf);} .stat.s2 .n{color:var(--sky);} .stat.s3 .n{color:var(--violet);} .stat.s4 .n{color:var(--gold);}
+  .stat .t{font-size:12.5px;color:var(--text-faint);margin-top:9px;line-height:1.4;}
+
+  section{margin-top:60px;}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.13em;color:var(--berry);text-transform:uppercase;margin:0 0 10px;}
+  h2.sec{font-size:clamp(21px,3.6vw,28px);font-weight:800;margin:0 0 6px;letter-spacing:-.01em;}
+  .sec-sub{color:var(--text-dim);margin:0 0 26px;font-size:15.5px;}
+
+  /* ── JOURNEY ── */
+  .journey{overflow-x:auto;padding:4px 2px 8px;}
+  .jrow{display:flex;align-items:stretch;gap:0;min-width:min-content;}
+  .jstep{flex:0 0 auto;width:100px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 8px;text-align:center;}
+  .jstep .jn{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,var(--berry),#d94d63);color:#fff;
+    font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 7px;}
+  .jstep .jt{font-size:12.5px;font-weight:750;line-height:1.25;}
+  .jstep .jd{font-size:10px;color:var(--text-faint);margin-top:4px;line-height:1.3;}
+  .jstep.win{border-color:rgba(95,211,154,.5);background:rgba(95,211,154,.06);}
+  .jstep.win .jt{color:var(--leaf);}
+  .jarrow{flex:0 0 auto;display:flex;align-items:center;color:var(--text-faint);font-size:16px;padding:0 3px;}
+
+  /* ── DOC GALLERY ── */
+  .group{margin-top:34px;}
+  .group h3{font-size:16px;font-weight:800;margin:0 0 14px;display:flex;align-items:center;gap:9px;color:var(--text);}
+  .group h3 .dot{width:9px;height:9px;border-radius:3px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
+  .doc{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 19px;transition:transform .12s,border-color .12s;}
+  .doc:hover{transform:translateY(-2px);border-color:var(--berry);}
+  .doc .ic{font-size:22px;margin-bottom:9px;}
+  .doc .dt{font-size:15.5px;font-weight:750;margin-bottom:5px;}
+  .doc .dd{font-size:13px;color:var(--text-dim);line-height:1.5;}
+  .doc .badge{display:inline-block;margin-top:10px;font-size:11px;font-weight:700;padding:2px 9px;border-radius:6px;background:var(--card-2);color:var(--text-faint);}
+
+  /* ── STACK ── */
+  .chips{display:flex;flex-wrap:wrap;gap:9px;}
+  .chip{font-size:13px;color:var(--text-dim);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:8px 13px;}
+  .chip b{color:var(--text);}
+
+  .note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:12px;padding:15px 18px;margin-top:22px;font-size:14px;color:var(--text-dim);}
+  .note b{color:var(--text);}
+
+  footer{max-width:var(--maxw);margin:64px auto 0;padding:24px 22px 0;border-top:1px solid var(--line);color:var(--text-faint);font-size:13.5px;}
+  footer a{color:var(--sky);}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">🍓 베리디시전 · 프로젝트 인덱스</span>
+  <h1 class="title">berry_ai —<br><span class="accent">딸기 스마트팜</span> 예측·제어</h1>
+  <p class="lede">환경·생육 데이터로 딸기 생육을 <b style="color:var(--text)">예측</b>하고, 그 <b style="color:var(--text)">불확실성</b>과 <b style="color:var(--text)">제어 규칙</b>까지 도출한 프로젝트. 예측 → 불확실성 → 튜닝 → 제어 설계 → A/B 검증 → 환경 예보 → 실증 계획을 하나의 흐름으로 담았습니다.</p>
+  <div class="cta">
+    <a class="primary" href="pipeline/전체_예측_파이프라인_흐름도.html">전체 파이프라인 보기 →</a>
+    <a class="ghost" href="explain/모델_소개_설계의도.html">모델 소개 (5분)</a>
+    <a class="ghost" href="https://github.com/Rowan-Hyeho-Song/smartfarm">GitHub ↗</a>
+  </div>
+
+  <div class="stats">
+    <div class="stat s1"><div class="n">0.87</div><div class="t">착과수 예측 R² (v2)<br>온실별 검증 · 80% 돌파</div></div>
+    <div class="stat s2"><div class="n">0.86</div><div class="t">내부온도 예보 R²<br>6시간 뒤</div></div>
+    <div class="stat s3"><div class="n">83%</div><div class="t">예측 구간 적중률<br>Conformal 보정</div></div>
+    <div class="stat s4"><div class="n">+1.57<span style="font-size:15px">cm</span></div><div class="t">CO₂ 제어효과 (초장)<br>p&lt;0.001</div></div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- 여정 -->
+<section id="journey">
+  <p class="kicker">The Journey</p>
+  <h2 class="sec">프로젝트 여정</h2>
+  <p class="sec-sub">데이터에서 시작해 '제어 가능한 AI'까지. 각 단계가 다음을 위한 근거가 됐습니다.</p>
+  <div class="journey">
+    <div class="jrow">
+      <div class="jstep"><div class="jn">1</div><div class="jt">데이터 병합</div><div class="jd">환경(시간별)+생육(주1회)</div></div>
+      <div class="jarrow">→</div>
+      <div class="jstep"><div class="jn">2</div><div class="jt">예측</div><div class="jd">검증방식 매칭</div></div>
+      <div class="jarrow">→</div>
+      <div class="jstep"><div class="jn">3</div><div class="jt">불확실성</div><div class="jd">분위수+Conformal</div></div>
+      <div class="jarrow">→</div>
+      <div class="jstep"><div class="jn">4</div><div class="jt">튜닝</div><div class="jd">Optuna</div></div>
+      <div class="jarrow">→</div>
+      <div class="jstep"><div class="jn">5</div><div class="jt">제어 설계</div><div class="jd">룰 베이스(복합상관)</div></div>
+      <div class="jarrow">→</div>
+      <div class="jstep"><div class="jn">6</div><div class="jt">A/B 검증</div><div class="jd">CO₂·온도</div></div>
+      <div class="jarrow">→</div>
+      <div class="jstep"><div class="jn">7</div><div class="jt">환경 예보</div><div class="jd">선제 제어</div></div>
+      <div class="jarrow">→</div>
+      <div class="jstep win"><div class="jn">★</div><div class="jt">v2 돌파</div><div class="jd">R² 0.87</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 문서 갤러리 -->
+<section id="docs">
+  <p class="kicker">Documents</p>
+  <h2 class="sec">전체 문서</h2>
+  <p class="sec-sub">HTML 문서라 브라우저로 열면 도표·차트가 보입니다. 카드를 클릭하세요.</p>
+
+  <div class="group">
+    <h3><span class="dot" style="background:var(--berry)"></span>개요 &amp; 소개</h3>
+    <div class="grid">
+      <a class="doc" href="pipeline/전체_예측_파이프라인_흐름도.html">
+        <div class="ic">🗺️</div><div class="dt">전체 예측 파이프라인 흐름도</div>
+        <div class="dd">데이터→예측→제어까지 전체 시스템을 화살표로 한눈에.</div><span class="badge">SVG 흐름도</span></a>
+      <a class="doc" href="explain/모델_소개_설계의도.html">
+        <div class="ic">💡</div><div class="dt">모델 소개 · 설계 의도</div>
+        <div class="dd">무엇을·왜·어떻게. 용어 풀이까지, 5분 발표용.</div><span class="badge">발표용</span></a>
+      <a class="doc" href="journal/작업이력_원인과변경.html">
+        <div class="ic">📜</div><div class="dt">작업 이력 (원인·변경·이유)</div>
+        <div class="dd">모델링 결정 12가지를 원인→변경→이유로 기록.</div><span class="badge">12 카드</span></a>
+    </div>
+  </div>
+
+  <div class="group">
+    <h3><span class="dot" style="background:var(--leaf)"></span>핵심 실험</h3>
+    <div class="grid">
+      <a class="doc" href="experiments/생육지표_집계창_비교.html">
+        <div class="ic">📊</div><div class="dt">7개 생육 지표 &amp; 집계 창 비교</div>
+        <div class="dd">지표별 최적 검증·창을 데이터로 규명.</div><span class="badge">실험</span></a>
+      <a class="doc" href="experiments/AB제어실험_CO2.html">
+        <div class="ic">🧪</div><div class="dt">A/B 제어 실험 (CO₂·온도)</div>
+        <div class="dd">관측 준-A/B + 반사실 시뮬로 제어 레버 검증.</div><span class="badge">실험</span></a>
+      <a class="doc" href="experiments/환경예보_트랙.html">
+        <div class="ic">🌡️</div><div class="dt">환경 예보 트랙</div>
+        <div class="dd">h시간 뒤 내부 온도·CO₂ 예보 (선제 제어의 눈).</div><span class="badge">실험</span></a>
+    </div>
+  </div>
+
+  <div class="group">
+    <h3><span class="dot" style="background:var(--violet)"></span>제어 &amp; 실증</h3>
+    <div class="grid">
+      <a class="doc" href="control/룰베이스_제어규칙.html">
+        <div class="ic">🎛️</div><div class="dt">룰 베이스 제어 규칙</div>
+        <div class="dd">복합(다변량) 상관으로 CO₂ 등 제어 규칙 지정.</div><span class="badge">제어</span></a>
+      <a class="doc" href="plan/실증실험_계획서.html">
+        <div class="ic">📋</div><div class="dt">실증 실험 계획서</div>
+        <div class="dd">무작위 배정 A/B 프로토콜 (온실 확보 시 착수).</div><span class="badge">계획</span></a>
+    </div>
+  </div>
+
+  <div class="group">
+    <h3><span class="dot" style="background:var(--sky)"></span>가이드 &amp; 리서치</h3>
+    <div class="grid">
+      <a class="doc" href="guide/딸기생육_지표_의사결정_쉬운설명.html">
+        <div class="ic">🌱</div><div class="dt">딸기 생육 · 의사결정 쉬운 설명</div>
+        <div class="dd">지표 → 생육 → 결정. 실데이터로 쉽게.</div><span class="badge">가이드</span></a>
+      <a class="doc" href="setup/연습환경_설치_데이터준비.html">
+        <div class="ic">⚙️</div><div class="dt">연습환경 설치 · 데이터 준비</div>
+        <div class="dd">맥/윈도우 동일 환경 + 보유 데이터 준비.</div><span class="badge">가이드</span></a>
+      <a class="doc" href="research/오픈모델_리서치_혼합운용.html">
+        <div class="ic">🔎</div><div class="dt">오픈 모델 리서치 · 혼합운용</div>
+        <div class="dd">시계열/정형 ML·오픈 LLM 지형과 앙상블.</div><span class="badge">리서치</span></a>
+      <a class="doc" href="guide/딸기AI_보완의견_쉬운설명.html">
+        <div class="ic">📝</div><div class="dt">딸기 AI 보완의견 (쉬운 설명)</div>
+        <div class="dd">아키텍처 회의록 기반 보완 의견 정리.</div><span class="badge">가이드</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- 스택 -->
+<section id="stack">
+  <p class="kicker">Under the Hood</p>
+  <h2 class="sec">파이프라인 &amp; 스택</h2>
+  <p class="sec-sub"><code style="color:var(--sky)">data_prep → train / advanced / optuna / <b style="color:var(--leaf)">train_agg(v2)</b> → conformal → predict(v2) → forecast_env</code></p>
+  <div class="chips">
+    <span class="chip">언어 <b>Python 3.11</b></span>
+    <span class="chip">모델 <b>LightGBM · CatBoost</b></span>
+    <span class="chip">튜닝 <b>Optuna</b></span>
+    <span class="chip">불확실성 <b>Conformal (CQR)</b></span>
+    <span class="chip">검증 <b>온실별 LOGO · 시간분할</b></span>
+    <span class="chip">데이터 <b>온실 1~4 · 2024-11~2025-02</b></span>
+  </div>
+  <div class="note">
+    <b>정직성 원칙</b> — 모든 성능은 '처음 보는 상황'을 흉내 낸 검증(LOGO/시간분할) 기준이며, 데이터 누수를 구조적으로 차단했습니다. v2(R² 0.87)는 집계라 60행 기준이라 데이터 확대 시 재확인이 필요합니다.
+  </div>
+</section>
+
+<footer>
+  베리디시전 · berry_ai 프로젝트 인덱스 &nbsp;·&nbsp; 저장소: <a href="https://github.com/Rowan-Hyeho-Song/smartfarm">github.com/Rowan-Hyeho-Song/smartfarm</a><br>
+  성능 수치는 보유 데이터 기준의 상대 비교값이며, 데이터가 늘거나 검증 설정이 바뀌면 달라질 수 있습니다.
+</footer>
+
+</div>
+</body>
+</html>
