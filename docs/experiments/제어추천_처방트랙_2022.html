@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>제어활동 추천 — 처방 트랙 (착과수 최적환경 2022)</title>
+<style>
+  :root{
+    --bg:#0e1014; --bg-soft:#161922; --card:#1b1f2a; --card-2:#222736; --line:#2c3242;
+    --text:#e7e9ee; --text-dim:#a4abba; --text-faint:#7b8294;
+    --berry:#ff5d73; --berry-soft:#ff8a9c; --leaf:#5fd39a; --gold:#ffc861;
+    --sky:#5cc8ff; --violet:#b69bff; --new:#37c8c3; --radius:16px; --maxw:960px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%, #1d2230 0%, var(--bg) 55%);
+    color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px 110px;}
+  header.hero{max-width:var(--maxw);margin:0 auto;padding:56px 22px 20px;}
+  a.back{font-size:13.5px;color:var(--sky);text-decoration:none;}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.14em;font-weight:700;color:var(--violet);
+    text-transform:uppercase;border:1px solid rgba(182,155,255,.35);border-radius:999px;padding:6px 14px;margin:16px 0 20px;background:rgba(182,155,255,.07);}
+  h1.title{font-size:clamp(27px,5vw,42px);line-height:1.16;margin:0 0 16px;font-weight:800;letter-spacing:-.01em;}
+  h1.title .accent{color:var(--violet);}
+  .lede{font-size:clamp(15.5px,2.3vw,18px);color:var(--text-dim);max-width:730px;margin:0;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;}
+  .chip{font-size:12.5px;color:var(--text-dim);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 13px;}
+  .chip b{color:var(--text);}
+
+  section{margin-top:52px;}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--violet);text-transform:uppercase;margin:0 0 8px;}
+  h2.sec{font-size:clamp(21px,3.4vw,27px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;}
+  .sec-sub{color:var(--text-dim);margin:0 0 20px;font-size:15px;}
+  p{margin:0 0 14px;} .dim{color:var(--text-dim);} strong{color:var(--text);}
+  code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.86em;background:var(--card-2);padding:1.5px 6px;border-radius:5px;color:var(--text);}
+  a.inl{color:var(--sky);text-decoration:none;border-bottom:1px solid rgba(92,200,255,.35);}
+
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;margin:6px 0 0;}
+  table{border-collapse:collapse;width:100%;min-width:580px;font-size:14px;}
+  thead th{background:#23283a;color:var(--berry-soft);text-align:left;font-weight:700;padding:11px 15px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  tbody td{padding:11px 15px;border-bottom:1px solid var(--line);color:var(--text-dim);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:rgba(255,255,255,.018);}
+  tbody td b{color:var(--text);} td.term{color:#fff;font-weight:700;white-space:nowrap;}
+  td.num{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right;}
+  .fade{color:var(--text-faint);} .warncell{color:var(--gold);font-weight:700;}
+
+  .fig{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 12px;margin-top:8px;}
+  .fig svg{display:block;width:100%;height:auto;min-width:560px;}
+  .cap{font-size:12.5px;color:var(--text-faint);text-align:center;margin:10px 4px 0;}
+  .grid-line{stroke:#242a38;stroke-width:1;} .axis-t{fill:var(--text-faint);font-size:11px;}
+  .bar-lab{fill:var(--text);font-size:11px;font-weight:700;} .cat-lab{fill:var(--text-dim);font-size:11.5px;}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--text-dim);margin:12px 2px 0;align-items:center;justify-content:center;}
+  .legend .sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:middle;margin-right:5px;}
+
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:6px 0 0;}
+  @media(max-width:640px){.cards{grid-template-columns:1fr;}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 14px;text-align:center;}
+  .stat .n{font-size:25px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;}
+  .stat.s1 .n{color:var(--violet);} .stat.s2 .n{color:var(--gold);} .stat.s3 .n{color:var(--leaf);}
+  .stat .l{font-size:12px;color:var(--text-faint);margin-top:7px;line-height:1.4;}
+
+  .plain{border-left:3px solid var(--leaf);background:rgba(95,211,154,.07);border-radius:10px;padding:14px 17px;margin:18px 0 0;color:var(--text);font-size:15px;}
+  .plain b{color:var(--leaf);}
+  .plain::before{content:"🍓 한마디로";display:block;font-size:12.5px;font-weight:700;color:var(--leaf);margin-bottom:5px;}
+  .honest{border-left:3px solid var(--gold);background:rgba(255,200,97,.08);border-radius:10px;padding:14px 17px;margin:16px 0 0;color:var(--text);font-size:15px;}
+  .honest::before{content:"⚖️ 정직하게 밝히는 한계";display:block;font-size:12.5px;font-weight:700;color:var(--gold);margin-bottom:5px;}
+  .warn{border-left:3px solid var(--berry);background:rgba(255,93,115,.07);border-radius:10px;padding:14px 17px;margin:16px 0 0;color:var(--text);font-size:15px;}
+  .warn b{color:var(--berry-soft);}
+  .warn::before{content:"⚠️ 핵심 발견";display:block;font-size:12.5px;font-weight:700;color:var(--berry-soft);margin-bottom:5px;}
+
+  ul.clean{list-style:none;padding:0;margin:14px 0 0;}
+  ul.clean>li{position:relative;padding-left:20px;margin:9px 0;font-size:15px;color:var(--text-dim);}
+  ul.clean>li::before{content:"";position:absolute;left:3px;top:.7em;width:6px;height:6px;background:var(--violet);border-radius:50%;}
+  ul.clean>li b{color:var(--text);}
+  footer{max-width:var(--maxw);margin:56px auto 0;padding:22px 22px 0;border-top:1px solid var(--line);color:var(--text-faint);font-size:13.5px;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <a class="back" href="../index.html">← 문서 인덱스</a>
+  <div><span class="eyebrow">신규 데이터 · 처방(제어 추천) 트랙</span></div>
+  <h1 class="title">제어활동을 <span class="accent">추천</span>할 수 있나 —<br>발달단계를 걷어낸 정직한 처방</h1>
+  <p class="lede"><a class="inl" href="착과수_최적환경_데이터_분석.html">예측 트랙</a>이 "환경으로 착과수를 맞히기"였다면, 이 처방 트랙은 <strong>"제어를 어느 방향으로 바꾸면 착과가 나았나"</strong>를 봅니다. 예측과 다른 모델(<strong>단계보정 잔차 + 성과 상·하위 대조</strong>)로 분석해, 관측데이터의 <strong>상관≠인과 함정</strong>을 정면으로 통과시킨 종합 처방입니다.</p>
+  <div class="chips">
+    <span class="chip"><b>단위</b> 조사기간(주) 27개</span>
+    <span class="chip"><b>제어 레버</b> 13개</span>
+    <span class="chip"><b>방법</b> stage-adjusted 잔차 · uplift 대조</span>
+    <span class="chip"><b>재현</b> src/control_recommend_2022.py</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- 1. 접근 -->
+<section id="how">
+  <p class="kicker">The Approach</p>
+  <h2 class="sec">왜 '다른 모델'이 필요한가</h2>
+  <p class="sec-sub">예측 모델로 제어를 추천하면, 프로젝트가 경고한 바로 그 함정에 빠집니다.</p>
+  <p>착과수는 <strong>발달단계가 지배</strong>합니다(예측 트랙에서 확인). 관측데이터에선 "겨울→봄"이라는 계절이 <strong>제어값과 착과수를 동시에 움직이는 배후</strong>라, 제어와 착과의 상관 대부분이 <strong>계절 교란(confounding)</strong>입니다. 그래서 순진하게 "제어→착과 예측 후 최적화"하면 가짜 처방이 나옵니다.</p>
+  <ul class="clean">
+    <li><b>1단계 — 발달단계 제거:</b> 경과일 곡선으로 '단계 기대 착과수'를 만들고, 그 <b>잔차</b>(단계 대비 초과성과)만 본다.</li>
+    <li><b>2단계 — 잔차와 제어 상관:</b> 계절을 걷어낸 뒤 각 제어 레버가 성과와 연관되는지(부분상관).</li>
+    <li><b>3단계 — 성과 상·하위 대조:</b> 단계 대비 잘된 9주 vs 부진한 9주의 제어 설정을 비교(uplift식).</li>
+    <li><b>4단계 — 농학 교차검증:</b> 데이터 방향이 <a class="inl" href="../guide/심화_제어로직원리.html">제어 로직 심화</a>의 농학 규칙과 맞을 때만 채택.</li>
+  </ul>
+</section>
+
+<!-- 2. 발달단계 지배 + 붕괴 차트 -->
+<section id="collapse">
+  <p class="kicker">The Finding</p>
+  <h2 class="sec">상관은 대부분 '계절'이었다</h2>
+  <p class="sec-sub">발달단계를 걷어내자 제어 레버의 상관이 무너집니다 — 상관≠인과의 실증.</p>
+
+  <div class="cards">
+    <div class="stat s1"><div class="n">0.885</div><div class="l">경과일 곡선만으로<br>착과수 R² (발달단계 지배)</div></div>
+    <div class="stat s2"><div class="n">-0.90 → -0.19</div><div class="l">야간온도 상관<br>원본 → 단계보정</div></div>
+    <div class="stat s3"><div class="n">0개</div><div class="l">단계보정 |r|≥0.30<br>넘는 제어 레버</div></div>
+  </div>
+
+  <div class="fig" style="margin-top:20px">
+    <svg viewBox="0 0 640 300" role="img" aria-label="원상관 대비 단계보정 상관 붕괴">
+      <line class="grid-line" x1="70" y1="60"  x2="620" y2="60"/>
+      <line class="grid-line" x1="70" y1="96"  x2="620" y2="96"/>
+      <line class="grid-line" x1="70" y1="132" x2="620" y2="132"/>
+      <line class="grid-line" x1="70" y1="168" x2="620" y2="168"/>
+      <line class="grid-line" x1="70" y1="204" x2="620" y2="204"/>
+      <line class="grid-line" x1="70" y1="240" x2="620" y2="240"/>
+      <text class="axis-t" x="60" y="64"  text-anchor="end">1.0</text>
+      <text class="axis-t" x="60" y="100" text-anchor="end">0.8</text>
+      <text class="axis-t" x="60" y="136" text-anchor="end">0.6</text>
+      <text class="axis-t" x="60" y="172" text-anchor="end">0.4</text>
+      <text class="axis-t" x="60" y="208" text-anchor="end">0.2</text>
+      <text class="axis-t" x="60" y="244" text-anchor="end">0</text>
+      <text class="axis-t" x="24" y="150" transform="rotate(-90 24 150)" text-anchor="middle">|상관계수|</text>
+
+      <!-- 6 levers: raw(berry) vs adjusted(gray). y0=240, h=|r|*180 -->
+      <!-- 야간온도 .90/.19 -->
+      <rect x="89"  y="78"    width="26" height="162"  rx="3" fill="#ff5d73"/>
+      <rect x="117" y="205.8" width="26" height="34.2" rx="3" fill="#5c6478"/>
+      <!-- 천창개도 .86/.13 -->
+      <rect x="181" y="85.2"  width="26" height="154.8" rx="3" fill="#ff5d73"/>
+      <rect x="209" y="216.6" width="26" height="23.4" rx="3" fill="#5c6478"/>
+      <!-- 주간온도 .86/.04 -->
+      <rect x="273" y="85.2"  width="26" height="154.8" rx="3" fill="#ff5d73"/>
+      <rect x="301" y="232.8" width="26" height="7.2"  rx="3" fill="#5c6478"/>
+      <!-- CO2실측 .76/.08 -->
+      <rect x="365" y="103.2" width="26" height="136.8" rx="3" fill="#ff5d73"/>
+      <rect x="393" y="225.6" width="26" height="14.4" rx="3" fill="#5c6478"/>
+      <!-- 난방설정 .74/.11 -->
+      <rect x="457" y="106.8" width="26" height="133.2" rx="3" fill="#ff5d73"/>
+      <rect x="485" y="220.2" width="26" height="19.8" rx="3" fill="#5c6478"/>
+      <!-- CO2발생비율 .70/.25 -->
+      <rect x="549" y="114"   width="26" height="126"  rx="3" fill="#ff5d73"/>
+      <rect x="577" y="195"   width="26" height="45"   rx="3" fill="#5c6478"/>
+
+      <text class="cat-lab" x="116" y="258" text-anchor="middle">야간온도</text>
+      <text class="cat-lab" x="208" y="258" text-anchor="middle">천창개도</text>
+      <text class="cat-lab" x="300" y="258" text-anchor="middle">주간온도</text>
+      <text class="cat-lab" x="392" y="258" text-anchor="middle">CO₂실측</text>
+      <text class="cat-lab" x="484" y="258" text-anchor="middle">난방설정</text>
+      <text class="cat-lab" x="576" y="258" text-anchor="middle">CO₂발생</text>
+    </svg>
+    <div class="legend">
+      <span><span class="sw" style="background:#ff5d73"></span>원상관 |r| (계절 포함)</span>
+      <span><span class="sw" style="background:#5c6478"></span>단계보정 |r| (계절 제거)</span>
+    </div>
+  </div>
+  <p class="cap">제어 레버들의 큰 상관(빨강)은 단계를 걷어내면 거의 사라진다(회색) — 대부분 계절 교란이었다.</p>
+
+  <div class="warn">착과수 변동의 <b>88.5%가 발달단계</b>로 설명되고, 단계를 걷어내면 <b>어떤 제어 레버도 |r|≥0.30을 못 넘습니다.</b> 즉 이 관측데이터만으로는 <b>"제어→착과" 인과를 뽑을 수 없습니다</b>(가장 약한 후보 CO₂발생 -0.25·DIF +0.24·환기 -0.23도 n=27에선 노이즈와 구분 불가).</div>
+</section>
+
+<!-- 3. 종합 처방 -->
+<section id="rx">
+  <p class="kicker">The Prescription</p>
+  <h2 class="sec">종합 처방 — 데이터 '운영 갭' × 농학</h2>
+  <p class="sec-sub">제어효과를 못 가리므로, 데이터로 확인한 <strong>실제 운영점 vs 농학 목표</strong>의 격차를 처방합니다. (예측이 아니라 진단.)</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>제어 항목</th><th>실제 운영 (데이터)</th><th>농학 목표</th><th>처방</th></tr></thead>
+      <tbody>
+        <tr><td class="term warncell">⚠️ 내부습도</td><td class="num">87%</td><td>≈75%</td><td>겨울 <b>과습 지속</b> → 곰팡이병(습도 94%↑ 4h) 위험. <b>최소난방으로 습도↓</b>(문 안 열고 상대습도↓).</td></tr>
+        <tr><td class="term warncell">⚠️ CO₂ 달성</td><td class="num">실측 449 / 설정 755</td><td>설정 근접(≤750 포화)</td><td>설정 대비 <b>~300ppm 미달</b> → 주간 광합성 손실. <b>공급·밀폐 타이밍 점검</b>(환기와 상호배제).</td></tr>
+        <tr><td class="term">· 주간 VPD</td><td class="num">0.62 kPa</td><td>0.8 부근</td><td>약간 과습쪽 → 증산·양분이동 여지. 습도 교정과 함께 자연히 개선.</td></tr>
+        <tr><td class="term">· 주야 DIF</td><td class="num">7.6℃</td><td>동화산물 기반 가변</td><td>고정값이 아니라 <b>그날 축적량 대응</b> — 맑고 축적 많은 날 야온↑로 소모 유도.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="plain">데이터가 짚어준 두 개의 명확한 갭 — <b>과습(87% vs 75%)</b>과 <b>CO₂ 미달(449 vs 설정 755)</b>. 이 둘은 상관분석이 아니라 <b>실측 운영점</b>이라 노이즈에 안 흔들리고, <a class="inl" href="../guide/심화_제어로직원리.html">농학 규칙</a>과도 정확히 일치합니다 → 가장 믿을 만한 처방.</div>
+</section>
+
+<!-- 4. 정리 -->
+<section id="wrap-up">
+  <p class="kicker">Synthesis</p>
+  <h2 class="sec">종합 — 두 트랙이 만나는 곳</h2>
+  <p>예측 트랙과 처방 트랙이 같은 결론을 서로 다른 각도에서 확인했습니다.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>트랙</th><th>질문</th><th>결과</th><th>함의</th></tr></thead>
+      <tbody>
+        <tr><td class="term">예측</td><td>환경→착과수?</td><td>실전 R² 0.76 ≈ 지속성</td><td>환경은 발달단계 위에 추가정보 거의 없음</td></tr>
+        <tr><td class="term">처방</td><td>제어→성과?</td><td>단계보정 후 신호 소멸</td><td>관측데이터로 제어 인과 불가 → <b>농학 갭으로 처방</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="margin-top:16px">결국 <strong>"AI 예측 + 농학 규칙 하이브리드"</strong>라는 프로젝트의 전략이 이 신규 데이터에서도 정답이었습니다. 데이터는 <strong>진단(어디가 목표에서 벗어났나)</strong>에 강하고, <strong>처방의 근거는 농학</strong>이 대며, <strong>인과 확정은 실증 A/B</strong>가 맡습니다.</p>
+
+  <div class="honest">n=27주·단일 구역·관측데이터입니다. 단계보정 상관은 표본이 작아 불확실하고, 운영 갭 처방도 <b>연관·진단 수준</b>입니다. "습도↓·CO₂ 달성이 실제로 착과를 늘리는가"는 <b>무작위 배정 A/B 실증</b>으로만 확정됩니다. 구역·연도가 늘면 단계보정 상관의 검정력도 올라갑니다.</div>
+</section>
+
+<footer>
+  베리디시전 · 제어 추천 처방 트랙(2022) &nbsp;·&nbsp; 재현: <code>python src/control_recommend_2022.py</code> · 추천표: <code>data/processed/control_recommendation_2022.csv</code><br>
+  방법: 발달단계(경과일 4차곡선) 잔차에 대한 Spearman 부분상관 + 성과 상·하위 대조. 관련: <a class="inl" href="착과수_최적환경_데이터_분석.html">예측 트랙</a> · <a class="inl" href="../guide/심화_제어로직원리.html">제어 로직 심화</a> · <a class="inl" href="../plan/실증실험_계획서.html">실증 A/B 계획</a>. 수치는 보유 표본 기준.
+</footer>
+
+</div>
+</body>
+</html>
