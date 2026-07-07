@@ -109,6 +109,7 @@
     <a href="#c12">⑫ v2 정확도 돌파</a>
     <a href="#c13">⑬ v2.1 분포 살리기·결과지</a>
     <a href="#c14">⑭ v3 개체 추적</a>
+    <a href="#c15">⑮ 신규 테스트 데이터</a>
     <a href="#result">결과 · 파일</a>
   </div>
 </header>
@@ -132,6 +133,7 @@
     <li><b>v2 정확도 돌파</b> — 예측 단위 '개체→온실-날짜 평균' + lag(전주 생육) + 튜닝 → 착과수 <b>R² 0.87</b>(80% 돌파).</li>
     <li><b>v2.1 "살리기" + 결과지</b> — 평균으로 뭉갤 때 잃은 <b>전주 개체 분포</b>만 되살려 <b>R² 0.89</b>. 행별 결과지로 <b>버킷 정확도 73%</b> 확인.</li>
     <li><b>v3 개체 추적(life2vec식)</b> — (온실+라인+표본)을 개체로 보고 그 <b>개체 자신의 과거</b>를 씀 → 개체 R² 0.64→<b>0.85</b>, 집계 <b>0.94</b>. 손실을 <b>huber</b>로 바꿔 MAE중앙 <b>0.73</b>.</li>
+    <li><b>신규 테스트 데이터 3트랙(2022)</b> — 예측(forward R² <b>0.76</b>≈지속성)·처방(단계보정 후 제어 신호 소멸)·결과지. '<b>발달단계 지배·제어는 상관≠인과</b>'가 다른 온실·시즌·스키마에서 <b>재현</b>.</li>
   </ol>
 </div>
 
@@ -158,6 +160,7 @@
         <tr><td class="term">⑫</td><td>모델</td><td>v2 — 온실-날짜 평균 + lag + 튜닝</td><td class="good">착과수 R² 0.87 (80%+)</td></tr>
         <tr><td class="term">⑬</td><td>모델</td><td>v2.1 — 전주 개체 분포 살리기 + 결과지</td><td class="good">R² 0.89 · 버킷 73%</td></tr>
         <tr><td class="term">⑭</td><td>모델</td><td>v3 — 개체 추적 + huber·MAE 튜닝</td><td class="good">개체 0.85·집계 0.94·MAE 0.73</td></tr>
+        <tr><td class="term">⑮</td><td>실험</td><td>신규 테스트 데이터 — 예측·처방·결과지(2022)</td><td class="good">발달단계 지배 재현 · forward 0.76</td></tr>
       </tbody>
     </table>
   </div>
@@ -384,6 +387,29 @@
   <div class="plain">life2vec처럼 <b>개체를 시퀀스로</b> 보고 그 개체의 과거를 쓰니, 앞선 실험에서 실패했던 '개체 학습'이 되살아났습니다(그땐 개체마다 입력이 같았던 게 원인). 결과지: <a href="../report/착과수_개체별_결과지.html">착과수 개체별 결과지</a>. 단 개체 40개·600행·온실 4개 LOGO라 데이터 확대 시 재확인 권장.</div>
 </section>
 
+<!-- ⑮ 신규 테스트 데이터 -->
+<section id="c15">
+  <div class="issue">
+    <div class="head"><span class="num">15</span><h3>신규 테스트 데이터 3트랙 — 예측·처방·결과지 (2022)</h3><span class="tag t-data">실험</span></div>
+    <div class="rows">
+      <div class="r cause"><div class="lbl">원인</div><div class="body"><b>신규 테스트 데이터</b>(<code class="inl">STRAWBERRY_FRUIT_SETTING_ENV_20221209.csv</code>, 103열)가 들어왔다. 기존 파이프라인(4온실·2024·주1회 생육)과 <b>스키마·시즌·단위가 다르고</b>, 착과수가 '주 조사값을 10분마다 반복'하는 <b>계단형</b>(단일 구역·27주). 억지로 merge하면 노이즈 → 별도 트랙이 필요.</div></div>
+      <div class="r change"><div class="lbl">변경</div><div class="body"><b>A. 예측 트랙</b>(<code class="inl">exp_fruit_setting_2022.py</code>) — 계단형 누수를 막는 <b>세그먼트 GroupKFold</b> + 실전형 <b>시간순 forward-chaining</b> 두 검증. <b>B. 처방 트랙</b>(<code class="inl">control_recommend_2022.py</code>) — 예측과 다른 모델: <b>발달단계(경과일 곡선) 잔차</b>에 대한 부분상관 + 성과 상·하위 대조. <b>C. 결과지</b>(<code class="inl">report_fruit_setting_2022.py</code>) — 27주 실제 vs forward 예측 궤적·오차·적중. 세 트랙 모두 다크 문서 + CSV 산출.</div></div>
+      <div class="r why"><div class="lbl">이유</div><div class="body">정직한 검증 결과 — <b>발달단계가 착과수의 88.5%</b>를 설명, forward 예측 R² <b>0.76 ≈ 지속성 0.76</b>(환경 추가정보 미미), 단계보정 후 <b>제어 신호 소멸</b>(상관≠인과 실증). 즉 기존 결론('착과수는 발달단계 지배·제어는 관측데이터로 인과 불가')이 <b>다른 온실·시즌·스키마에서 재현</b>. 처방은 데이터 '운영 갭'(과습 87%·CO₂ 미달) × 농학으로 대체.</div></div>
+    </div>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>트랙</th><th>방법 (예측과 다른 모델)</th><th>결과</th></tr></thead>
+      <tbody>
+        <tr><td class="term">예측</td><td>세그먼트 GroupKFold / forward-chaining</td><td class="good">0.82 / 0.76 (≈지속성)</td></tr>
+        <tr><td class="term">처방</td><td>단계보정 잔차 부분상관 + 상·하위 대조</td><td class="bad">단계보정 |r|&lt;0.30 (신호 소멸)</td></tr>
+        <tr><td class="term">결과지</td><td>27주 실제 vs forward 예측</td><td class="good">±1.0 적중 68%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="plain">데이터가 제어→착과 인과를 못 가리므로, 처방은 <b>실측 운영점 vs 농학 목표</b>의 갭으로 갈음(과습·CO₂ 미달). 문서: <a href="../experiments/착과수_최적환경_데이터_분석.html">예측 트랙</a> · <a href="../experiments/제어추천_처방트랙_2022.html">처방 트랙</a> · <a href="../report/착과수_결과지_신규2022.html">결과지</a>. n=27주·단일 구역이라 구역·연도 확대 시 재확인.</div>
+</section>
+
 <!-- 결과 -->
 <section id="result">
   <p class="kicker">Result</p>
@@ -412,14 +438,17 @@
     <div class="file"><div class="fn">src/compare_experiments.py</div><div class="fd">7개 지표 × 검증방식 × 집계 창 전수 실험.</div></div>
     <div class="file"><div class="fn">src/forecast_env.py</div><div class="fd">환경 예보 — h시간 뒤 내부온도·CO₂ (부스팅 + 시차 feature).</div></div>
     <div class="file"><div class="fn">src/train_agg.py</div><div class="fd">v2 — 온실-날짜 평균 + lag + Optuna. 착과수 R² 0.87.</div></div>
+    <div class="file"><div class="fn">src/exp_fruit_setting_2022.py</div><div class="fd">신규 데이터 예측 트랙 — 세그먼트 GroupKFold + forward-chaining.</div></div>
+    <div class="file"><div class="fn">src/control_recommend_2022.py</div><div class="fd">신규 데이터 처방 트랙 — 단계보정 잔차 부분상관 + 성과 대조 + 농학 갭.</div></div>
+    <div class="file"><div class="fn">src/report_fruit_setting_2022.py</div><div class="fd">신규 데이터 결과지 — 27주 실제 vs forward 예측(HTML+CSV 생성).</div></div>
   </div>
 
-  <div class="plain" style="margin-top:20px"><b>다음에 이어갈 것</b> — 룰의 인과를 <b>A/B 제어 실험</b>(CO₂ 시비 vs 대조)으로 실증, 착과수 집계 창 14일 반영, 환경 예보(제어용) 트랙, TabPFN 등 추가 모델 비교. 시퀀스(LSTM)는 데이터가 적어 현재는 보류.</div>
+  <div class="plain" style="margin-top:20px"><b>다음에 이어갈 것</b> — 룰의 인과를 <b>A/B 제어 실험</b>(CO₂ 시비 vs 대조)으로 실증, 착과수 집계 창 14일 반영, 환경 예보(제어용) 트랙, TabPFN 등 추가 모델 비교. 신규 테스트 데이터는 <b>개화수(BLMNG_CNT) merge</b>로 개화→착과 선행 분석·발달단계 feature 강화·제어/에너지 트랙으로 확장. 시퀀스(LSTM)는 데이터가 적어 현재는 보류.</div>
 </section>
 
 <footer>
   베리디시전 · 모델링 작업 이력(원인·변경·이유) &nbsp;·&nbsp; 검증 · 앙상블 · 불확실성 · 튜닝 · 실험 &nbsp;·&nbsp; 환경 셋팅·전처리 단계는 제외<br>
-  성능 수치는 보유 데이터(온실1~4, 2024-11~2025-02) 기준이며, 데이터가 늘거나 검증 설정이 바뀌면 달라질 수 있습니다.
+  성능 수치는 보유 데이터(온실1~4, 2024-11~2025-02 · 신규 테스트 2022 단일구역) 기준이며, 데이터가 늘거나 검증 설정이 바뀌면 달라질 수 있습니다.
 </footer>
 
 </div>

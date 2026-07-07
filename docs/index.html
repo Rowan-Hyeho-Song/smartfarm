@@ -127,8 +127,11 @@
       <div class="jstep win"><div class="jn">★</div><div class="jt">v2.1 돌파</div><div class="jd">R² 0.89</div></div>
       <div class="jarrow">→</div>
       <div class="jstep win"><div class="jn">★</div><div class="jt">v3 개체추적</div><div class="jd">MAE 0.73·개체 0.85</div></div>
+      <div class="jarrow">→</div>
+      <div class="jstep win"><div class="jn">★</div><div class="jt">신규 테스트 데이터</div><div class="jd">예측·처방·결과지(2022)</div></div>
     </div>
   </div>
+  <p class="sec-sub" style="margin-top:14px">신규 테스트 데이터(2022, 103열)로 <b style="color:var(--text)">예측·처방·결과지</b> 3트랙을 검증 — '착과수는 발달단계 지배·제어는 상관≠인과'라는 결론이 다른 온실·시즌에서 재현됐습니다.</p>
 </section>
 
 <!-- 문서 갤러리 -->
@@ -149,12 +152,21 @@
       <a class="doc" href="journal/작업이력_원인과변경.html">
         <div class="ic">📜</div><div class="dt">작업 이력 (원인·변경·이유)</div>
         <div class="dd">모델링 결정을 원인→변경→이유로 기록.</div><span class="badge">작업이력</span></a>
+    </div>
+  </div>
+
+  <div class="group">
+    <h3><span class="dot" style="background:var(--gold)"></span>결과지 (Result Sheets)</h3>
+    <div class="grid">
       <a class="doc" href="report/착과수_예측_결과지.html">
         <div class="ic">📄</div><div class="dt">착과수 예측 결과지 (v2.1)</div>
         <div class="dd">온실-날짜 60건 행별 실제·예측·버킷일치·신뢰도. 버킷 정확도 73%.</div><span class="badge">결과지</span></a>
       <a class="doc" href="report/착과수_개체별_결과지.html">
         <div class="ic">🔬</div><div class="dt">착과수 개체별 결과지 (v3)</div>
         <div class="dd">개체 40개 × 15주 궤적(실제 vs 예측). huber·MAE 튜닝으로 MAE중앙 0.73·개체 R² 0.85.</div><span class="badge">결과지</span></a>
+      <a class="doc" href="report/착과수_결과지_신규2022.html">
+        <div class="ic">📄</div><div class="dt">착과수 결과지 — 신규 데이터(2022)</div>
+        <div class="dd">27주 실제 vs forward 예측 궤적·오차·적중. forward R² 0.76 · MAE 0.96 · ±1.0 적중 68%.</div><span class="badge">결과지 · 신규</span></a>
     </div>
   </div>
 
@@ -172,13 +184,10 @@
         <div class="dd">h시간 뒤 내부 온도·CO₂ 예보 (선제 제어의 눈).</div><span class="badge">실험</span></a>
       <a class="doc" href="experiments/착과수_최적환경_데이터_분석.html">
         <div class="ic">🆕</div><div class="dt">신규 데이터 — 착과수 최적환경(2022) 첫 분석</div>
-        <div class="dd">본선형 103열 데이터. 세그먼트 GroupKFold 0.82 vs 실전 forward-chaining 0.76 ≈ 지속성 — '발달단계 지배' 재현.</div><span class="badge">실험 · 신규</span></a>
+        <div class="dd">신규 테스트 데이터(103열). 세그먼트 GroupKFold 0.82 vs 실전 forward-chaining 0.76 ≈ 지속성 — '발달단계 지배' 재현.</div><span class="badge">실험 · 신규</span></a>
       <a class="doc" href="experiments/제어추천_처방트랙_2022.html">
         <div class="ic">🎛️</div><div class="dt">제어활동 추천 — 처방 트랙 (2022)</div>
         <div class="dd">단계보정 잔차로 상관≠인과 함정 통과. 발달단계 걷어내면 제어 신호 소멸 → 농학 '운영 갭'(과습·CO₂미달)으로 처방.</div><span class="badge">실험 · 신규</span></a>
-      <a class="doc" href="report/착과수_결과지_신규2022.html">
-        <div class="ic">📄</div><div class="dt">착과수 결과지 — 신규 데이터(2022)</div>
-        <div class="dd">27주 실제 vs forward 예측 궤적·오차·적중. forward R² 0.76 · MAE 0.96 · ±1.0 적중 68%.</div><span class="badge">결과지 · 신규</span></a>
     </div>
   </div>
 
