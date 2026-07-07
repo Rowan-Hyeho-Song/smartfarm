@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>신규 데이터 — 착과수 최적환경(2022) 첫 분석</title>
+<style>
+  :root{
+    --bg:#0e1014; --bg-soft:#161922; --card:#1b1f2a; --card-2:#222736; --line:#2c3242;
+    --text:#e7e9ee; --text-dim:#a4abba; --text-faint:#7b8294;
+    --berry:#ff5d73; --berry-soft:#ff8a9c; --leaf:#5fd39a; --gold:#ffc861;
+    --sky:#5cc8ff; --violet:#b69bff; --new:#37c8c3; --radius:16px; --maxw:960px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%, #1d2230 0%, var(--bg) 55%);
+    color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px 110px;}
+  header.hero{max-width:var(--maxw);margin:0 auto;padding:56px 22px 20px;}
+  a.back{font-size:13.5px;color:var(--sky);text-decoration:none;}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.14em;font-weight:700;color:var(--berry-soft);
+    text-transform:uppercase;border:1px solid rgba(255,93,115,.35);border-radius:999px;padding:6px 14px;margin:16px 0 20px;background:rgba(255,93,115,.07);}
+  h1.title{font-size:clamp(27px,5vw,42px);line-height:1.16;margin:0 0 16px;font-weight:800;letter-spacing:-.01em;}
+  h1.title .accent{color:var(--berry);}
+  .lede{font-size:clamp(15.5px,2.3vw,18px);color:var(--text-dim);max-width:730px;margin:0;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;}
+  .chip{font-size:12.5px;color:var(--text-dim);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 13px;}
+  .chip b{color:var(--text);}
+
+  section{margin-top:52px;}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--berry);text-transform:uppercase;margin:0 0 8px;}
+  h2.sec{font-size:clamp(21px,3.4vw,27px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;}
+  .sec-sub{color:var(--text-dim);margin:0 0 20px;font-size:15px;}
+  p{margin:0 0 14px;} .dim{color:var(--text-dim);} strong{color:var(--text);}
+  code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.86em;background:var(--card-2);padding:1.5px 6px;border-radius:5px;color:var(--text);}
+
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;margin:6px 0 0;}
+  table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px;}
+  thead th{background:#23283a;color:var(--berry-soft);text-align:left;font-weight:700;padding:11px 15px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  tbody td{padding:11px 15px;border-bottom:1px solid var(--line);color:var(--text-dim);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:rgba(255,255,255,.018);}
+  tbody td b{color:var(--text);} td.term{color:#fff;font-weight:700;white-space:nowrap;}
+  td.num{font-variant-numeric:tabular-nums;white-space:nowrap;} .u{color:var(--leaf);font-weight:700;}
+
+  .fig{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 12px;margin-top:8px;}
+  .fig svg{display:block;width:100%;height:auto;}
+  .cap{font-size:12.5px;color:var(--text-faint);text-align:center;margin:10px 4px 0;}
+  .grid-line{stroke:#242a38;stroke-width:1;} .axis-t{fill:var(--text-faint);font-size:11px;}
+  .bar-lab{fill:var(--text);font-size:13px;font-weight:750;} .cat-lab{fill:var(--text-dim);font-size:12px;}
+
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:6px 0 0;}
+  @media(max-width:640px){.cards{grid-template-columns:repeat(2,1fr);}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 14px;text-align:center;}
+  .stat .n{font-size:25px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;}
+  .stat.s1 .n{color:var(--leaf);} .stat.s2 .n{color:var(--sky);} .stat.s3 .n{color:var(--violet);} .stat.s4 .n{color:var(--gold);}
+  .stat .l{font-size:12px;color:var(--text-faint);margin-top:7px;line-height:1.4;}
+
+  .plain{border-left:3px solid var(--leaf);background:rgba(95,211,154,.07);border-radius:10px;padding:14px 17px;margin:18px 0 0;color:var(--text);font-size:15px;}
+  .plain b{color:var(--leaf);}
+  .plain::before{content:"🍓 한마디로";display:block;font-size:12.5px;font-weight:700;color:var(--leaf);margin-bottom:5px;}
+  .honest{border-left:3px solid var(--gold);background:rgba(255,200,97,.08);border-radius:10px;padding:14px 17px;margin:16px 0 0;color:var(--text);font-size:15px;}
+  .honest::before{content:"⚖️ 정직하게 밝히는 한계";display:block;font-size:12.5px;font-weight:700;color:var(--gold);margin-bottom:5px;}
+  .warn{border-left:3px solid var(--berry);background:rgba(255,93,115,.07);border-radius:10px;padding:14px 17px;margin:16px 0 0;color:var(--text);font-size:15px;}
+  .warn b{color:var(--berry-soft);}
+  .warn::before{content:"⚠️ 함정";display:block;font-size:12.5px;font-weight:700;color:var(--berry-soft);margin-bottom:5px;}
+
+  ul.clean{list-style:none;padding:0;margin:14px 0 0;}
+  ul.clean>li{position:relative;padding-left:20px;margin:9px 0;font-size:15px;color:var(--text-dim);}
+  ul.clean>li::before{content:"";position:absolute;left:3px;top:.7em;width:6px;height:6px;background:var(--berry-soft);border-radius:50%;}
+  ul.clean>li b{color:var(--text);}
+  footer{max-width:var(--maxw);margin:56px auto 0;padding:22px 22px 0;border-top:1px solid var(--line);color:var(--text-faint);font-size:13.5px;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <a class="back" href="../index.html">← 문서 인덱스</a>
+  <div><span class="eyebrow">신규 데이터 · 첫 분석</span></div>
+  <h1 class="title">본선형 <span class="accent">착과수 최적환경</span> 데이터 —<br>무엇이고, 첫 모델은 무엇을 말하나</h1>
+  <p class="lede">경진대회 본선격의 <code>STRAWBERRY_FRUIT_SETTING_ENV_20221209.csv</code>(103열)를 처음 열어, 착과수(<code>FRST_TREE_CNT</code>)를 <strong>정직한 두 가지 검증</strong>으로 예측해 봤습니다. 결론부터 — <strong>기존 프로젝트의 핵심 발견이 이 데이터에서도 그대로 재현</strong>됩니다.</p>
+  <div class="chips">
+    <span class="chip"><b>데이터</b> 26,063행 × 103열</span>
+    <span class="chip"><b>기간</b> 2022-01~06 · 10분 간격</span>
+    <span class="chip"><b>구역</b> 단일(ZONE 66)</span>
+    <span class="chip"><b>타깃</b> FRST_TREE_CNT(착과수)</span>
+    <span class="chip"><b>재현</b> src/exp_fruit_setting_2022.py</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- 1. 데이터 정체 -->
+<section id="what">
+  <p class="kicker">The Data</p>
+  <h2 class="sec">이 데이터는 무엇인가</h2>
+  <p class="sec-sub">기존 학습표(4온실·2024·주1회 생육)와는 완전히 다른, 실제 온실 제어 시스템 로그.</p>
+
+  <div class="cards">
+    <div class="stat s1"><div class="n">26,063</div><div class="l">행<br>(10분 간격 로깅)</div></div>
+    <div class="stat s2"><div class="n">103</div><div class="l">열<br>환경 + 제어장비</div></div>
+    <div class="stat s3"><div class="n">27</div><div class="l">조사기간(세그먼트)<br>≈ 주간 착과수</div></div>
+    <div class="stat s4"><div class="n">1</div><div class="l">구역(ZONE 66)<br>단일 온실</div></div>
+  </div>
+
+  <p style="margin-top:22px">환경·제어는 <strong>10분 간격으로 촘촘</strong>하지만, 착과수는 <strong>주 1회 조사값이 그 주 내내 상수로 반복</strong>되는 계단형입니다(고유값 22개, 값 유지 구간 27개). 값이 <code>4.875</code>처럼 소수인 것은 여러 표본의 평균이기 때문입니다. 착과수 범위는 <strong>0.125 ~ 8.75</strong>(평균 4.28)로, 겨울 정점(2월 8.75) 후 봄~초여름에 감소하는 재배 주기를 그립니다.</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>구성</th><th>내용</th></tr></thead>
+      <tbody>
+        <tr><td class="term">식별 · 시간</td><td><code>ZONE_NM</code>(구역, 단일) · <code>STRG_DT</code>(10분 타임스탬프)</td></tr>
+        <tr><td class="term">타깃 ⭐</td><td><code>FRST_TREE_CNT</code> = <b>착과수</b> — 대회 타깃 그 자체. 결측 0.</td></tr>
+        <tr><td class="term">외부 환경 (8)</td><td>외부기온·일사·누적광량·이슬점·풍향/풍속·절대습도·포화수분/수분부족·강수</td></tr>
+        <tr><td class="term">내부 환경</td><td>내부온도 1~9·습도 1~9(+평균)·내부일사/누적광량·<b>실내CO₂</b>·주야코드</td></tr>
+        <tr><td class="term">관수·양액 (10)</td><td>토양온·습도·공급온도 1~4·회수온도 1~4</td></tr>
+        <tr><td class="term">제어장비 (본선 핵심)</td><td>냉방·난방·환기·순환펌프·유동팬·<b>천창·수평스크린·3방밸브·CO₂발생기</b>·훈증기·보일러·분무 — 작동여부/모드/개도율</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 2. 왜 기존 파이프라인에 바로 못 붙이나 -->
+<section id="mismatch">
+  <p class="kicker">Why a New Track</p>
+  <h2 class="sec">왜 기존 v1~v3에 바로 못 붙이나</h2>
+  <p class="sec-sub">같은 '착과수'를 다루지만, 데이터의 뼈대가 다릅니다.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>축</th><th>기존 파이프라인 (v1~v3)</th><th>이 신규 데이터</th></tr></thead>
+      <tbody>
+        <tr><td class="term">구역</td><td>온실 4개 → <b>온실별 LOGO 검증 가능</b></td><td>단일 구역 1개 → LOGO 불가, <b>시간 검증만</b></td></tr>
+        <tr><td class="term">시즌</td><td>2024-11 ~ 2025-02 (겨울작)</td><td>2022-01 ~ 06 (겨울→초여름)</td></tr>
+        <tr><td class="term">해상도</td><td>환경 시간별 + 생육 주1회(개체 40)</td><td>환경·제어 <b>10분</b> + 착과수 주1회(구역 평균)</td></tr>
+        <tr><td class="term">컬럼</td><td>한글 생육/환경 요약 피처</td><td>영문 103열(제어장비 대량)</td></tr>
+        <tr><td class="term">타깃 형태</td><td>조사일 행마다 실측</td><td><b>계단형</b>(주값을 10분마다 반복)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="warn">스키마·단위·시즌이 달라 <b>바로 merge하면 오히려 노이즈</b>입니다. 그래서 억지로 합치지 않고, 이 데이터 구조에 맞춘 <b>독립 트랙</b>으로 먼저 검증했습니다. (기존 문서의 '검증방식을 타깃 성격에 맞춘다' 원칙을 그대로 적용.)</div>
+</section>
+
+<!-- 3. 첫 모델 결과 -->
+<section id="model">
+  <p class="kicker">First Model</p>
+  <h2 class="sec">첫 모델 — 정직한 두 가지 검증</h2>
+  <p class="sec-sub">LightGBM 회귀. 같은 조사기간 행이 학습/검증에 쪼개지지 않게 <strong>세그먼트 단위</strong>로 나눕니다(누수 차단).</p>
+
+  <div class="warn"><b>계단형 타깃의 함정</b> — 행 단위 랜덤 분할로 돌리면 '시간블록 암기'만으로 R²가 가짜로 치솟습니다. 반드시 조사기간(세그먼트) 단위로 나눠야 정직합니다.</div>
+
+  <div class="tbl-wrap" style="margin-top:18px">
+    <table>
+      <thead><tr><th>검증 방식</th><th class="num">R²</th><th class="num">MAE</th><th>의미</th></tr></thead>
+      <tbody>
+        <tr><td class="term">naive (평균 찍기)</td><td class="num">0.00</td><td class="num">—</td><td>기준선. 아무 정보 없음.</td></tr>
+        <tr><td class="term">세그먼트 GroupKFold</td><td class="num u">0.82</td><td class="num">0.87</td><td>세그먼트 랜덤 배정 → 과거↔미래 <b>보간</b>(낙관적)</td></tr>
+        <tr><td class="term">forward-chaining (모델)</td><td class="num">0.76</td><td class="num">0.96</td><td>과거로 <b>미래 1주 예측</b>(실전에 가까움, 19주 평가)</td></tr>
+        <tr><td class="term">forward-chaining (지속성)</td><td class="num">0.76</td><td class="num">1.01</td><td>'<b>직전 주값 그대로</b>' 쓰는 순진한 기준선</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="dim" style="margin-top:10px;font-size:13.5px">행 단위 GroupKFold R²는 0.75(MAE 1.03) — 위 표의 세그먼트평균 지표가 조사기간 단위 실질 성능입니다.</p>
+
+  <div class="fig">
+    <svg viewBox="0 0 620 300" role="img" aria-label="검증 방식별 R2 비교">
+      <line class="grid-line" x1="70" y1="30"  x2="600" y2="30"/>
+      <line class="grid-line" x1="70" y1="66"  x2="600" y2="66"/>
+      <line class="grid-line" x1="70" y1="102" x2="600" y2="102"/>
+      <line class="grid-line" x1="70" y1="138" x2="600" y2="138"/>
+      <line class="grid-line" x1="70" y1="174" x2="600" y2="174"/>
+      <line class="grid-line" x1="70" y1="210" x2="600" y2="210"/>
+      <text class="axis-t" x="60" y="34"  text-anchor="end">1.0</text>
+      <text class="axis-t" x="60" y="70"  text-anchor="end">0.8</text>
+      <text class="axis-t" x="60" y="106" text-anchor="end">0.6</text>
+      <text class="axis-t" x="60" y="142" text-anchor="end">0.4</text>
+      <text class="axis-t" x="60" y="178" text-anchor="end">0.2</text>
+      <text class="axis-t" x="60" y="214" text-anchor="end">0</text>
+      <!-- naive .00, groupkfold .82, forward-model .76, persistence .76 ; h=v*180, y=210-h -->
+      <rect x="95"  y="210"   width="80" height="0.5" rx="4" fill="#5c6478"/>
+      <rect x="225" y="62.6"  width="80" height="147.4" rx="5" fill="#ffc861"/>
+      <rect x="355" y="72.7"  width="80" height="137.3" rx="5" fill="#5fd39a"/>
+      <rect x="485" y="73.6"  width="80" height="136.4" rx="5" fill="#5c6478"/>
+      <text class="bar-lab" x="135" y="203" text-anchor="middle">0.00</text>
+      <text class="bar-lab" x="265" y="55"  text-anchor="middle" fill="#ffc861">0.82</text>
+      <text class="bar-lab" x="395" y="65"  text-anchor="middle" fill="#5fd39a">0.76</text>
+      <text class="bar-lab" x="525" y="66"  text-anchor="middle">0.76</text>
+      <text class="cat-lab" x="135" y="230" text-anchor="middle">naive</text>
+      <text class="cat-lab" x="265" y="230" text-anchor="middle" fill="#ffc861">GroupKFold</text>
+      <text class="cat-lab" x="395" y="230" text-anchor="middle" fill="#5fd39a">forward 모델</text>
+      <text class="cat-lab" x="525" y="230" text-anchor="middle">지속성</text>
+      <text class="cat-lab" x="135" y="246" text-anchor="middle" fill="#7b8294">기준선</text>
+      <text class="cat-lab" x="265" y="246" text-anchor="middle" fill="#7b8294">낙관(보간)</text>
+      <text class="cat-lab" x="395" y="246" text-anchor="middle" fill="#7b8294">실전 예측</text>
+      <text class="cat-lab" x="525" y="246" text-anchor="middle" fill="#7b8294">직전주값</text>
+    </svg>
+  </div>
+  <p class="cap">착과수 예측 R² — 실전형 forward-chaining(초록)에서 모델(0.76)이 '직전 주값 그대로'(0.76)를 사실상 못 이긴다.</p>
+
+  <div class="honest">forward-chaining에서 <b>모델(0.763) ≈ 지속성(0.758)</b>. 즉 진짜 미래 예측에선 환경·제어 100개 피처가 '지난주 값'이 이미 주는 정보 위에 <b>거의 아무것도 못 보탰습니다</b>. GroupKFold 0.82는 계절 위치를 보간해 얻은 낙관치입니다.</div>
+</section>
+
+<!-- 4. 무엇을 배웠나 -->
+<section id="learn">
+  <p class="kicker">Interpretation</p>
+  <h2 class="sec">무엇을 말하나 — 기존 결론의 재현</h2>
+  <p class="sec-sub">피처 중요도와 성능 격차가 같은 곳을 가리킵니다.</p>
+
+  <p>전체 학습 피처 중요도 1등은 <strong>외부누적광량(EXTN_ACCMLT_QOFLG)</strong> — 계절이 지날수록 쌓이는 값이라 사실상 <strong>생육단계(발달) 프록시</strong>입니다. 그 뒤로 외부기온·실내CO₂·공급온도·CO₂설정값이 따릅니다. 조절 가능한 제어보다 <strong>'지금이 시즌의 어디쯤인가'</strong>가 착과수를 설명한다는 뜻입니다.</p>
+
+  <div class="plain">기존 프로젝트가 밝힌 <b>"착과수는 환경보다 발달단계·자기상관이 지배"</b>가 이 신규 데이터(단일 구역·2022)에서도 <b>독립적으로 재현</b>됐습니다. 서로 다른 온실·시즌·스키마에서 같은 결론 → 그만큼 견고한 신호입니다.</p>
+
+  <h2 class="sec" style="margin-top:34px;font-size:19px">그래서 이 데이터로 할 일</h2>
+  <ul class="clean">
+    <li><b>개화수 데이터와 merge</b> — 짝 데이터 <code>BLMNG_CNT</code>(개화수)와 포맷이 동일. <code>STRG_DT</code>·<code>ZONE_NM</code>으로 붙이면 <b>개화(t) → 착과(t+k) 선행 분석</b>이 드디어 가능(발달단계 신호를 직접 만드는 길).</li>
+    <li><b>발달단계 feature 추가</b> — 정식 후 경과주·적산광량·화방 주기를 명시 피처로. 기존 v3가 개체 lag로 얻은 이득을, 여기선 이 신호로 재현.</li>
+    <li><b>제어 · 에너지 트랙</b> — 제어장비 대량(천창·스크린·CO₂·난방 개도율)은 예측이 아니라 <b>본선 '제어 + 에너지 효율'</b>의 근거. 예측 R²보다 이쪽이 이 데이터의 진짜 가치.</li>
+    <li><b>단일 구역 한계 인지</b> — 구역이 1개라 일반화 검증은 시간분할뿐. 다른 구역·연도 데이터가 붙어야 LOGO급 정직성이 확보됨.</li>
+  </ul>
+
+  <div class="honest">단일 구역 · 27개 조사기간 · 계단형 타깃이라 수치는 표본이 작습니다. forward-chaining 19주 평가도 한 온실의 한 시즌일 뿐 — 결론(발달단계 지배)은 방향으로 받아들이고, 구역·연도가 늘면 재확인해야 합니다.</div>
+</section>
+
+<footer>
+  베리디시전 · 신규 데이터(착과수 최적환경 2022) 첫 분석 &nbsp;·&nbsp; 재현: <code>python src/exp_fruit_setting_2022.py</code><br>
+  원본: STRAWBERRY_FRUIT_SETTING_ENV_20221209.csv (103열) · 짝 데이터: 개화수(BLMNG_CNT) merge 대상. 수치는 보유 표본 기준이며 구역·연도 확대 시 달라질 수 있습니다.
+</footer>
+
+</div>
+</body>
+</html>
