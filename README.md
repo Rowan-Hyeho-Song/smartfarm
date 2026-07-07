@@ -4,6 +4,11 @@
 
 > 데이터: 온실 1~4 · 2024-11 ~ 2025-02 (겨울작) · 생육 주 1회 조사 + 환경 시간별 로깅
 
+## 📑 [문서 인덱스 바로가기 → `docs/index.html`](docs/index.html)
+
+모든 결과지·실험·가이드·회의 문서를 한 페이지에서 볼 수 있는 대시보드입니다. HTML이라 **브라우저로 열면** 도표·차트가 그대로 보입니다.
+(GitHub Pages 배포 시 렌더링 주소: <https://rowan-hyeho-song.github.io/smartfarm/>)
+
 ---
 
 ## 📊 핵심 결과
@@ -75,6 +80,8 @@ python src/forecast_env.py      # (선택) 환경 예보 성능
 ---
 
 ## 📚 문서 (docs/)
+
+👉 먼저 **[문서 인덱스(docs/index.html)](docs/index.html)** 를 열면 아래 문서 전체를 카드로 한눈에 볼 수 있습니다.
 
 HTML 문서라 **브라우저로 열면** 도표·차트가 보입니다. (GitHub에서는 raw로 보이므로 로컬에서 열람 권장)
 
