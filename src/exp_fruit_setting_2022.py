@@ -3,7 +3,7 @@
 exp_fruit_setting_2022.py  (신규 데이터 · 착과수 최적환경 2022 첫 분석)
 =====================================================================
 [이 파일이 하는 일 — 한 문장]
-본선형 신규 데이터(STRAWBERRY_FRUIT_SETTING_ENV_20221209.csv)로 착과수(FRST_TREE_CNT)를
+신규 테스트 데이터(STRAWBERRY_FRUIT_SETTING_ENV_20221209.csv)로 착과수(FRST_TREE_CNT)를
 예측하되, '조사기간(세그먼트) 단위 GroupKFold'와 '시간순 forward-chaining' 두 가지로
 정직하게 평가하고, 순진한 기준선(평균찍기·지속성)과 비교한다.
 

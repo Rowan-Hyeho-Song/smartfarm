@@ -78,8 +78,8 @@
 <header class="hero">
   <a class="back" href="../index.html">← 문서 인덱스</a>
   <div><span class="eyebrow">신규 데이터 · 첫 분석</span></div>
-  <h1 class="title">본선형 <span class="accent">착과수 최적환경</span> 데이터 —<br>무엇이고, 첫 모델은 무엇을 말하나</h1>
-  <p class="lede">경진대회 본선격의 <code>STRAWBERRY_FRUIT_SETTING_ENV_20221209.csv</code>(103열)를 처음 열어, 착과수(<code>FRST_TREE_CNT</code>)를 <strong>정직한 두 가지 검증</strong>으로 예측해 봤습니다. 결론부터 — <strong>기존 프로젝트의 핵심 발견이 이 데이터에서도 그대로 재현</strong>됩니다.</p>
+  <h1 class="title"><span class="accent">착과수 최적환경</span> 테스트 데이터 —<br>무엇이고, 첫 모델은 무엇을 말하나</h1>
+  <p class="lede">신규 <strong>테스트 데이터</strong> <code>STRAWBERRY_FRUIT_SETTING_ENV_20221209.csv</code>(103열)를 처음 열어, 착과수(<code>FRST_TREE_CNT</code>)를 <strong>정직한 두 가지 검증</strong>으로 예측해 봤습니다. 결론부터 — <strong>기존 프로젝트의 핵심 발견이 이 데이터에서도 그대로 재현</strong>됩니다.</p>
   <div class="chips">
     <span class="chip"><b>데이터</b> 26,063행 × 103열</span>
     <span class="chip"><b>기간</b> 2022-01~06 · 10분 간격</span>
@@ -115,7 +115,7 @@
         <tr><td class="term">외부 환경 (8)</td><td>외부기온·일사·누적광량·이슬점·풍향/풍속·절대습도·포화수분/수분부족·강수</td></tr>
         <tr><td class="term">내부 환경</td><td>내부온도 1~9·습도 1~9(+평균)·내부일사/누적광량·<b>실내CO₂</b>·주야코드</td></tr>
         <tr><td class="term">관수·양액 (10)</td><td>토양온·습도·공급온도 1~4·회수온도 1~4</td></tr>
-        <tr><td class="term">제어장비 (본선 핵심)</td><td>냉방·난방·환기·순환펌프·유동팬·<b>천창·수평스크린·3방밸브·CO₂발생기</b>·훈증기·보일러·분무 — 작동여부/모드/개도율</td></tr>
+        <tr><td class="term">제어장비 (제어 트랙)</td><td>냉방·난방·환기·순환펌프·유동팬·<b>천창·수평스크린·3방밸브·CO₂발생기</b>·훈증기·보일러·분무 — 작동여부/모드/개도율</td></tr>
       </tbody>
     </table>
   </div>
@@ -214,7 +214,7 @@
   <ul class="clean">
     <li><b>개화수 데이터와 merge</b> — 짝 데이터 <code>BLMNG_CNT</code>(개화수)와 포맷이 동일. <code>STRG_DT</code>·<code>ZONE_NM</code>으로 붙이면 <b>개화(t) → 착과(t+k) 선행 분석</b>이 드디어 가능(발달단계 신호를 직접 만드는 길).</li>
     <li><b>발달단계 feature 추가</b> — 정식 후 경과주·적산광량·화방 주기를 명시 피처로. 기존 v3가 개체 lag로 얻은 이득을, 여기선 이 신호로 재현.</li>
-    <li><b>제어 · 에너지 트랙</b> — 제어장비 대량(천창·스크린·CO₂·난방 개도율)은 예측이 아니라 <b>본선 '제어 + 에너지 효율'</b>의 근거. 예측 R²보다 이쪽이 이 데이터의 진짜 가치.</li>
+    <li><b>제어 · 에너지 트랙</b> — 제어장비 대량(천창·스크린·CO₂·난방 개도율)은 예측이 아니라 <b>'제어 + 에너지 효율'</b> 분석의 소재. 예측 R²보다 이쪽이 이 데이터의 진짜 가치.</li>
     <li><b>단일 구역 한계 인지</b> — 구역이 1개라 일반화 검증은 시간분할뿐. 다른 구역·연도 데이터가 붙어야 LOGO급 정직성이 확보됨.</li>
   </ul>
 
