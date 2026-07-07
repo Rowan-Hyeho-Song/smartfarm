@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>딸기 스마트팜 공부 노트 — 생육과 환경 제어 (회의 기반 학습자료)</title>
+<style>
+  :root {
+    --berry:#ff5d73; --berry-soft:#ff8a9c; --leaf:#5fd39a; --leaf-soft:rgba(95,211,154,.12);
+    --amber:#ffc861; --amber-soft:rgba(255,200,97,.12); --paper:#0e1014; --card:#1b1f2a;
+    --ink:#e7e9ee; --ink-soft:#a4abba; --line:#2c3242; --line-strong:#3a4152;
+    --berry-wash:rgba(255,93,115,.14); --code-bg:#222736;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    --maxw:1180px;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: radial-gradient(1200px 600px at 80% -10%, #1d2230 0%, var(--paper) 55%);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", "Segoe UI", "Noto Sans KR", Roboto, sans-serif;
+    line-height: 1.72;
+    font-size: 16.5px;
+    letter-spacing: -0.003em;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    border-bottom: 1px solid var(--line);
+    background:
+      radial-gradient(120% 80% at 88% -10%, var(--berry-wash) 0%, transparent 55%),
+      var(--paper);
+  }
+  .hero-inner { max-width: var(--maxw); margin: 0 auto; padding: 60px 24px 46px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-size: 12.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--berry);
+  }
+  .eyebrow::before { content: ""; width: 22px; height: 2px; background: var(--berry); border-radius: 2px; }
+  h1.title {
+    font-size: clamp(30px, 5vw, 46px);
+    line-height: 1.12; margin: 18px 0 14px; font-weight: 800;
+    letter-spacing: -0.02em; text-wrap: balance; max-width: 20ch;
+  }
+  h1.title em { font-style: normal; color: var(--berry); }
+  .lede { font-size: clamp(16px, 2vw, 18.5px); color: var(--ink-soft); max-width: 62ch; margin: 0; }
+  .hero-meta {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px;
+  }
+  .chip {
+    font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    background: var(--card); border: 1px solid var(--line-strong);
+    padding: 6px 13px; border-radius: 999px;
+  }
+  .chip b { color: var(--ink); }
+
+  /* ---------- LAYOUT ---------- */
+  .layout { display: grid; grid-template-columns: 240px 1fr; gap: 48px; align-items: start; padding: 44px 0 90px; }
+  nav.toc {
+    position: sticky; top: 20px;
+    font-size: 13.5px; line-height: 1.5;
+    border-left: 2px solid var(--line);
+    padding-left: 2px;
+  }
+  nav.toc .toc-head { font-size: 11.5px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--ink-soft); padding: 0 0 10px 16px; }
+  nav.toc a {
+    display: block; color: var(--ink-soft); text-decoration: none;
+    padding: 5px 0 5px 16px; margin-left: -2px; border-left: 2px solid transparent;
+    transition: color .15s, border-color .15s;
+  }
+  nav.toc a .n { color: var(--berry); font-weight: 700; font-variant-numeric: tabular-nums; margin-right: 8px; }
+  nav.toc a:hover { color: var(--ink); border-left-color: var(--berry-soft); }
+  nav.toc a:focus-visible { outline: 2px solid var(--berry); outline-offset: 2px; border-radius: 3px; }
+
+  main { min-width: 0; }
+
+  /* ---------- SECTIONS ---------- */
+  section { scroll-margin-top: 20px; margin-bottom: 20px; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; margin: 46px 0 4px; }
+  section:first-child .sec-head { margin-top: 0; }
+  .sec-num {
+    font-size: 13px; font-weight: 800; color: var(--berry);
+    font-variant-numeric: tabular-nums; letter-spacing: .05em;
+    border: 1.5px solid var(--berry); border-radius: 7px; padding: 2px 9px; flex: none;
+    line-height: 1.4;
+  }
+  h2 { font-size: clamp(21px, 3vw, 27px); font-weight: 800; letter-spacing: -0.015em; margin: 0; text-wrap: balance; }
+  .sec-sub { color: var(--ink-soft); font-size: 15px; margin: 8px 0 22px; }
+  h3 { font-size: 18.5px; font-weight: 750; margin: 30px 0 10px; letter-spacing: -0.01em; }
+  h3 .tag { font-size: 12px; font-weight: 700; color: var(--berry); background: var(--berry-wash); padding: 2px 8px; border-radius: 6px; margin-left: 8px; vertical-align: middle; letter-spacing: .02em; }
+  p { margin: 12px 0; }
+  strong { font-weight: 700; color: var(--ink); }
+  .hl { background: linear-gradient(transparent 62%, var(--berry-wash) 62%); padding: 0 1px; font-weight: 600; }
+
+  ul.clean { list-style: none; padding: 0; margin: 14px 0; }
+  ul.clean > li { position: relative; padding-left: 22px; margin: 9px 0; }
+  ul.clean > li::before { content: ""; position: absolute; left: 4px; top: .72em; width: 6px; height: 6px; background: var(--berry-soft); border-radius: 50%; }
+  ul.plain { padding-left: 20px; margin: 12px 0; }
+  ul.plain li { margin: 7px 0; }
+
+  code {
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    font-size: .87em; background: var(--code-bg); padding: 1.5px 6px; border-radius: 5px;
+    color: var(--ink); letter-spacing: 0;
+  }
+
+  /* ---------- CARDS / CALLOUTS ---------- */
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px; box-shadow: var(--shadow); margin: 18px 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 18px 0; }
+  .grid2 .card { margin: 0; }
+
+  .callout { border-radius: 12px; padding: 16px 18px 16px 20px; margin: 20px 0; border: 1px solid; position: relative; }
+  .callout .lab { font-size: 11.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; display: block; margin-bottom: 6px; }
+  .callout p { margin: 6px 0; }
+  .callout p:first-of-type { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout.key { background: var(--berry-wash); border-color: color-mix(in srgb, var(--berry) 30%, transparent); }
+  .callout.key .lab { color: var(--berry); }
+  .callout.warn { background: var(--amber-soft); border-color: color-mix(in srgb, var(--amber) 35%, transparent); }
+  .callout.warn .lab { color: var(--amber); }
+  .callout.tip { background: var(--leaf-soft); border-color: color-mix(in srgb, var(--leaf) 30%, transparent); }
+  .callout.tip .lab { color: var(--leaf); }
+
+  /* ---------- TABLES ---------- */
+  .tbl-scroll { overflow-x: auto; margin: 20px 0; border: 1px solid var(--line); border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 520px; }
+  th, td { text-align: left; padding: 11px 15px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--berry-wash); color: var(--ink); font-weight: 700; font-size: 13px; letter-spacing: .01em; white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num, th.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tbody tr:hover td { background: color-mix(in srgb, var(--berry-wash) 45%, transparent); }
+  .u { color: var(--berry); font-weight: 700; }
+
+  /* stage flow */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 18px 0 8px; }
+  .flow .step { background: var(--card); border: 1px solid var(--line-strong); border-radius: 9px; padding: 8px 13px; font-weight: 650; font-size: 14px; }
+  .flow .step small { display: block; color: var(--ink-soft); font-weight: 500; font-size: 11.5px; }
+  .flow .arw { color: var(--berry-soft); font-weight: 800; }
+
+  /* two-col compare */
+  .vs { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; margin: 18px 0; }
+  .vs > div { padding: 18px 20px; }
+  .vs > div:first-child { border-right: 1px solid var(--line); }
+  .vs h4 { margin: 0 0 10px; font-size: 15.5px; font-weight: 750; display: flex; align-items: center; gap: 8px; }
+  .vs .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .vs ul { margin: 0; padding-left: 18px; font-size: 14.5px; }
+  .vs li { margin: 6px 0; }
+  .veg .dot { background: var(--leaf); } .veg h4 { color: var(--leaf); }
+  .gen .dot { background: var(--berry); } .gen h4 { color: var(--berry); }
+
+  /* glossary */
+  dl.gloss { margin: 16px 0; }
+  dl.gloss > div { padding: 13px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 190px 1fr; gap: 20px; }
+  dl.gloss > div:last-child { border-bottom: none; }
+  dl.gloss dt { font-weight: 750; color: var(--ink); }
+  dl.gloss dt small { display: block; font-weight: 500; color: var(--ink-soft); font-size: 12.5px; margin-top: 2px; }
+  dl.gloss dd { margin: 0; color: var(--ink-soft); font-size: 14.5px; }
+  dl.gloss dd b { color: var(--ink); }
+
+  .footer { border-top: 1px solid var(--line); padding: 28px 0 60px; color: var(--ink-soft); font-size: 13.5px; }
+
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; gap: 0; }
+    nav.toc { display: none; }
+    .grid2, .vs { grid-template-columns: 1fr; }
+    .vs > div:first-child { border-right: none; border-bottom: 1px solid var(--line); }
+    dl.gloss > div { grid-template-columns: 1fr; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="eyebrow">스마트팜 딸기 해커톤 · 공부 노트</span>
+    <h1 class="title">딸기는 어떻게 자라고<br>환경은 어떻게 <em>제어</em>하는가</h1>
+    <p class="lede">회의에서 오간 내용을 개발자 관점에서 정리한 학습 자료입니다. 대회 최다 실패 원인이 바로 이 두 가지 — <strong>작물 생육 이해</strong>와 <strong>환경 제어 이해</strong>. 농업 전문가가 회의에서 풀어준 도메인 지식이 이 문서의 핵심입니다.</p>
+    <div class="hero-meta">
+      <span class="chip"><b>출처</b> 경진대회 회의록 1·2·3</span>
+      <span class="chip"><b>주제</b> 농작업 의사결정 AI</span>
+      <span class="chip"><b>심사 핵심</b> "열매를 잘 키워내는가"</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="layout">
+    <nav class="toc" aria-label="목차">
+      <div class="toc-head">목차</div>
+      <a href="#big"><span class="n">01</span>큰 그림 — 무슨 대회인가</a>
+      <a href="#stage"><span class="n">02</span>딸기 생육 단계</a>
+      <a href="#veggen"><span class="n">03</span>영양생장 vs 생식생장</a>
+      <a href="#diag"><span class="n">04</span>현재 상태 진단법</a>
+      <a href="#photo"><span class="n">05</span>동화산물과 순광합성</a>
+      <a href="#temp"><span class="n">06</span>온도 제어 (교과서는 틀렸다)</a>
+      <a href="#vpd"><span class="n">07</span>VPD·습도·증산</a>
+      <a href="#root"><span class="n">08</span>배액관리 EC·pH</a>
+      <a href="#control"><span class="n">09</span>환경제어 실무</a>
+      <a href="#risk"><span class="n">10</span>병해충·생리장애·위험</a>
+      <a href="#ai"><span class="n">11</span>AI 모델 구조 논의</a>
+      <a href="#gloss"><span class="n">12</span>용어집</a>
+    </nav>
+
+    <main>
+      <!-- 01 -->
+      <section id="big">
+        <div class="sec-head"><span class="sec-num">01</span><h2>큰 그림 — 무슨 대회인가</h2></div>
+        <p class="sec-sub">기술보다 먼저, 심사위원이 무엇을 보는지부터.</p>
+
+        <p>이번 해커톤 주제는 <span class="hl">스마트팜 딸기 재배의 "농작업 의사결정 AI"</span>를 만드는 것. 지금 상황을 보고 <strong>어떤 작업(온도 올려라/물 줘라/적엽해라 등)을 해야 할지 결정</strong>해주는 모델이 목표다.</p>
+
+        <div class="callout key">
+          <span class="lab">가장 중요한 한 문장</span>
+          <p>경험자들이 입을 모아 말한 최대 실패 원인 — <strong>"스마트팜에서 작물이 어떻게 자라는지, 환경을 어떻게 제어하는지 몰라서"</strong>. AI 개발 실력이 뛰어나도 <strong>작물을 못 키우면 탈락</strong>시킨다는 의도가 심사에 깔려 있다. 최종 결과물은 코드가 아니라 <strong>열매(품질·크기·수확량)</strong>로 증명해야 한다.</p>
+        </div>
+
+        <p>즉 이 문서에 정리된 <strong>농업 도메인 지식이 곧 경쟁력</strong>이다. 그리고 하나 더 — <strong>에너지·비용도 점수</strong>다. 성과만 좋게 하려고 난방·환기로 에너지를 펑펑 쓰면 감점. "생산량은 늘리되 비용은 줄이는" 최적화가 진짜 목표다.</p>
+      </section>
+
+      <!-- 02 -->
+      <section id="stage">
+        <div class="sec-head"><span class="sec-num">02</span><h2>딸기 생육 단계</h2></div>
+        <p class="sec-sub">파종부터 수확까지. 단계마다 관리 목표가 다르다.</p>
+
+        <div class="flow">
+          <span class="step">육묘기<small>모종 키우기</small></span><span class="arw">→</span>
+          <span class="step">정식기<small>본밭에 옮겨심기</small></span><span class="arw">→</span>
+          <span class="step">영양생장기<small>잎·줄기 성장</small></span><span class="arw">→</span>
+          <span class="step">출뢰기<small>첫 꽃대 등장</small></span><span class="arw">→</span>
+          <span class="step">개화·수정<small>벌이 수정</small></span><span class="arw">→</span>
+          <span class="step">비대기<small>열매 커짐</small></span><span class="arw">→</span>
+          <span class="step">수확기</span>
+        </div>
+
+        <p><strong>육묘 → 정식</strong>: 씨/모종을 키운 뒤 본밭으로 옮겨 심는 것을 <code>정식(定植)</code>이라 한다. 정식부터 첫 꽃이 필 때까지가 딸기 일생에서 <span class="hl">영양생장 속도가 가장 빠른 시기</span>.</p>
+
+        <p><strong>출뢰기(出蕾期)</strong>: 첫 번째 꽃대가 딱 나오는 시기. <strong>출뢰기 이후로는 영양생장과 생식생장이 동시에 진행</strong>된다 — 이게 딸기 관리의 핵심 난이도(3장 참고).</p>
+
+        <h3>화방 구조 <span class="tag">헷갈리기 쉬움</span></h3>
+        <p>딸기는 새순 끝(정단부)에서 꽃눈이 분화·개화하고, 끝나면 옆에서 곁가지가 나와 그 정단부에서 또 꽃눈이 생긴다. 겉보기엔 한 줄기에서 계속 일어나는 것처럼 <strong>착각하기 쉽다</strong>. 부르는 순서:</p>
+        <ul class="clean">
+          <li>처음 나온 것 = <span class="u">정화방</span></li>
+          <li>다음 = <span class="u">제1액화방</span></li>
+          <li>그다음 = <span class="u">제2액화방</span> (순서상 세 번째)</li>
+        </ul>
+        <div class="callout tip">
+          <span class="lab">착과수 상식</span>
+          <p>한 화방에서 이론상 25개까지 열매를 달 수 있지만, 다 달면 품질이 급락. 실무에선 <strong>10~13개 정도로 조절</strong>한다. 세력이 아주 좋으면 꽃대가 쌍으로 갈라지는 <code>복합방</code>이 나오는데, 이게 <strong>생산량 극대화 상태</strong>다.</p>
+        </div>
+
+        <div class="callout warn">
+          <span class="lab">사계절 딸기? 아니다</span>
+          <p>"스마트팜이니 온도·광 다 제어하면 봄여름가을겨울 딸 수 있냐"는 흔한 오해. <strong>유리온실은 자연 일조량의 영향을 받는다.</strong> 일장(낮 길이)이 짧아지는 겨울이 딸기 제철인 이유. 완전 통제는 불가능.</p>
+        </div>
+      </section>
+
+      <!-- 03 -->
+      <section id="veggen">
+        <div class="sec-head"><span class="sec-num">03</span><h2>영양생장 vs 생식생장 — 가장 중요한 개념</h2></div>
+        <p class="sec-sub">이 하나를 이해하면 나머지 제어 로직의 절반이 풀린다.</p>
+
+        <p>식물의 에너지를 어디에 쓰느냐의 문제. <strong>잎·줄기를 키우면 영양생장, 꽃·열매를 키우면 생식생장.</strong> 딸기는 이 둘을 <span class="hl">매일 한 번씩 왔다 갔다 하며</span> 자란다 — 잎도 키워야 하고 열매도 키워야 하는 <strong>동시 작업</strong>이기 때문.</p>
+
+        <div class="vs">
+          <div class="veg">
+            <h4><span class="dot"></span>영양생장 (잎·줄기)</h4>
+            <ul>
+              <li>온도·습도 <strong>약간 높이면</strong> 유도됨</li>
+              <li>함수율 <strong>높게</strong> 관리 → 잎·열매 커짐</li>
+              <li>질산태 질소(NO₃⁻) 흡수 → pH ↑ 경향</li>
+              <li>엽병 각도 수직에 가까움</li>
+              <li>너무 강하면 잎만 무성, 열매 부실</li>
+            </ul>
+          </div>
+          <div class="gen">
+            <h4><span class="dot"></span>생식생장 (꽃·열매)</h4>
+            <ul>
+              <li>빛 강하게 + 온도 낮춰 <strong>스트레스</strong>로 유도</li>
+              <li>함수율 <strong>낮게</strong> 관리 → 생식 전환</li>
+              <li>암모늄태 질소(NH₄⁺) 흡수 → pH ↓ 경향</li>
+              <li>엽병 각도 눕는 쪽</li>
+              <li>너무 강하면 잎 안 나오고 열매만</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout key">
+          <span class="lab">겨울의 딜레마와 제어</span>
+          <p>겨울은 낮 길이가 짧아 식물이 <strong>생식생장으로 과하게 치우친다</strong>. 방치하면 "겨울이구나" 인식 → 잎 작아지고 열매만 충실해지다 망가짐. 그래서 <strong>아침·저녁·밤에 전조등(보광)을 켜서 낮 길이를 늘려</strong> 다시 영양생장으로 되돌린다. 딸기가 "밤"으로 인식하는 경계는 약 <strong>2000 lux</strong>(1m 거리에서 신문을 읽을 수 있는 밝기).</p>
+        </div>
+
+        <h3>초세(草勢) ≠ 영양생장</h3>
+        <p>비슷해 보이지만 다른 개념. <strong>초세는 식물의 "세력·건강함"</strong>이다.</p>
+        <ul class="clean">
+          <li>잎이 커지고 <strong>두꺼워지고</strong> 줄기가 <strong>굵어지면</strong> → 초세가 강함(건강)</li>
+          <li>잎이 커지기만 하고 줄기가 <strong>가늘고 길어지면</strong> → 영양신장이 강함(웃자람)</li>
+          <li>초세 약한 개체는 환경 스트레스 받으면 급격히 생식생장에 빠져 <strong>작물이 망가진다</strong></li>
+        </ul>
+        <p>이상적 관리 = <strong>초세는 강하게 유지하면서 약한 영양생장으로</strong> 키우기. 그러면 복합방(쌍꽃대)이 나와 생산량이 극대화된다.</p>
+      </section>
+
+      <!-- 04 -->
+      <section id="diag">
+        <div class="sec-head"><span class="sec-num">04</span><h2>현재 상태를 어떻게 진단하나</h2></div>
+        <p class="sec-sub">"지금 이 작물이 어느 단계·어떤 상태인지"를 읽는 지표들. AI의 첫 번째 과제.</p>
+
+        <div class="grid2">
+          <div class="card">
+            <h3 style="margin-top:0">① 잎 개수 세기</h3>
+            <p>진행 단계를 보는 <strong>가장 명확한 방법</strong>. 정상 생육 시 <strong>5~6일에 잎 한 장</strong>씩 나온다. 나온 잎 수를 세면 현재 진행 상태를 안다. 잎이 계속 나오면 영양생장, 나오는 속도가 뚝 떨어지면 생식생장.</p>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">② 적산온도</h3>
+            <p>수확기 예측용. 꽃이 수정된 뒤부터 낮 동안 온도를 누적해 <strong>적산온도 600℃</strong>가 차면 수확기 진입. 광이 셀수록 이 기간이 짧아진다.</p>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">③ 엽면적지수(LAI)</h3>
+            <p>잎이 자랄수록 커진다. 정식 후 개화기까지 <strong>목표 2.5</strong>. 도달이 빠르면 생식생장 활발. <strong>2.5 초과 시</strong> 광합성 생산 &lt; 소모라 수지가 안 맞아 → <code>적엽(잎 따내기)</code> 작업이 필요.</p>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">④ 엽병 각도 · 신엽 간격</h3>
+            <p>엽병(잎자루) 각도가 <strong>수직이면 영양생장형</strong>. 설향 품종은 <strong>35~45°</strong>가 가장 안정적. 새 잎이 성엽으로 커지는 간격(약 1주)이 줄면 활발, 늘면 스트레스.</p>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <span class="lab">AI 설계 힌트</span>
+          <p>현재 위치 진단은 <strong>이미지 데이터가 거의 확실한 해법</strong>. 단계 분류(육묘/정식/출뢰/개화/비대) 모델 1개 + 신엽 검출 모델 + 각도/LAI 추정 모델… 이렇게 <strong>여러 이미지 모델을 합치는 멀티모델</strong> 구조로 간다(11장).</p>
+        </div>
+      </section>
+
+      <!-- 05 -->
+      <section id="photo">
+        <div class="sec-head"><span class="sec-num">05</span><h2>동화산물과 순광합성</h2></div>
+        <p class="sec-sub">"만든 에너지를 열매에 줄까 잎에 줄까"가 제어의 본질.</p>
+
+        <p><strong>동화산물</strong> = 광합성으로 만든 산물(당·에너지). 그런데 식물은 <strong>만들면서 동시에 소모</strong>한다(호흡). 주간에 만든 것의 약 <strong>2/3를 스스로 소모</strong>해버린다(생명 유지·체온 조절).</p>
+
+        <div class="callout key">
+          <span class="lab">핵심 등식</span>
+          <p><strong>순광합성 = 총광합성 − 호흡 소모</strong>. 이 "남은 양"만큼만 열매를 키우거나 잎을 키우는 데 배분할 수 있다. 재배자가 개입하는 지점이 바로 <strong>야간 온도로 이 배분을 조절</strong>하는 것.</p>
+        </div>
+
+        <ul class="clean">
+          <li><strong>동화산물 측정은 증산량으로 추정</strong>한다. 광합성엔 반드시 증산이 따르므로, 물을 얼마나 흡수해 공중으로 내보냈는지(증산량)를 알면 광합성량을 간접 추정할 수 있다.</li>
+          <li>단, 실제 스마트팜 기술로는 동화산물 양을 <strong>정밀 계산이 어렵다</strong>(변수가 큼). 그래서 현장은 주로 <strong>24시간 평균온도</strong>로 추정한다. → AI가 이걸 더 정밀하게 추정하면 큰 무기.</li>
+        </ul>
+
+        <h3>포화점 — 더 줘도 소용없는 지점</h3>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>요소</th><th class="num">포화/한계</th><th>넘어서면</th></tr></thead>
+            <tbody>
+              <tr><td>광량</td><td class="num u">550 W</td><td>딸기에 스트레스. 차광 필요. 호흡량만 증가</td></tr>
+              <tr><td>CO₂</td><td class="num u">750 ppm</td><td>효율 안 오르고 소모만 늘어남</td></tr>
+              <tr><td>주간 온도</td><td class="num u">25℃</td><td>넘을수록 호흡량↑ (동화산물 소모↑)</td></tr>
+              <tr><td>고온 한계</td><td class="num u">35℃</td><td>모든 생육 정지</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>그래서 수치를 맞출 때 <strong>광 550W, CO₂ 750ppm 이상은 잘 올리지 않고, 온도는 25℃ 근처 유지</strong>가 가장 효율적. 광합성 그래프(보상점~광포화점)에서 순광합성이 나오는 구간이다.</p>
+      </section>
+
+      <!-- 06 -->
+      <section id="temp">
+        <div class="sec-head"><span class="sec-num">06</span><h2>온도 제어 — 교과서는 틀렸다</h2></div>
+        <p class="sec-sub">전문가가 강조한 포인트. 여기서 AI가 갈린다.</p>
+
+        <div class="callout warn">
+          <span class="lab">교과서 함정</span>
+          <p>국내 교과서: "딸기 최적온도 = 주간 25℃ / 야간 10℃ 유지". <strong>스마트 농업 관점에서 이건 틀린 말.</strong> 특정 수치를 계속 유지하는 게 목표가 아니라, <strong>그날의 상황(일사량·동화산물 축적량)에 따라 제어 방향을 바꾸는 것</strong>이 최적. 교과서를 그대로 학습시키면 실제 작물 반응과 어긋난다.</p>
+        </div>
+
+        <h3>야간 온도로 주야간 편차를 조절한다</h3>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>그날 상황</th><th>동화산물</th><th>제어</th><th>이유</th></tr></thead>
+            <tbody>
+              <tr><td>맑음·고온 (일사 많음)</td><td>많이 축적</td><td class="u">야간 온도 ↑</td><td>편차↓ → 호흡 소모↑ → 열매 과비대(맛없음) 방지, 잎 키울 기회</td></tr>
+              <tr><td>흐림·저온 (일사 적음)</td><td>적게 축적</td><td class="u">온도 ↓</td><td>벌어놓은 게 없는데 쓰면 생리 스트레스. 소모 억제</td></tr>
+              <tr><td>야간 급랭하는 날</td><td>—</td><td class="u">주간 온도 ↓</td><td>편차 줄여 작물 스트레스 방지</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>핵심 통찰: <strong>온도가 높으면 호흡량이 늘어 동화산물이 소모되고, 그 소모가 있어야 잎·열매가 자란다.</strong> 소모를 안 시키면 영양기관이 안 자란다. 열매를 너무 키우면(과비대) 크기만 크고 맛없는 열매가 되므로, 야간 온도를 올려 소모를 늘려 균형을 맞춘다.</p>
+
+        <div class="callout tip">
+          <span class="lab">전문가 실무 룰</span>
+          <p>"오늘 적산량이 높은 날은 야간 온도를 <strong>오히려 더 올려라</strong>(소모↑로 맛 지키기). 잎이 부족한 상황이면 온도 올려 새 잎을 빨리 꺼내라." 참고로 네덜란드 교과서는 저온·동화산물 많은 날 오히려 더 낮춰 스트레스를 막으라고까지 한다.</p>
+        </div>
+      </section>
+
+      <!-- 07 -->
+      <section id="vpd">
+        <div class="sec-head"><span class="sec-num">07</span><h2>VPD · 습도 · 증산</h2></div>
+        <p class="sec-sub">습도를 "수증기압차(VPD)"라는 통합 지표로 다룬다.</p>
+
+        <p><code>VPD</code> = 식물 체내 수분 압력과 공기 중 압력의 차이. 이 차이가 있어야 식물이 증산(물을 내보냄)을 하고, 증산이 있어야 광합성·양분 이동이 일어난다. <strong>습도만 보지 말고 VPD로 봐야</strong> 하는 이유.</p>
+
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>단계</th><th class="num">VPD 목표</th><th>이유</th></tr></thead>
+            <tbody>
+              <tr><td>어린 개체 / 육묘기</td><td class="num u">0.8 미만</td><td>온·습도 약간 높게, 스트레스 없이 빠르게 성장</td></tr>
+              <tr><td>영양생장기</td><td class="num u">0.8 아래쪽</td><td>잎 키우기 유리</td></tr>
+              <tr><td>수확기(생식생장)</td><td class="num u">0.8 이상</td><td>약간 높이면 품질(맛) 좋아짐</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout key">
+          <span class="lab">VPD → 증산 → 동화산물의 연결고리</span>
+          <p>광이 세지면 VPD가 떨어지고 증산량이 많아지고 물 소모가 많아진다 → 이걸로 광합성량을 <strong>간접 추정</strong>. 즉 <strong>VPD 정밀 제어 = 생산량 제어</strong>. 유리온실이 비닐하우스보다 생산성이 떨어지는 이유도 습도 관리(VPD) 실패 때문이다.</p>
+        </div>
+
+        <p><strong>습도 목표 ≈ 75%.</strong> 광합성용 수분은 덜 뺏기면서, 지속적 증산을 위한 여유 공간(20~25%)은 남기는 균형점. 습도가 확 낮아지면 광합성 속도가 50%까지 떨어지고 기공도 50% 닫힌다.</p>
+      </section>
+
+      <!-- 08 -->
+      <section id="root">
+        <div class="sec-head"><span class="sec-num">08</span><h2>배액관리 — 뿌리를 간접적으로 읽기</h2></div>
+        <p class="sec-sub">EC와 pH로 작물의 생장 방향을 진단하고 제어한다.</p>
+
+        <p>뿌리 상태는 색으로 보는 게 가장 정확하지만, <strong>뿌리를 드러내면 미세뿌리가 죽는다.</strong> 그래서 흘러나온 배액의 <strong>화학 조성(EC·pH)을 측정</strong>해 간접 확인하는 게 <code>배액관리</code>.</p>
+
+        <div class="grid2">
+          <div class="card">
+            <h3 style="margin-top:0">함수율</h3>
+            <ul class="clean" style="margin:6px 0">
+              <li><strong>낮게</strong> 관리 → 생식생장 전환, 초세 강화</li>
+              <li><strong>높게</strong> 관리 → 열매·잎 커짐(영양생장형)</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">pH 목표</h3>
+            <p style="margin:6px 0">딸기 최적 <strong class="u">pH 5.8</strong> 유지가 기준. 뿌리가 잎을 키우느냐 열매를 키우느냐에 따라 pH가 변한다.</p>
+          </div>
+        </div>
+
+        <h3>왜 pH가 움직이나 — 선택적 흡수</h3>
+        <ul class="clean">
+          <li><strong>영양생장기</strong>: 암모늄태 질소(NH₄⁺, 양이온) 많이 흡수 → 균형 위해 수소이온(H⁺) 방출 → 뿌리 근처 <span class="u">pH 하락</span></li>
+          <li><strong>생식생장 전환기</strong>: 질산태 질소(NO₃⁻, 음이온) 흡수 → OH⁻로 대체 → <span class="u">pH 상승</span></li>
+        </ul>
+        <p>이 변화를 읽으면 다음 상태를 예측할 수 있다. 제어는 비료를 직접 못 만지고(통에 레시피대로 섞어둠), <strong>A·B·C 3액 중 C액(질산·인산 등 산성)으로 조절</strong>. 통상 pH가 오르므로 산성 물질로 낮추지만, 빗물·역삼투수처럼 중탄산이 적은 원수는 pH 변동이 심해 <strong>거꾸로 수산화칼륨 같은 염기로 올려야</strong> 할 때도 있다.</p>
+      </section>
+
+      <!-- 09 -->
+      <section id="control">
+        <div class="sec-head"><span class="sec-num">09</span><h2>환경제어 실무 — 여기서 팀이 갈린다</h2></div>
+        <p class="sec-sub">"온도 오르면 문 열어" 수준으로는 스마트팜을 못 쓴다. 경험자들이 가장 어려워한 부분.</p>
+
+        <h3>겨울 습도 배출의 딜레마</h3>
+        <p>습도가 높으면 빼야 하는데, 환기창을 열면 애써 올린 <strong>온도와 CO₂가 같이 빠져나간다</strong>(에너지 낭비). 그래서:</p>
+        <ul class="clean">
+          <li><strong>최소 난방 기법</strong>: 실내 온도를 살짝 올리면 상대습도가 떨어져 증산 공간이 생긴다. 환기창은 압력 조절할 틈만 미세하게 연다.</li>
+          <li><strong>온도 상승 속도 제어</strong>: 1시간에 1℃씩만 올려, 문 안 열고도 습도↓·CO₂ 소모·광합성이 되는 지점을 찾는다.</li>
+          <li><strong>아침 특수 상황</strong>: 야간 호흡으로 CO₂ 700ppm↑ 축적 + 습도 90%↑. 문 열면 CO₂ 낭비 → 최소 난방으로 습도만 빼고 CO₂ 보존.</li>
+        </ul>
+
+        <div class="callout tip">
+          <span class="lab">천창 미세제어 + PI 밴드</span>
+          <p>습기는 상층부에 몰린다. 천창을 <strong>확 열면</strong> 온·습도 다 빠져 저습이 되고 광합성이 반토막. 그래서 아주 미세하게 연다. 여닫는 속도를 조절하는 게 <code>PI(P밴드) 제어</code>. 주기별(아침/낮/오후/야간)로 P값을 다르게 준다 — 아침엔 둔감하게(P↑), 한낮 고광·고온엔 민감하게(P↓)로 적극 환기.</p>
+        </div>
+
+        <h3>미리 준비하는 제어</h3>
+        <p><code>조조가온 / 예비가온</code> — 해 뜨기 전에 환경을 미리 데워 준비. 스마트팜 스펙이 충분한데 과하게 열어 에너지를 낭비하지 않고, 낭비 없이 광합성량을 늘리는 패턴을 AI가 찾아야 한다.</p>
+
+        <div class="callout warn">
+          <span class="lab">가장 흔한 치명적 실수 — 비 오는 날 관수</span>
+          <p>"비 오면 증산 안 하니 물 끄자"는 관행이 <strong>작물을 죽인다.</strong> 흐려도 습도 100%는 아니라 VPD가 0.1~0.5로 형성되면 증산은 일어난다. 물을 안 주면:</p>
+          <p>· <strong>칼슘</strong>이 생장점에 공급 안 됨 → 세포 외피 형성 실패 → 생장점 괴사<br>· <strong>칼륨</strong> 공급 지연 → 기공 개폐 불능 → 세포 파괴</p>
+          <p>대책: 누적 광량이 100 J에 도달하면 관수하도록 세팅하거나, <strong>일정 간격 강제 관수</strong>를 넣어야 한다. 양액기 고장까지 AI가 감지·대응하면 좋다. 스마트팜 하는 사람들도 자주 놓치는 부분.</p>
+        </div>
+      </section>
+
+      <!-- 10 -->
+      <section id="risk">
+        <div class="sec-head"><span class="sec-num">10</span><h2>병해충 · 생리장애 · 위험 진단</h2></div>
+        <p class="sec-sub">환경으로 병을 예방하고, 환경 패턴으로 발생을 예측한다.</p>
+
+        <div class="callout key">
+          <span class="lab">수정(受精)을 빠뜨리지 마라</span>
+          <p>개화와 비대 사이의 결정적 단계. <strong>꽃이 수정 안 되면 열매가 안 생긴다.</strong> 수정은 환경 + 벌 활동에 달렸다 — 온도를 작물 좋으라고 너무 올리면 <strong>벌이 활동 안 하는 온도</strong>가 되고, VPD를 너무 낮추면 수정이 방해되며, 방제 농약도 수정을 방해한다. AI가 이 관계를 다 확인해야 한다.</p>
+        </div>
+
+        <h3>환경 패턴 → 병해충 예측</h3>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>환경 조건</th><th>발생</th><th>유형</th></tr></thead>
+            <tbody>
+              <tr><td class="u">저온 다습</td><td>습도 94%↑가 4시간 지속</td><td>곰팡이병 — 잿빛곰팡이·탄저·꽃곰팡이(균류)</td></tr>
+              <tr><td class="u">고온 저습</td><td>갑자기 광↑ + 습도↓</td><td>총채벌레·응애 (춘분 이후 대량 발생 위험)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout warn">
+          <span class="lab">이미지 감지의 한계</span>
+          <p>딸기 해충은 <strong>0.1mm 이하</strong>라 잎 뒷면에 있어 이미지로 직접 감지 어렵다. 대신 <strong>흡즙 피해 흔적(잎 얼룩·무늬 vs 멀쩡한 잎 대조)</strong>으로 학습하거나, <strong>환경 패턴으로 발생 확률을 예측</strong>하는 방향이 현실적. 꽃 속 총채벌레는 사람 눈으로도 안 보인다.</p>
+        </div>
+
+        <h3>생리장애 = 환경 실패</h3>
+        <p>양분 결핍증이 대표적. 양액기로 비료를 줬어도 <strong>증산이 안 되면 물이 안 움직여 양분이 식물 체내 이동을 못 한다.</strong> 결국 생장점에서 결핍 증상. → "언제나 물이 원활히 흐르는 환경"을 유지하는 것도 위험 방지 학습 대상.</p>
+
+        <div class="callout tip">
+          <span class="lab">종합</span>
+          <p>회의에서 나온 <strong>"위험 진단 모델"</strong> = 병해충 이미지 진단 + 양분 결핍 + 생리장애 위험을 통합. 환경적으로 <strong>병 안 걸리는 환경을 만드는 것</strong>이 치료보다 우선.</p>
+        </div>
+      </section>
+
+      <!-- 11 -->
+      <section id="ai">
+        <div class="sec-head"><span class="sec-num">11</span><h2>AI 모델 구조 논의 (개발팀 파트)</h2></div>
+        <p class="sec-sub">회의에서 오간 기술 이야기 정리. 도메인 지식을 어떻게 모델에 담을까.</p>
+
+        <h3>어떤 모델을 쓰나</h3>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>모델</th><th>성격</th><th>용도</th></tr></thead>
+            <tbody>
+              <tr><td><strong>부스팅 트리</strong><br><small>XGBoost·LightGBM·CatBoost·RandomForest</small></td><td>표/센서 숫자 데이터와 궁합 좋음. "온도 20도 이하면…" 식 분기</td><td>환경 → 착과수 예측 같은 정형 예측</td></tr>
+              <tr><td><strong>LSTM</strong></td><td>기억력 있는 시퀀스 모델. 낮온·저녁온 순서 차이(인과) 학습</td><td>시간 흐름 있는 환경 예측</td></tr>
+              <tr><td><strong>앙상블</strong></td><td>위 둘을 결합. 트리는 인과 약점, LSTM이 보완</td><td>환경 → 생육 예측 정밀화</td></tr>
+              <tr><td><strong>Life2vec 계열</strong><br><small>→ "berry2vec"로 응용 아이디어</small></td><td>덴마크 인구 생애 데이터 모델에서 영감. "서사(내러티브)" 기반</td><td>작물/센서/온실 중심 서사로 생애주기 학습 (단, 데이터 대량 필요 — 미검증)</td></tr>
+              <tr><td><strong>룰 베이스</strong></td><td>특정 조건 = 특정 결정. 명시적 규칙</td><td>수정 온도, 비 오는 날 관수 등 도메인 규칙 주입</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>제안된 멀티모델 아키텍처</h3>
+        <div class="flow">
+          <span class="step">① 현재 위치 진단<small>이미지: 단계·신엽·각도·LAI</small></span><span class="arw">→</span>
+          <span class="step">② 환경 점검·예측<small>온습도 평균, 미래 환경</small></span><span class="arw">→</span>
+          <span class="step">③ 광합성/동화산물 추정<small>주야간 편차 의사결정</small></span><span class="arw">→</span>
+          <span class="step">④ 위험 진단<small>병해충·결핍</small></span><span class="arw">→</span>
+          <span class="step">⑤ 의사결정 통합<small>+ 룰베이스</small></span>
+        </div>
+        <p>여러 개의 특화 모델을 만들고 그 출력을 합산해 최종 의사결정에 넣는 <strong>멀티모델</strong> 전략. 하나의 거대 모델에 다 맡기면 <strong>데이터-모델 의존성이 너무 커져</strong> 데이터 부족 시 결과가 나빠진다는 우려에서 나온 설계.</p>
+
+        <h3>기타 기술 논점</h3>
+        <ul class="clean">
+          <li><strong>정규화 함정</strong>: 데이터가 뭉쳐 있어(동일값 반복) 정규화하면 점수 하락. 대회에선 버린 데이터도 다 살리는 게 유리했다는 경험.</li>
+          <li><strong>센서 주기 1분</strong>: 스마트팜 복합환경 데이터는 1분 단위 기록(장비 과부하·메모리 고려한 표준). 겨울엔 1분에 위험 수치까지 떨어지기도 해서 의미 있는 해상도.</li>
+          <li><strong>맥락(context) 반영</strong>: "8시에 일어났다"도 몇 시에 잤냐에 따라 의미가 다르듯, 세부 태스크 결과의 의미가 주변 맥락(지속가능성·수익 극대화)에 따라 달라진다 → 이 맥락을 어떻게 반영할지가 남은 기획 과제.</li>
+        </ul>
+      </section>
+
+      <!-- 12 -->
+      <section id="gloss">
+        <div class="sec-head"><span class="sec-num">12</span><h2>용어집</h2></div>
+        <p class="sec-sub">회의에서 나온 단어를 빠르게 찾아보기.</p>
+
+        <dl class="gloss">
+          <div><dt>정식 <small>定植</small></dt><dd>모종을 본밭에 옮겨 심는 것. 육묘기 다음 단계.</dd></div>
+          <div><dt>출뢰기 <small>出蕾期</small></dt><dd>첫 꽃대가 나오는 시기. 이후 영양·생식생장이 <b>동시 진행</b>.</dd></div>
+          <div><dt>영양생장</dt><dd>잎·줄기(영양기관)를 키우는 성장. 온·습도 높이면 유도.</dd></div>
+          <div><dt>생식생장</dt><dd>꽃·열매(생식기관)를 키우는 성장. 빛↑·온도↓·저함수율로 유도.</dd></div>
+          <div><dt>초세 <small>草勢</small></dt><dd>식물의 세력·건강함. 굵고 두꺼우면 강함. 영양생장과 다른 개념.</dd></div>
+          <div><dt>화방 / 정화방·액화방</dt><dd>꽃대 단위. 처음=정화방, 다음=제1·제2 액화방. 쌍대로 갈라지면 복합방(생산량↑).</dd></div>
+          <div><dt>착과 <small>着果</small></dt><dd>열매가 달림. 한 화방에 10~13개가 품질·수량 균형점.</dd></div>
+          <div><dt>동화산물</dt><dd>광합성으로 만든 당·에너지. 만들면서 동시에 호흡으로 소모.</dd></div>
+          <div><dt>순광합성</dt><dd>총광합성 − 호흡 소모. 열매·잎에 배분 가능한 실제 여유분.</dd></div>
+          <div><dt>증산</dt><dd>잎에서 물을 공기로 내보냄. 광합성에 필수. 동화산물 추정 지표.</dd></div>
+          <div><dt>적산온도</dt><dd>일정 기준 온도를 누적한 값. 수정 후 <b>600℃</b>면 수확기.</dd></div>
+          <div><dt>VPD</dt><dd>수증기압차. 습도를 대신하는 통합 지표. 기준 0.8, 단계별 조정.</dd></div>
+          <div><dt>EC</dt><dd>양액의 전기전도도(양분 농도). 배액으로 측정.</dd></div>
+          <div><dt>함수율</dt><dd>배지의 수분 함량. 낮으면 생식·초세강, 높으면 영양생장.</dd></div>
+          <div><dt>엽면적지수 <small>LAI</small></dt><dd>단위면적당 잎 면적. 개화기까지 목표 2.5. 초과 시 적엽.</dd></div>
+          <div><dt>적엽</dt><dd>잎을 따내는 작업. LAI가 2.5 넘어 수지 안 맞을 때.</dd></div>
+          <div><dt>엽병</dt><dd>잎자루. 각도(35~45°)로 영양/생식생장 판단.</dd></div>
+          <div><dt>질산태 / 암모늄태 질소</dt><dd>NO₃⁻(음이온, pH↑ 유발) / NH₄⁺(양이온, pH↓ 유발). 흡수 형태로 생장 방향 진단.</dd></div>
+          <div><dt>PI(P밴드) 제어</dt><dd>창을 여닫는 속도·민감도 제어. 주기별 P값 조정.</dd></div>
+          <div><dt>조조가온 / 예비가온</dt><dd>해 뜨기 전 미리 데워 환경을 준비하는 선제 제어.</dd></div>
+          <div><dt>최소 난방</dt><dd>겨울, CO₂·온도 보존하며 습도만 빼려 살짝 난방 + 미세 환기.</dd></div>
+          <div><dt>배액관리</dt><dd>흘러나온 양액의 EC·pH를 재 뿌리 상태를 간접 진단.</dd></div>
+          <div><dt>연속 출뢰</dt><dd>1화방 수확 끝나며 바로 2화방으로 이어지는 것. 착과 스트레스 유발.</dd></div>
+        </dl>
+      </section>
+
+      <div class="footer">
+        <p>정리 출처 — 경진대회 회의록 1·2·3 (2026-07-03). 농업 도메인 지식은 회의 참석 전문가 발언 기반, AI 구조는 개발팀 논의 기반으로 재구성했습니다. 수치는 회의에서 언급된 값을 그대로 옮긴 것으로, 품종·시설·지역에 따라 달라질 수 있습니다.</p>
+      </div>
+    </main>
+  </div>
+</div>
+</body>
+</html>

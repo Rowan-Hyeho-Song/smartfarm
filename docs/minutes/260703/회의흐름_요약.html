@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>회의 흐름 요약 — 누가 무엇을 주장했나</title>
+<style>
+  :root {
+    --berry:#ff5d73; --berry-soft:#ff8a9c; --leaf:#5fd39a; --leaf-soft:rgba(95,211,154,.12);
+    --amber:#ffc861; --amber-soft:rgba(255,200,97,.12); --paper:#0e1014; --card:#1b1f2a;
+    --ink:#e7e9ee; --ink-soft:#a4abba; --line:#2c3242; --line-strong:#3a4152;
+    --berry-wash:rgba(255,93,115,.14); --code-bg:#222736;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    --maxw:1180px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: radial-gradient(1200px 600px at 80% -10%, #1d2230 0%, var(--paper) 55%);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", "Segoe UI", "Noto Sans KR", Roboto, sans-serif;
+    line-height: 1.72; font-size: 16.5px; letter-spacing: -0.003em; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  .hero { border-bottom: 1px solid var(--line); background: radial-gradient(120% 80% at 88% -10%, var(--berry-wash) 0%, transparent 55%), var(--paper); }
+  .hero-inner { max-width: var(--maxw); margin: 0 auto; padding: 56px 24px 44px; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 9px; font-size: 12.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--berry); }
+  .eyebrow::before { content: ""; width: 22px; height: 2px; background: var(--berry); border-radius: 2px; }
+  h1.title { font-size: clamp(28px, 4.6vw, 43px); line-height: 1.14; margin: 18px 0 14px; font-weight: 800; letter-spacing: -0.02em; text-wrap: balance; max-width: 20ch; }
+  h1.title em { font-style: normal; color: var(--berry); }
+  .lede { font-size: clamp(15.5px, 2vw, 18px); color: var(--ink-soft); max-width: 64ch; margin: 0; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+  .chip { font-size: 13px; font-weight: 600; color: var(--ink-soft); background: var(--card); border: 1px solid var(--line-strong); padding: 6px 13px; border-radius: 999px; }
+  .chip b { color: var(--ink); }
+  .maincol { max-width: 820px; margin: 0 auto; padding: 46px 0 90px; }
+  section { scroll-margin-top: 20px; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; margin: 52px 0 4px; }
+  section:first-child .sec-head { margin-top: 0; }
+  .sec-num { font-size: 13px; font-weight: 800; color: var(--berry); font-variant-numeric: tabular-nums; letter-spacing: .05em; border: 1.5px solid var(--berry); border-radius: 7px; padding: 2px 9px; flex: none; line-height: 1.4; }
+  h2 { font-size: clamp(21px, 3vw, 27px); font-weight: 800; letter-spacing: -0.015em; margin: 0; text-wrap: balance; }
+  .sec-sub { color: var(--ink-soft); font-size: 15px; margin: 8px 0 22px; }
+  h3 { font-size: 18px; font-weight: 750; margin: 30px 0 10px; letter-spacing: -0.01em; }
+  p { margin: 12px 0; }
+  strong { font-weight: 700; color: var(--ink); }
+  .hl { background: linear-gradient(transparent 62%, var(--berry-wash) 62%); padding: 0 1px; font-weight: 600; }
+  code { font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size: .87em; background: var(--code-bg); padding: 1.5px 6px; border-radius: 5px; color: var(--ink); }
+
+  /* participant cards */
+  .people { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
+  .person { background: var(--card); border: 1px solid var(--line); border-radius: 13px; padding: 16px 18px; box-shadow: var(--shadow); }
+  .person .role { font-weight: 750; font-size: 15.5px; display: flex; align-items: center; gap: 9px; }
+  .person .ic { width: 30px; height: 30px; border-radius: 8px; background: var(--berry-wash); color: var(--berry); display: grid; place-items: center; font-weight: 800; font-size: 14px; flex: none; }
+  .person .who { color: var(--ink-soft); font-size: 12.5px; margin-top: 3px; font-weight: 500; }
+  .person p { font-size: 13.8px; margin: 10px 0 0; color: var(--ink-soft); line-height: 1.6; }
+  .person p b { color: var(--ink); }
+
+  /* timeline */
+  .tl { border-left: 2px solid var(--line-strong); margin: 22px 0 22px 6px; padding-left: 0; }
+  .tl-block { position: relative; padding: 0 0 8px 26px; margin-bottom: 22px; }
+  .tl-block::before { content: ""; position: absolute; left: -7px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--berry); border: 3px solid var(--paper); }
+  .tl-file { font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--berry); text-transform: uppercase; }
+  .tl-title { font-weight: 750; font-size: 16.5px; margin: 3px 0 8px; }
+  .tl-block ul { margin: 6px 0; padding-left: 18px; font-size: 14.8px; }
+  .tl-block li { margin: 6px 0; }
+  .tl-block li b { color: var(--ink); }
+  .spk { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 7px; border-radius: 5px; background: var(--leaf-soft); color: var(--leaf); margin-right: 4px; vertical-align: 1.5px; }
+  .spk.dev { background: var(--berry-wash); color: var(--berry); }
+  .spk.exp { background: var(--leaf-soft); color: var(--leaf); }
+
+  /* debate cards */
+  .debate { background: var(--card); border: 1px solid var(--line); border-radius: 13px; padding: 18px 20px; margin: 16px 0; box-shadow: var(--shadow); }
+  .debate h4 { margin: 0 0 12px; font-size: 16px; font-weight: 750; }
+  .stance { display: grid; grid-template-columns: 96px 1fr; gap: 12px; padding: 8px 0; border-top: 1px dashed var(--line); font-size: 14.3px; }
+  .stance:first-of-type { border-top: none; }
+  .stance .name { font-weight: 700; color: var(--berry); font-size: 13px; padding-top: 1px; }
+  .stance .name.exp { color: var(--leaf); }
+  .stance .txt { color: var(--ink); }
+  .resolve { margin-top: 12px; font-size: 13.6px; background: var(--berry-wash); border-radius: 8px; padding: 9px 12px; color: var(--ink); }
+  .resolve b { color: var(--berry); }
+
+  .callout { border-radius: 12px; padding: 16px 18px; margin: 20px 0; border: 1px solid; }
+  .callout .lab { font-size: 11.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; display: block; margin-bottom: 6px; }
+  .callout p { margin: 6px 0; } .callout p:first-of-type { margin-top: 0; } .callout p:last-child { margin-bottom: 0; }
+  .callout.key { background: var(--berry-wash); border-color: color-mix(in srgb, var(--berry) 30%, transparent); }
+  .callout.key .lab { color: var(--berry); }
+  .callout.warn { background: var(--amber-soft); border-color: color-mix(in srgb, var(--amber) 35%, transparent); }
+  .callout.warn .lab { color: var(--amber); }
+
+  /* action / status lists */
+  .status { display: grid; gap: 10px; margin: 18px 0; }
+  .st-row { display: grid; grid-template-columns: 78px 1fr; gap: 14px; align-items: start; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 15px; font-size: 14.5px; }
+  .badge { font-size: 11.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; text-align: center; align-self: start; }
+  .badge.done { background: var(--leaf-soft); color: var(--leaf); }
+  .badge.open { background: var(--amber-soft); color: var(--amber); }
+  .badge.todo { background: var(--berry-wash); color: var(--berry); }
+  .st-row b { color: var(--ink); }
+
+  .footer { border-top: 1px solid var(--line); padding: 28px 0 60px; color: var(--ink-soft); font-size: 13.5px; margin-top: 40px; }
+  .note-diar { font-size: 13px; color: var(--ink-soft); background: var(--code-bg); border-radius: 8px; padding: 10px 13px; margin: 16px 0; }
+
+  @media (max-width: 720px) {
+    .people { grid-template-columns: 1fr; }
+    .stance { grid-template-columns: 1fr; gap: 3px; }
+    .st-row { grid-template-columns: 1fr; gap: 7px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="eyebrow">스마트팜 딸기 해커톤 · 회의 흐름</span>
+    <h1 class="title">누가 <em>무엇을</em> 주장했나</h1>
+    <p class="lede">2026-07-03 밤 회의(녹음 3개, 총 약 2시간) 재구성. 회의를 놓친 사람이 "무슨 얘기가 오갔고, 각자 입장이 뭐였는지" 5분에 따라잡도록 정리했다. 도메인 지식 자체는 공부 노트·심화편 참고, 여기선 흐름과 논쟁·결정에 집중.</p>
+    <div class="hero-meta">
+      <span class="chip"><b>녹음</b> 경진대회 1·2·3</span>
+      <span class="chip"><b>길이</b> 36 + 60 + 30분</span>
+      <span class="chip"><b>결과</b> 본선 합격 · 등록 마감 7/5</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="maincol">
+
+    <!-- 1 참가자 -->
+    <section>
+      <div class="sec-head"><span class="sec-num">01</span><h2>참가자 — 누가 누구인가</h2></div>
+      <p class="sec-sub">역할별로 정리. 발언 성격 기준.</p>
+
+      <div class="people">
+        <div class="person">
+          <div class="role"><span class="ic">農</span>농업 전문가 (컨설턴트)</div>
+          <div class="who">송대정/송나경 선생님으로 호칭됨</div>
+          <p>회의의 <b>도메인 지식 원천.</b> 생육 단계·화방·영양/생식생장·동화산물·VPD·배액·병해충·환경제어를 대량 설명. 재배 컨설팅 경험 다수, 1400명 스마트팜 단톡방 운영.</p>
+        </div>
+        <div class="person">
+          <div class="role"><span class="ic">PM</span>개발 리더 / PM</div>
+          <div class="who">프로젝트 구조 주도</div>
+          <p>전문가에게 계속 질문하며 지식을 끌어냄. <b>멀티모델 아키텍처</b>(현재진단·환경예측·의사결정·위험진단) 제안. 룰베이스로 도메인 규칙 주입하자는 방향 정리.</p>
+        </div>
+        <div class="person">
+          <div class="role"><span class="ic">AI</span>AI 기술책임 (김 책임)</div>
+          <div class="who">모델 구현 담당</div>
+          <p>"AI 경험 많지 않다" 전제로 리서치. <b>부스팅 트리 + LSTM 앙상블</b> 소개·직접 학습(정확도 ~86). 해커톤 당일 중기부 사업으로 <b>현장 불참</b>(원격 지원).</p>
+        </div>
+        <div class="person">
+          <div class="role"><span class="ic">L2</span>Life2vec 제안자 (다솜)</div>
+          <div class="who">"다수 님"으로 호칭됨</div>
+          <p>2024 딸기 데이터로 작물별 그룹핑 후 <b>착과수 6클래스 예측</b>. <b>Life2vec→"berry2vec"</b> 서사(내러티브) 기반 접근 제안(인코더-디코더, 시계열 임베딩).</p>
+        </div>
+        <div class="person">
+          <div class="role"><span class="ic">맥</span>맥락 강조자</div>
+          <div class="who">개발진 중 1인</div>
+          <p>세부 태스크의 의미는 <b>주변 맥락</b>(지속가능성·수익 극대화)에 따라 달라진다며, context 반영을 <b>기획의 축</b>으로 다루자 제안. 별도 정리해 공유하기로.</p>
+        </div>
+        <div class="person">
+          <div class="role"><span class="ic">?</span>실무 질문자 (대표급)</div>
+          <div class="who">데이터 관련 질문</div>
+          <p>"온·습도·계절 같으면 착과수도 같나?"처럼 <b>재현성</b> 질문으로 핵심을 찌름. 데이터 일치 가능성을 실무 관점에서 확인.</p>
+        </div>
+      </div>
+
+      <div class="note-diar">⚠️ 녹음 파일마다 "참석자 1~4" 번호가 <b>새로 매겨진다</b>(화자 분리는 파일 단위). 예: 전문가는 경진대회2에선 "참석자 3", 경진대회3에선 "참석자 1". 그래서 이 문서는 번호 대신 <b>역할</b>로 표기했다.</div>
+    </section>
+
+    <!-- 2 타임라인 -->
+    <section>
+      <div class="sec-head"><span class="sec-num">02</span><h2>흐름 타임라인</h2></div>
+      <p class="sec-sub">세 녹음을 시간순으로. 무슨 일이 벌어졌나.</p>
+
+      <div class="tl">
+        <div class="tl-block">
+          <div class="tl-file">경진대회 · 36분 — 기술 탐색</div>
+          <div class="tl-title">각자 시도한 모델 공유</div>
+          <ul>
+            <li><span class="spk dev">L2제안자</span>정규화하면 점수 오르지만, <b>데이터를 안 뭉개고 다 살리니 성능 급등</b> → 해커톤에선 버린 데이터도 살리자.</li>
+            <li><span class="spk dev">L2제안자</span>2024 딸기 생육정보로 작물 그룹핑 → 최종 착과수 예측. <b>Life2100에서 영감받은 berry2vec</b>(인코더-디코더) 설명.</li>
+            <li><span class="spk exp">AI책임</span>Life2100은 <b>데이터가 많이 필요</b>하다는 우려. 대안으로 <b>부스팅 트리(GBT)</b>가 센서 숫자 데이터와 궁합 좋다 소개, <b>LSTM과 앙상블</b>로 인과 보완.</li>
+            <li><span class="spk">공지</span>한국농업기술진흥원 결재 지연으로 <b>발표 지연</b>(19시 이후 통보). 1분 단위 센서 표준·피밴드 제어 언급.</li>
+            <li><span class="spk exp">AI책임</span>해커톤 당일 <b>중기부 사업으로 불참</b> 통보(오전만 가능, 원격 지원).</li>
+          </ul>
+        </div>
+
+        <div class="tl-block">
+          <div class="tl-file">경진대회2 · 60분 — 도메인 지식 대방출</div>
+          <div class="tl-title">전문가가 딸기 재배 전체를 설명</div>
+          <ul>
+            <li><span class="spk dev">PM</span>모델을 <b>다수확형·품질형·절충형</b> 3종으로 나누자. 현재 생육 위치 측정 모델이 필요.</li>
+            <li><span class="spk exp">전문가</span><b>잎 개수(5~6일 1장)</b>로 단계 진단, 화방 구조(정화방·액화방), <b>적산온도 600℃=수확</b>, 영양/생식생장·초세, 함수율, 배액 EC/pH·질소 형태.</li>
+            <li><span class="spk exp">전문가</span><b>교과서 온도(주25/야10) 반박</b> → 동화산물·순광합성 기반 야간온도 제어. VPD 0.8 기준, 포화점(550W·750ppm·25·35℃).</li>
+            <li><span class="spk exp">전문가</span>엽병 각도 35~45°, <b>LAI 2.5</b>·적엽, 수정·벌 활동, 병해충(저온다습/고온저습) 설명.</li>
+            <li><span class="spk">이벤트</span>회의 중 <b>합격 메일 도착</b>(합불 명시 없어 확인 중).</li>
+            <li><span class="spk dev">PM</span>이미지 기반 현재위치 진단 + 여러 모델 합치는 <b>멀티모델</b> 구조로 정리.</li>
+            <li><span class="spk dev">맥락강조자</span>세부 태스크 의미가 맥락 따라 달라짐 → 맥락 반영 필요 제기.</li>
+          </ul>
+        </div>
+
+        <div class="tl-block">
+          <div class="tl-file">경진대회3 · 30분 — 환경제어와 마무리</div>
+          <div class="tl-title">"제어를 모르면 진다"</div>
+          <ul>
+            <li><span class="spk exp">전문가</span>1400명 단톡 경험담: <b>최다 실패 원인 = 작물 생육·환경제어 이해 부족.</b> 농업 전문가↔개발자 소통이 승부.</li>
+            <li><span class="spk exp">전문가</span>겨울 습도: <b>최소 난방</b>으로 문 안 열고 습도↓, 천창 미세제어, <b>PI(P밴드) 주기별</b>, 조조가온. <b>에너지=점수.</b></li>
+            <li><span class="spk dev">PM</span>예측만이 아니라 <b>제어까지 준비</b> 필요 인식. 룰베이스로 케이스 대응.</li>
+            <li><span class="spk dev">맥락강조자</span>맥락(지속가능성·수익)을 <b>기획 축</b>으로. 별도 정리해 피드백 요청하기로.</li>
+            <li><span class="spk">질문자</span>"온·습도·계절 같으면 착과수 같나?" → 전문가: <b>화방 차수·착과 스트레스로 달라진다</b>(똑같은 수확량 유지 불가).</li>
+            <li><span class="spk">행정</span><b>본선 합격 확정</b> 판단(외부유출 금지 문건 = 대상자 한정). <b>등록 마감 7/5 오전 10시</b> — 팀명·소개·슬로건.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 쟁점 -->
+    <section>
+      <div class="sec-head"><span class="sec-num">03</span><h2>주요 쟁점 — 입장 대조</h2></div>
+      <p class="sec-sub">의견이 갈리거나 조율된 지점.</p>
+
+      <div class="debate">
+        <h4>쟁점 1 · 어떤 모델 계열로 갈까</h4>
+        <div class="stance"><span class="name">L2제안자</span><span class="txt">Life2vec 기반 <b>berry2vec</b> — 작물/센서/온실을 "서사"로 보고 생애주기 학습. 수집 빈도·서사 중심점을 조절하면 데이터 확보 가능.</span></div>
+        <div class="stance"><span class="name">AI책임</span><span class="txt">Life2100은 LLM 계열이라 <b>데이터가 대량 필요</b>. 예외 케이스에서 제대로 동작할지 미지수. 표/센서 데이터엔 <b>부스팅 트리+LSTM 앙상블</b>이 범용적.</span></div>
+        <div class="resolve"><b>조율:</b> berry2vec를 배제하진 않고 <b>같이 테스트</b>. 단 실용 축은 트리+LSTM 앙상블. AI책임은 "다솜 아이디어가 최신일 수 있다"며 존중.</div>
+      </div>
+
+      <div class="debate">
+        <h4>쟁점 2 · 하나의 큰 모델 vs 멀티모델</h4>
+        <div class="stance"><span class="name">PM</span><span class="txt">전체 흐름을 한 모델에 학습시키면 결과는 좋을 수 있으나 <b>데이터-모델 의존이 과도.</b> 데이터 부족 시 성능 붕괴 → <b>태스크를 잘게 쪼갠 멀티모델</b>로.</span></div>
+        <div class="stance"><span class="name">맥락강조자</span><span class="txt">세부 태스크에 집중하면 <b>맥락(배경)에 따라 결과 의미가 달라지는</b> 문제를 놓친다. 맥락 반영을 기획에 넣자.</span></div>
+        <div class="resolve"><b>정리:</b> 멀티모델 + 룰베이스로 가되, <b>맥락 축</b>은 맥락강조자가 별도 문서로 정리해 다음 회의에 반영.</div>
+      </div>
+
+      <div class="debate">
+        <h4>쟁점 3 · 데이터 정규화</h4>
+        <div class="stance"><span class="name">L2제안자</span><span class="txt">동일 데이터가 뭉쳐 있음(더미 형식 추정). <b>정규화로 뭉개지 말고 다 살려야</b> 점수 급등.</span></div>
+        <div class="resolve"><b>합의:</b> 해커톤에선 <b>정규화 최소화, 원본 보존</b> 방향.</div>
+      </div>
+
+      <div class="debate">
+        <h4>쟁점 4 · 예측이면 충분한가, 제어까지 가야 하나</h4>
+        <div class="stance"><span class="name exp">전문가</span><span class="txt">AI가 아무리 정밀 예측해도 <b>실제 환경 제어(습도 배출·천창·최소난방·조조가온)</b>를 모르면 소용없다. 최종 결과물은 <b>열매.</b></span></div>
+        <div class="stance"><span class="name">PM</span><span class="txt">동의. 예측 + <b>제어 케이스·룰</b>까지 준비. 경영적 의사결정(비용) 모델도 추가.</span></div>
+        <div class="resolve"><b>확정 방향:</b> 환경 <b>예측 + 제어 + 비용 최적화</b>를 다 포함. 심사가 "작물 키우는 능력"을 본다는 전제.</div>
+      </div>
+    </section>
+
+    <!-- 4 상태 -->
+    <section>
+      <div class="sec-head"><span class="sec-num">04</span><h2>결정된 것 · 미결 · 할 일</h2></div>
+      <p class="sec-sub">회의 산출물 체크리스트.</p>
+
+      <h3>결정된 것</h3>
+      <div class="status">
+        <div class="st-row"><span class="badge done">확정</span><div><b>멀티모델 + 룰베이스</b> 아키텍처 방향. 현재위치 진단(이미지) + 환경 예측 + 위험 진단 + 의사결정.</div></div>
+        <div class="st-row"><span class="badge done">확정</span><div>실용 모델 축 = <b>부스팅 트리 + LSTM 앙상블</b>. berry2vec는 병행 실험.</div></div>
+        <div class="st-row"><span class="badge done">확정</span><div>데이터는 <b>정규화 최소화·원본 보존.</b></div></div>
+        <div class="st-row"><span class="badge done">확정</span><div>예측을 넘어 <b>환경 제어 + 비용 최적화</b>까지 범위 확대.</div></div>
+        <div class="st-row"><span class="badge done">확정</span><div><b>본선 합격.</b> 온라인 과제는 본 문제보다 쉬울 것으로 판단, 별도 준비 최소화.</div></div>
+      </div>
+
+      <h3>미결 / 계속 논의</h3>
+      <div class="status">
+        <div class="st-row"><span class="badge open">미결</span><div><b>맥락(context) 반영</b> 방식 — 맥락강조자가 정리해 공유 후 기획 반영 여부 결정.</div></div>
+        <div class="st-row"><span class="badge open">미결</span><div><b>동화산물 양 계산</b> — 정밀 계산 어려움. 증산량 기반 추정으로 대체할지 실험 필요.</div></div>
+        <div class="st-row"><span class="badge open">미결</span><div>전체 <b>구조도</b> — 각자 그려와서 다음 회의(다음 주 수요일 해커톤 후)에 맞춰보기로.</div></div>
+        <div class="st-row"><span class="badge open">미결</span><div>기획이 촉박했다는 공감대 — 단계별(육묘·정식·출뢰·개화·비대) 세분화 재정리 필요.</div></div>
+      </div>
+
+      <div class="callout warn">
+        <span class="lab">마감 임박 · 놓치면 안 됨</span>
+        <p><b>7/5(토) 오전 10시까지 운영사무국 등록</b> — 팀명 · 팀 소개 · 슬로건. (회의 시점 기준 이틀 뒤. 오늘 날짜와 대조 필수.)</p>
+      </div>
+
+      <h3>다음 액션</h3>
+      <div class="status">
+        <div class="st-row"><span class="badge todo">할일</span><div><b>전원</b> — 모델 구조도 각자 스케치 → 다음 회의에서 통합.</div></div>
+        <div class="st-row"><span class="badge todo">할일</span><div><b>맥락강조자</b> — 맥락 축 문서 정리 후 피드백 요청.</div></div>
+        <div class="st-row"><span class="badge todo">할일</span><div><b>PM/개발</b> — 전문가가 준 제어 규칙(최소난방·관수·수정·병해충)을 룰베이스로 구현·검증.</div></div>
+        <div class="st-row"><span class="badge todo">할일</span><div><b>팀</b> — 7/5 등록 정보 확정(팀명·슬로건).</div></div>
+      </div>
+    </section>
+
+    <div class="footer">
+      <p>출처: 경진대회 회의록 1·2·3(2026-07-03, clovanote 녹취). 화자 번호는 녹음 파일마다 재설정되므로 역할 기준으로 재구성했으며, 일부 호칭·역할 추정은 발언 맥락에 근거함. 사실 확인이 필요한 호칭(예: 전문가 성함)은 원문 재확인 권장.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

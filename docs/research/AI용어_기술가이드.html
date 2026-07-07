@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 용어·기술 가이드 — 전문가와 대화하기 위한 최소 지식</title>
+<style>
+  :root {
+    --berry:#ff5d73; --berry-soft:#ff8a9c; --leaf:#5fd39a; --leaf-soft:rgba(95,211,154,.12);
+    --amber:#ffc861; --amber-soft:rgba(255,200,97,.12); --paper:#0e1014; --card:#1b1f2a;
+    --ink:#e7e9ee; --ink-soft:#a4abba; --line:#2c3242; --line-strong:#3a4152;
+    --berry-wash:rgba(255,93,115,.14); --code-bg:#222736;
+    --blue:#5cc8ff; --blue-soft:rgba(92,200,255,.12);
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    --maxw:1180px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: radial-gradient(1200px 600px at 80% -10%, #1d2230 0%, var(--paper) 55%);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", "Segoe UI", "Noto Sans KR", Roboto, sans-serif;
+    line-height: 1.72; font-size: 16.5px; letter-spacing: -0.003em; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  .hero { border-bottom: 1px solid var(--line); background: radial-gradient(120% 80% at 88% -10%, var(--berry-wash) 0%, transparent 55%), var(--paper); }
+  .hero-inner { max-width: var(--maxw); margin: 0 auto; padding: 56px 24px 44px; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 9px; font-size: 12.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--berry); }
+  .eyebrow::before { content: ""; width: 22px; height: 2px; background: var(--berry); border-radius: 2px; }
+  h1.title { font-size: clamp(28px, 4.6vw, 43px); line-height: 1.14; margin: 18px 0 14px; font-weight: 800; letter-spacing: -0.02em; text-wrap: balance; max-width: 21ch; }
+  h1.title em { font-style: normal; color: var(--berry); }
+  .lede { font-size: clamp(15.5px, 2vw, 18px); color: var(--ink-soft); max-width: 64ch; margin: 0; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+  .chip { font-size: 13px; font-weight: 600; color: var(--ink-soft); background: var(--card); border: 1px solid var(--line-strong); padding: 6px 13px; border-radius: 999px; }
+  .chip b { color: var(--ink); }
+  .layout { display: grid; grid-template-columns: 232px 1fr; gap: 48px; align-items: start; padding: 44px 0 90px; }
+  nav.toc { position: sticky; top: 20px; font-size: 13.5px; line-height: 1.5; border-left: 2px solid var(--line); padding-left: 2px; }
+  nav.toc .toc-head { font-size: 11.5px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--ink-soft); padding: 0 0 10px 16px; }
+  nav.toc a { display: block; color: var(--ink-soft); text-decoration: none; padding: 5px 0 5px 16px; margin-left: -2px; border-left: 2px solid transparent; transition: color .15s, border-color .15s; }
+  nav.toc a .n { color: var(--berry); font-weight: 700; font-variant-numeric: tabular-nums; margin-right: 8px; }
+  nav.toc a:hover { color: var(--ink); border-left-color: var(--berry-soft); }
+  nav.toc a:focus-visible { outline: 2px solid var(--berry); outline-offset: 2px; border-radius: 3px; }
+  main { min-width: 0; }
+  section { scroll-margin-top: 20px; margin-bottom: 18px; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; margin: 50px 0 4px; }
+  section:first-child .sec-head { margin-top: 0; }
+  .sec-num { font-size: 13px; font-weight: 800; color: var(--berry); font-variant-numeric: tabular-nums; letter-spacing: .05em; border: 1.5px solid var(--berry); border-radius: 7px; padding: 2px 9px; flex: none; line-height: 1.4; }
+  h2 { font-size: clamp(21px, 3vw, 27px); font-weight: 800; letter-spacing: -0.015em; margin: 0; text-wrap: balance; }
+  .sec-sub { color: var(--ink-soft); font-size: 15px; margin: 8px 0 22px; }
+  h3 { font-size: 18px; font-weight: 750; margin: 30px 0 10px; letter-spacing: -0.01em; }
+  h3 .tag { font-size: 12px; font-weight: 700; color: var(--berry); background: var(--berry-wash); padding: 2px 8px; border-radius: 6px; margin-left: 8px; vertical-align: middle; }
+  p { margin: 12px 0; }
+  strong { font-weight: 700; color: var(--ink); }
+  .hl { background: linear-gradient(transparent 62%, var(--berry-wash) 62%); padding: 0 1px; font-weight: 600; }
+  ul.clean { list-style: none; padding: 0; margin: 14px 0; }
+  ul.clean > li { position: relative; padding-left: 22px; margin: 9px 0; }
+  ul.clean > li::before { content: ""; position: absolute; left: 4px; top: .72em; width: 6px; height: 6px; background: var(--berry-soft); border-radius: 50%; }
+  code { font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size: .85em; background: var(--code-bg); padding: 1.5px 6px; border-radius: 5px; color: var(--ink); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px; box-shadow: var(--shadow); margin: 18px 0; }
+  .callout { border-radius: 12px; padding: 16px 18px; margin: 20px 0; border: 1px solid; }
+  .callout .lab { font-size: 11.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; display: block; margin-bottom: 6px; }
+  .callout p { margin: 6px 0; } .callout p:first-of-type { margin-top: 0; } .callout p:last-child { margin-bottom: 0; }
+  .callout.key { background: var(--berry-wash); border-color: color-mix(in srgb, var(--berry) 30%, transparent); }
+  .callout.key .lab { color: var(--berry); }
+  .callout.warn { background: var(--amber-soft); border-color: color-mix(in srgb, var(--amber) 35%, transparent); }
+  .callout.warn .lab { color: var(--amber); }
+  .callout.tip { background: var(--leaf-soft); border-color: color-mix(in srgb, var(--leaf) 30%, transparent); }
+  .callout.tip .lab { color: var(--leaf); }
+  .callout.mine { background: var(--blue-soft); border-color: color-mix(in srgb, var(--blue) 32%, transparent); }
+  .callout.mine .lab { color: var(--blue); }
+  .tbl-scroll { overflow-x: auto; margin: 20px 0; border: 1px solid var(--line); border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.3px; min-width: 560px; }
+  th, td { text-align: left; padding: 11px 15px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--berry-wash); color: var(--ink); font-weight: 700; font-size: 13px; white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num, th.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tbody tr:hover td { background: color-mix(in srgb, var(--berry-wash) 45%, transparent); }
+  .u { color: var(--berry); font-weight: 700; }
+
+  /* model zoo */
+  .zoo { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 18px 0; }
+  .mz { background: var(--card); border: 1px solid var(--line); border-radius: 13px; padding: 16px 18px; box-shadow: var(--shadow); }
+  .mz .nm { font-weight: 750; font-size: 15.5px; display: flex; align-items: center; gap: 8px; }
+  .mz .en { font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 11.5px; color: var(--ink-soft); font-weight: 500; }
+  .mz .k { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 5px; margin-left: auto; }
+  .mz .k.tree { background: var(--leaf-soft); color: var(--leaf); }
+  .mz .k.dl { background: var(--blue-soft); color: var(--blue); }
+  .mz p { font-size: 13.6px; margin: 9px 0 0; color: var(--ink-soft); line-height: 1.6; }
+  .mz p b { color: var(--ink); }
+
+  /* say-this phrase pairs */
+  .phrase { border: 1px solid var(--line); border-radius: 13px; overflow: hidden; margin: 16px 0; box-shadow: var(--shadow); }
+  .phrase .row { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); }
+  .phrase .row:first-child { border-top: none; }
+  .phrase .say, .phrase .mean { padding: 13px 16px; font-size: 14px; }
+  .phrase .say { background: var(--card); border-right: 1px solid var(--line); }
+  .phrase .say b { color: var(--berry); }
+  .phrase .mean { color: var(--ink-soft); background: color-mix(in srgb, var(--card) 60%, var(--paper)); }
+  .phrase .hd { font-size: 11.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); padding: 9px 16px; background: var(--berry-wash); }
+  .phrase .hd.a { border-right: 1px solid var(--line); color: var(--berry); }
+  .phrase-head { display: grid; grid-template-columns: 1fr 1fr; }
+
+  dl.gloss { margin: 16px 0; }
+  dl.gloss > div { padding: 12px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 210px 1fr; gap: 20px; }
+  dl.gloss > div:last-child { border-bottom: none; }
+  dl.gloss dt { font-weight: 750; color: var(--ink); }
+  dl.gloss dt small { display: block; font-weight: 500; color: var(--ink-soft); font-size: 12px; margin-top: 2px; font-family: "SF Mono", ui-monospace, monospace; }
+  dl.gloss dd { margin: 0; color: var(--ink-soft); font-size: 14.3px; }
+  dl.gloss dd b { color: var(--ink); }
+
+  .footer { border-top: 1px solid var(--line); padding: 28px 0 60px; color: var(--ink-soft); font-size: 13.5px; }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; gap: 0; }
+    nav.toc { display: none; }
+    .zoo { grid-template-columns: 1fr; }
+    .phrase .row { grid-template-columns: 1fr; }
+    .phrase .say { border-right: none; border-bottom: 1px solid var(--line); }
+    .phrase-head .hd.a { display: none; }
+    .phrase-head { grid-template-columns: 1fr; }
+    dl.gloss > div { grid-template-columns: 1fr; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="eyebrow">딸기 스마트팜 · AI 용어·기술편</span>
+    <h1 class="title">AI 전문가와 <em>대화하기</em><br>위한 최소 지식</h1>
+    <p class="lede">회의와 우리 팀 코드에 실제로 등장한 모델·개념만 골라 정리했다. 목표는 "직접 모델을 짜는 것"이 아니라, 개발자가 하는 말을 <strong>알아듣고, 맞는 질문을 되던지는 것</strong>. 파란 박스는 <strong>우리 프로젝트가 실제로 쓴 것</strong>이라 대화에서 바로 통한다.</p>
+    <div class="hero-meta">
+      <span class="chip"><b>근거</b> 회의록 + 팀 코드(노하우.md·submit_pipeline)</span>
+      <span class="chip"><b>대상</b> 비개발 팀원</span>
+      <span class="chip"><b>수록</b> 모델 동물원 · 대화 표현 · 용어집</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="layout">
+    <nav class="toc" aria-label="목차">
+      <div class="toc-head">목차</div>
+      <a href="#map"><span class="n">01</span>큰 그림 — 지형과 우리 스택</a>
+      <a href="#zoo"><span class="n">02</span>모델 동물원</a>
+      <a href="#data"><span class="n">03</span>데이터 · 피처</a>
+      <a href="#train"><span class="n">04</span>학습 · 검증 · 과적합</a>
+      <a href="#metric"><span class="n">05</span>평가 지표</a>
+      <a href="#uncert"><span class="n">06</span>불확실성 — 신뢰구간</a>
+      <a href="#cause"><span class="n">07</span>상관≠인과 · 예측vs제어</a>
+      <a href="#talk"><span class="n">08</span>전문가와 대화하기</a>
+      <a href="#gloss"><span class="n">09</span>용어집</a>
+    </nav>
+
+    <main>
+      <!-- 01 -->
+      <section id="map">
+        <div class="sec-head"><span class="sec-num">01</span><h2>큰 그림 — 지형과 우리 스택</h2></div>
+        <p class="sec-sub">단어들이 어디에 속하는지 지도부터.</p>
+
+        <p>흔히 뭉뚱그리는 세 단어의 포함 관계: <strong>AI ⊃ 머신러닝(ML) ⊃ 딥러닝(DL)</strong>.</p>
+        <ul class="clean">
+          <li><strong>머신러닝</strong> = 데이터로 규칙을 스스로 학습. 우리가 쓰는 대부분.</li>
+          <li><strong>딥러닝</strong> = 신경망(뉴럴넷) 기반 ML의 한 갈래. LSTM·트랜스포머가 여기.</li>
+          <li><strong>전통 ML(트리 계열)</strong> = 신경망 아님. 엑셀 같은 <span class="hl">표(정형) 데이터에 강함</span>. 우리 스택의 주력.</li>
+        </ul>
+
+        <div class="callout mine">
+          <span class="lab">우리 팀이 실제로 쓰는 것</span>
+          <p><strong>모델</strong>: RandomForest, LightGBM, XGBoost, CatBoost (전부 트리 계열). <strong>검증</strong>: GroupKFold 교차검증. <strong>지표</strong>: R²·MAE. <strong>불확실성</strong>: CQR(등각예측) 신뢰구간. <strong>구조</strong>: 환경 입력(X) → 생육 7개 예측(Y), 예측 + 농학 규칙 <strong>하이브리드</strong>. 회의에선 여기에 LSTM·트랜스포머·berry2vec를 얹을지 논의 중.</p>
+        </div>
+
+        <div class="callout tip">
+          <span class="lab">한 문장으로 ML의 전부</span>
+          <p><code>model.fit(X, y)</code> = 문제(X)와 정답(y)으로 <strong>공부</strong>. <code>model.predict(X)</code> = 새 문제로 <strong>시험</strong>. 나머지는 전부 이 두 줄을 잘하기 위한 곁가지다.</p>
+        </div>
+      </section>
+
+      <!-- 02 -->
+      <section id="zoo">
+        <div class="sec-head"><span class="sec-num">02</span><h2>모델 동물원</h2></div>
+        <p class="sec-sub">회의·코드에 나온 모델들. 초록=트리 계열, 파랑=딥러닝.</p>
+
+        <h3>트리 계열 — 표 데이터의 주력</h3>
+        <p>"질문을 나뭇가지처럼 분기(온도 20도↑? → …)"하는 <code>결정트리</code>를 여러 개 묶은 것들. 센서 숫자 데이터와 궁합이 좋아 스마트팜에서 많이 쓴다.</p>
+        <div class="zoo">
+          <div class="mz">
+            <div class="nm">랜덤포레스트 <span class="k tree">트리</span></div>
+            <div class="en">RandomForest</div>
+            <p>나무 여러 개가 <b>투표</b>. 작은 데이터에 안정적. <b>우리 데이터(600줄)에서 최다 1등</b> — 유명 부스팅보다 나았다.</p>
+          </div>
+          <div class="mz">
+            <div class="nm">그래디언트 부스팅 <span class="k tree">트리</span></div>
+            <div class="en">GBT / Gradient Boosting</div>
+            <p>나무를 <b>순차로 쌓아 앞 나무 실수를 다음 나무가 보정</b>. 아래 3형제가 이 방식의 고성능 구현.</p>
+          </div>
+          <div class="mz">
+            <div class="nm">XGBoost <span class="k tree">트리</span></div>
+            <div class="en">xgboost</div>
+            <p>부스팅 대표주자. <b>우리 착과수 예측 1등</b>(R² 0.92, 단 교차검증 땐 불안정). 큰 데이터일수록 강함.</p>
+          </div>
+          <div class="mz">
+            <div class="nm">LightGBM <span class="k tree">트리</span></div>
+            <div class="en">lightgbm</div>
+            <p>빠르고 가벼운 부스팅. 우리는 <b>신뢰구간(분위수 회귀)</b> 뽑는 데 활용.</p>
+          </div>
+          <div class="mz">
+            <div class="nm">CatBoost <span class="k tree">트리</span></div>
+            <div class="en">catboost</div>
+            <p>범주형 데이터에 강한 부스팅. <b>관부직경 예측 1등</b>(0.89).</p>
+          </div>
+          <div class="mz">
+            <div class="nm">앙상블 <span class="k tree">기법</span></div>
+            <div class="en">Ensemble</div>
+            <p>모델을 <b>합침</b>(예측 평균/결합). 트리는 인과가 약하니 LSTM과 앙상블해 보완하자는 게 회의 아이디어.</p>
+          </div>
+        </div>
+
+        <h3>딥러닝 — 시간·서사를 다룰 때</h3>
+        <div class="zoo">
+          <div class="mz">
+            <div class="nm">LSTM <span class="k dl">딥러닝</span></div>
+            <div class="en">Long Short-Term Memory</div>
+            <p><b>기억력 있는 순차 모델.</b> "낮에 높았다 밤에 낮음" vs 반대 같은 <b>시간 순서·인과</b>를 학습. 트리가 약한 부분.</p>
+          </div>
+          <div class="mz">
+            <div class="nm">트랜스포머 <span class="k dl">딥러닝</span></div>
+            <div class="en">Transformer</div>
+            <p>요즘 AI(챗GPT 등)의 뼈대. 시퀀스 전체를 한눈에 보는 <b>어텐션</b> 방식. 히스토리 연결에 강함.</p>
+          </div>
+          <div class="mz">
+            <div class="nm">인코더-디코더 <span class="k dl">구조</span></div>
+            <div class="en">Encoder-Decoder</div>
+            <p><b>인코더</b>: 입력을 압축 요약. <b>디코더</b>: 그걸 풀어 예측 생성. 회의의 berry2vec가 이 구조(인코더만 떼어 착과수 디코더에 붙임).</p>
+          </div>
+          <div class="mz">
+            <div class="nm">Life2vec → berry2vec <span class="k dl">응용</span></div>
+            <div class="en">life2vec</div>
+            <p>덴마크 인구 <b>생애 데이터</b>로 수명을 예측한 모델. "작물의 일생을 서사로" 응용한 게 berry2vec. <b>단점: 데이터 대량 필요</b>(회의 우려).</p>
+          </div>
+        </div>
+
+        <div class="callout key">
+          <span class="lab">대화에서 이것만 기억</span>
+          <p><strong>"우리 데이터는 작고(수백 줄) 표 형태라 트리 계열이 주력, 시간 인과가 필요하면 LSTM을 얹는다"</strong> — 이 한 문장이면 모델 선택 논의를 따라갈 수 있다. 그리고 <strong>"유명 모델이 항상 최강은 아니다, 항목별로 돌려 비교해야"</strong>가 우리 팀이 데이터로 증명한 결론.</p>
+        </div>
+      </section>
+
+      <!-- 03 -->
+      <section id="data">
+        <div class="sec-head"><span class="sec-num">03</span><h2>데이터 · 피처</h2></div>
+        <p class="sec-sub">모델보다 데이터가 점수를 더 많이 좌우한다 — 우리 팀이 몸으로 겪은 것.</p>
+
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>용어</th><th>뜻</th><th>우리 예</th></tr></thead>
+            <tbody>
+              <tr><td><strong>X (피처/입력)</strong></td><td>모델이 보고 판단할 재료</td><td>환경 9개(EC·pH·CO₂·온습도·일사…) + 이력</td></tr>
+              <tr><td><strong>Y (타깃/정답)</strong></td><td>맞히려는 값</td><td>생육 7개(착과수·초장·관부직경…)</td></tr>
+              <tr><td><strong>정형 데이터</strong></td><td>표(행·열) 형태</td><td>우리 CSV/엑셀 — 트리 계열이 강함</td></tr>
+              <tr><td><strong>시계열</strong></td><td>시간 순서 있는 데이터</td><td>1분 단위 환경 센서 로그</td></tr>
+              <tr><td><strong>임베딩</strong></td><td>데이터를 숫자 벡터로 변환</td><td>berry2vec의 시계열 임베딩</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>피처 엔지니어링 <span class="tag">점수의 핵심</span></h3>
+        <p><strong>피처 엔지니어링 = X를 더 똑똑하게 가공</strong>하는 것. 새 열 추가만이 아니라 <span class="hl">"기존 정보를 어떻게 요약하느냐"</span>가 진짜 무기. 우리 팀 최대 성과가 여기서 나왔다.</p>
+        <div class="callout mine">
+          <span class="lab">우리가 점수 올린 실제 피처</span>
+          <ul class="clean" style="margin:6px 0">
+            <li><strong>집계 기간 바꾸기</strong>: 환경을 "주 평균" 대신 "<strong>조사일 직전 N일 평균</strong>"으로 → 착과수 R² <span class="u">0.69 → 0.91</span>. 항목마다 최적 기간 다름(착과수 14일, 관부직경 7일).</li>
+            <li><strong>적산온도·누적일사·경과주</strong>: 시간·누적 정보를 피처로. (농학의 적산온도 개념을 코드로.)</li>
+            <li><strong>prev(지난주값)</strong>: 강력하지만 함정(4장 참고).</li>
+          </ul>
+        </div>
+
+        <h3>전처리 기본기</h3>
+        <ul class="clean">
+          <li><strong>정규화/표준화</strong>: 값 범위를 맞춤(0~1 등). <span class="u">주의</span> — 우리 데이터는 동일값이 뭉쳐 있어 정규화로 뭉개면 정보 손실. "안 뭉개고 다 살리기"가 유리했다.</li>
+          <li><strong>결측치(NaN)</strong>: 빈 값. 평균으로 채우거나(<code>fillna</code>) 제거.</li>
+          <li><strong>이상값(outlier)</strong>: 물리적으로 불가능한 값. 우리는 <strong>2월 내부습도 13.9%</strong>(겨울 온실 불가능)를 센서 고장으로 판단해 제거 → 과습 경고가 살아남. <strong>모델 전에 월별 스캔 필수.</strong></li>
+          <li><strong>데이터 살리기</strong>: 측정라인5 × 표본2 = 10개를 평균으로 뭉개 60줄이던 걸, 안 뭉개 <strong>600줄</strong>로 → 성능 급등(초장 0.60→0.93). <span class="u">모델 튜닝보다 큰 효과.</span></li>
+        </ul>
+      </section>
+
+      <!-- 04 -->
+      <section id="train">
+        <div class="sec-head"><span class="sec-num">04</span><h2>학습 · 검증 · 과적합</h2></div>
+        <p class="sec-sub">"점수 잘 나왔다"를 믿으면 안 되는 이유.</p>
+
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>용어</th><th>뜻</th></tr></thead>
+            <tbody>
+              <tr><td><strong>학습셋 / 검증셋 / 테스트셋</strong><br><small>train / validation / test</small></td><td>공부용 / 중간점검용 / 최종시험용 데이터 분리. 시험 문제를 미리 보면 안 되듯 나눈다.</td></tr>
+              <tr><td><strong>과적합</strong> <small>overfitting</small></td><td>학습 데이터만 달달 외워 <b>새 데이터엔 못 맞힘.</b> 데이터 적은데 피처 많으면 발생(우리: 열 9→27개 늘리자 0.58→0.42 하락).</td></tr>
+              <tr><td><strong>과소적합</strong> <small>underfitting</small></td><td>덜 배워서 학습 데이터조차 못 맞힘.</td></tr>
+              <tr><td><strong>교차검증</strong> <small>cross-validation</small></td><td>데이터를 여러 조각으로 나눠 <b>돌아가며 시험</b>. 단일 시험의 운빨을 걸러냄.</td></tr>
+              <tr><td><strong>하이퍼파라미터</strong></td><td>사람이 정하는 모델 설정(나무 개수 등). <code>n_estimators=300</code> 같은 것.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout mine">
+          <span class="lab">우리 팀이 겪은 두 함정 (대화에서 나오면 아는 척 가능)</span>
+          <p><strong>① 데이터 누수(leakage) + GroupKFold</strong> — 같은 온실·날짜 측정이 학습셋과 시험셋에 나뉘어 들어가면 "커닝"이 된다(누수). <strong>GroupKFold</strong>는 같은 그룹을 한쪽에만 넣어 이걸 막는다. 우리 600줄 검증의 핵심 안전장치.</p>
+          <p><strong>② prev(지난주값) 함정</strong> — 지난주 실제값을 넣으면 점수가 확 오르지만, 대회가 "미래 여러 주"를 물으면 그 값을 못 쓴다 → 점수 폭락. <strong>확인법: prev 빼고 돌려본다.</strong> 유지되면 진짜 실력, 뚝 떨어지면 의존(위험). 그래서 코드에 <code>USE_PREV</code> 플래그로 두 버전을 둔다.</p>
+        </div>
+
+        <div class="callout warn">
+          <span class="lab">단일 시험은 못 믿는다</span>
+          <p>우리 경험: "착과수 0.91, 14일 최적, XGBoost 최고"가 교차검증에선 "0.79, 7~21일 다 비슷, XGBoost 꼴찌"로 뒤집혔다. <strong>단일 20% 시험은 운에 흔들려 뻥튀기.</strong> 반드시 교차검증 + 오차범위(±)로 보고, ± 겹치면 "차이 없음"으로 판단.</p>
+        </div>
+      </section>
+
+      <!-- 05 -->
+      <section id="metric">
+        <div class="sec-head"><span class="sec-num">05</span><h2>평가 지표</h2></div>
+        <p class="sec-sub">"잘한다"를 숫자로. 우리는 R²·MAE를 쓴다.</p>
+
+        <h3>회귀 vs 분류 — 먼저 이걸 구분</h3>
+        <ul class="clean">
+          <li><strong>회귀(regression)</strong>: 연속된 <span class="hl">숫자</span>를 맞힘. "착과수 4.8개", "초장 22cm". 우리 주 방식.</li>
+          <li><strong>분류(classification)</strong>: <span class="hl">카테고리</span>를 맞힘. 회의의 berry2vec는 착과수를 "3개 이하 ~ 8개 이상"의 <strong>6클래스로 분류</strong>했다.</li>
+        </ul>
+
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>지표</th><th>쓰임</th><th>방향</th><th>메모</th></tr></thead>
+            <tbody>
+              <tr><td><strong>R²</strong> (결정계수)</td><td>회귀</td><td class="u">↑ 좋음 (최대 1)</td><td>"예측이 정답 변동을 얼마나 설명하나". 0.9=우수, 음수=엉망. 우리 착과수 0.83.</td></tr>
+              <tr><td><strong>MAE</strong> (평균절대오차)</td><td>회귀</td><td class="u">↓ 좋음</td><td>평균 몇 개 틀리나. 착과수 MAE 1.36 = 평균 1.36개 오차(작은 값이라 큼).</td></tr>
+              <tr><td><strong>RMSE</strong></td><td>회귀</td><td class="u">↓ 좋음</td><td>큰 오차에 더 민감한 오차 지표.</td></tr>
+              <tr><td><strong>정확도</strong> (Accuracy)</td><td>분류</td><td class="u">↑ 좋음</td><td>몇 % 맞혔나. 클래스 불균형 땐 오해 소지.</td></tr>
+              <tr><td><strong>F1 점수</strong></td><td>분류</td><td class="u">↑ 좋음</td><td>정밀도·재현율의 균형. 불균형 데이터에 정확도보다 신뢰.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout warn">
+          <span class="lab">R² 높다고 중요한 게 아니다</span>
+          <p>R²는 "예측 난이도"일 뿐. 착과수 R²는 중간(0.69~0.83)이어도 <strong>대회 핵심(열매=돈)</strong>이다. 반대로 엽수는 R²가 낮아(0.06) 예측이 어렵지만 착과수와 무관해 덜 중요. <strong>지표 순서 ≠ 중요도 순서.</strong></p>
+        </div>
+      </section>
+
+      <!-- 06 -->
+      <section id="uncert">
+        <div class="sec-head"><span class="sec-num">06</span><h2>불확실성 — 신뢰구간</h2></div>
+        <p class="sec-sub">"착과수 4.8개"보다 "4.8개, 3~7개 사이 80% 확신"이 훨씬 쓸모 있다. 우리 팀이 실제 구현한 고급 기법.</p>
+
+        <div class="callout mine">
+          <span class="lab">등각예측 / CQR — 우리가 쓰는 것</span>
+          <p><strong>등각예측(Conformal Prediction)</strong> = 점 예측에 <strong>수학적으로 보장된 신뢰구간</strong>을 붙이는 기법. 우리는 <strong>CQR(등각 분위수 회귀)</strong> 사용 — LightGBM으로 하한·상한을 예측하고, 보정량 Q로 조정해 <strong>"명목 커버리지 80%"</strong>를 맞춘다(<code>ALPHA=0.20</code>). 제출도 "값 + 하한 + 상한" 형태로 나간다.</p>
+        </div>
+
+        <h3>왜 중요한가 — 의사결정과 직결</h3>
+        <ul class="clean">
+          <li><strong>커버리지(coverage)</strong>: 신뢰구간이 실제 정답을 담는 비율. "80% 커버리지"면 100번 중 80번은 구간 안에 정답이 든다는 뜻. 실측이 명목과 맞는지 검증한다(우리 <code>문제3_커버리지결과.csv</code>).</li>
+          <li>구간이 <strong>좁으면</strong> 확신 있는 예측 → 과감히 결정. <strong>넓으면</strong> 불확실 → 보수적으로 대응하거나 사람이 개입. 농작업 의사결정에 직접 쓰인다.</li>
+        </ul>
+
+        <div class="callout tip">
+          <span class="lab">대화 팁</span>
+          <p>"이 예측 <strong>신뢰구간</strong>은 얼마고, <strong>커버리지</strong>는 검증했나요?"라고 물으면 개발자가 "이 사람 좀 아는데" 한다. 단일 점 예측만 들고 오면 "구간도 같이 봅시다"가 정석 반응.</p>
+        </div>
+      </section>
+
+      <!-- 07 -->
+      <section id="cause">
+        <div class="sec-head"><span class="sec-num">07</span><h2>상관 ≠ 인과 · 예측 vs 제어</h2></div>
+        <p class="sec-sub">이 대회의 승부를 가르는 개념. 우리 팀 기획안의 핵심 논리이기도 하다.</p>
+
+        <div class="callout key">
+          <span class="lab">한 줄 정의</span>
+          <p><strong>상관</strong>: 두 값이 같이 움직임. <strong>인과</strong>: 하나가 다른 하나의 <strong>원인</strong>. <span class="hl">같이 움직인다고 원인은 아니다.</span> 겨울엔 습도도 높고 딸기도 익는데, 습도가 익힌 게 아니라 "겨울"이 둘 다의 배후.</p>
+        </div>
+
+        <h3>왜 예측 모델로는 "제어 효과"를 못 뽑나</h3>
+        <p>우리가 직접 확인한 것: 습도·급액·온도를 바꿔 착과수 변화를 시뮬(<code>step10</code>)했더니 <strong>거의 안 변했다.</strong> 이유:</p>
+        <ul class="clean">
+          <li>데이터가 <strong>농가의 정상 재배 관찰 기록</strong>일 뿐, "일부러 습도를 바꿔본" 실험이 아님 → <strong>인과를 뽑을 재료가 없다.</strong></li>
+          <li>prev(지난주값)가 예측을 지배해 환경 변화를 눌러버림.</li>
+          <li>모델이 안 본 조합은 뭉갠다.</li>
+        </ul>
+
+        <div class="callout mine">
+          <span class="lab">그래서 우리 팀의 결론 = 하이브리드</span>
+          <p><strong>예측</strong>("이 환경이면 착과수 몇?")은 데이터로 잘 된다(R² 0.83). 하지만 <strong>제어</strong>("습도 올리면 착과수 는다?")는 순수 데이터로 못 답한다(인과 문제). → <strong>AI 예측 + 딸기 농학 규칙의 하이브리드</strong>로 간다. prev 빼고 재시뮬하면 급액EC·CO₂는 농학과 일치하는 신호를 주지만(믿을만), 습도는 계절과 얽힌 <strong>가짜 신호</strong>라 걸러야 한다 — <strong>그 판단이 바로 농학 지식.</strong></p>
+        </div>
+
+        <div class="callout tip">
+          <span class="lab">피처 중요도도 같은 함정</span>
+          <p>우리 모델에서 예측 중요도 1등은 <strong>외부온도(계절, 74~80%)</strong> — 그런데 <strong>못 바꾼다(하늘).</strong> 조절 가능한 것 중엔 내부습도·급액EC가 착과수를 좌우. "예측에 중요한 변수"와 "제어에 유용한 변수"는 다르다. 의사결정은 <strong>바꿀 수 있는 변수</strong> 중심으로.</p>
+        </div>
+      </section>
+
+      <!-- 08 -->
+      <section id="talk">
+        <div class="sec-head"><span class="sec-num">08</span><h2>전문가와 대화하기</h2></div>
+        <p class="sec-sub">알아듣기 + 되던지기. 왼쪽을 말하면 오른쪽 뜻이 전달된다.</p>
+
+        <div class="phrase">
+          <div class="phrase-head"><div class="hd a">이렇게 말하면</div><div class="hd">이런 뜻 / 효과</div></div>
+          <div class="row"><div class="say"><b>"이거 회귀예요 분류예요?"</b></div><div class="mean">숫자를 맞히는지 카테고리를 맞히는지 확인. 문제 정의를 짚는 기본기.</div></div>
+          <div class="row"><div class="say"><b>"교차검증 했어요? 오차범위는요?"</b></div><div class="mean">단일 시험 뻥튀기를 경계. "±겹치면 차이 없음"을 안다는 신호.</div></div>
+          <div class="row"><div class="say"><b>"prev 빼고도 점수 유지돼요?"</b></div><div class="mean">누수·미래예측 대비를 확인. 우리 팀 핵심 함정을 짚음.</div></div>
+          <div class="row"><div class="say"><b>"GroupKFold로 누수 막았어요?"</b></div><div class="mean">같은 온실·날짜가 학습·시험에 섞였는지. 검증 신뢰도 질문.</div></div>
+          <div class="row"><div class="say"><b>"신뢰구간이랑 커버리지는요?"</b></div><div class="mean">점 예측만 말고 불확실성까지. 의사결정용 관점.</div></div>
+          <div class="row"><div class="say"><b>"그거 상관이에요 인과예요?"</b></div><div class="mean">제어 효과라고 주장할 때 결정타. 관찰 데이터의 한계 지적.</div></div>
+          <div class="row"><div class="say"><b>"조절 가능한 변수 중에선 뭐가 중요해요?"</b></div><div class="mean">외부온도(못 바꿈) 말고 실제 의사결정에 쓸 변수로 방향 전환.</div></div>
+          <div class="row"><div class="say"><b>"이 항목은 어떤 모델이 제일 나았어요?"</b></div><div class="mean">"유명 모델=최강 아님, 항목별 비교" 원칙을 공유.</div></div>
+        </div>
+
+        <div class="callout key">
+          <span class="lab">듣다가 막히면 되물을 3종 세트</span>
+          <p><strong>"그게 X예요 Y예요?"</strong>(개념 구분) · <strong>"그럼 그게 왜 중요해요?"</strong>(의미 확인) · <strong>"그거 검증은 어떻게 했어요?"</strong>(신뢰도 확인). 이 3개면 대부분의 ML 대화를 따라가고 이끌 수 있다.</p>
+        </div>
+
+        <div class="callout warn">
+          <span class="lab">모르면 이렇게 (아는 척 금물)</span>
+          <p>ML은 반례가 많은 분야다. 모르면 <strong>"그 용어 우리 프로젝트 맥락에서 한 문장으로 설명해줄래요?"</strong>가 제일 안전하고 빠르다. 우리 팀 노하우.md·submit_pipeline.py를 같이 보며 "우리 경우엔?"으로 좁히면 대화가 구체화된다.</p>
+        </div>
+      </section>
+
+      <!-- 09 -->
+      <section id="gloss">
+        <div class="sec-head"><span class="sec-num">09</span><h2>용어집</h2></div>
+        <p class="sec-sub">빠른 참조. 회의·코드에 나온 순.</p>
+
+        <dl class="gloss">
+          <div><dt>피처 <small>feature (X)</small></dt><dd>모델 입력 변수. 우리는 환경9 + 이력 + prev.</dd></div>
+          <div><dt>타깃 <small>target (Y)</small></dt><dd>맞히려는 정답. 우리는 생육 7개.</dd></div>
+          <div><dt>피처 엔지니어링</dt><dd>X를 똑똑하게 가공. "직전 N일 평균"이 최대 무기였다.</dd></div>
+          <div><dt>회귀 / 분류</dt><dd>숫자 맞히기 / 카테고리 맞히기.</dd></div>
+          <div><dt>랜덤포레스트</dt><dd>나무 투표 트리 모델. 작은 데이터에 안정적.</dd></div>
+          <div><dt>부스팅 <small>XGBoost·LightGBM·CatBoost</small></dt><dd>나무를 순차로 쌓아 보정. 큰 데이터에 강함.</dd></div>
+          <div><dt>앙상블</dt><dd>여러 모델을 합쳐 성능·안정성↑.</dd></div>
+          <div><dt>LSTM</dt><dd>기억력 있는 딥러닝. 시간 순서·인과 학습.</dd></div>
+          <div><dt>트랜스포머</dt><dd>어텐션 기반 딥러닝. 최신 AI의 뼈대.</dd></div>
+          <div><dt>인코더-디코더</dt><dd>입력 압축(인코더) → 예측 생성(디코더).</dd></div>
+          <div><dt>임베딩</dt><dd>데이터를 숫자 벡터로 변환.</dd></div>
+          <div><dt>정규화 / 표준화</dt><dd>값 범위 맞추기. 우리 데이터는 과도하면 정보 손실.</dd></div>
+          <div><dt>결측치 <small>NaN</small></dt><dd>빈 값. 채우거나 제거.</dd></div>
+          <div><dt>이상값 <small>outlier</small></dt><dd>불가능한 값(2월 습도 13.9%). 제거 대상.</dd></div>
+          <div><dt>과적합 <small>overfitting</small></dt><dd>학습 데이터만 외워 새 데이터에 실패.</dd></div>
+          <div><dt>교차검증 <small>cross-validation</small></dt><dd>조각내 돌아가며 시험. 운빨 제거.</dd></div>
+          <div><dt>GroupKFold</dt><dd>같은 그룹을 한쪽에만 넣어 데이터 누수 방지.</dd></div>
+          <div><dt>데이터 누수 <small>leakage</small></dt><dd>시험 정보가 학습에 새어드는 것. 점수 뻥튀기 원인.</dd></div>
+          <div><dt>하이퍼파라미터</dt><dd>사람이 정하는 모델 설정(나무 수 등).</dd></div>
+          <div><dt>R²</dt><dd>회귀 정확도(↑좋음, 최대 1). 변동 설명력.</dd></div>
+          <div><dt>MAE / RMSE</dt><dd>평균 오차 지표(↓좋음).</dd></div>
+          <div><dt>F1</dt><dd>분류 균형 지표. 불균형 데이터에 신뢰.</dd></div>
+          <div><dt>등각예측 / CQR <small>conformal</small></dt><dd>예측에 보장된 신뢰구간을 붙임. 우리가 구현.</dd></div>
+          <div><dt>커버리지</dt><dd>신뢰구간이 정답을 담는 비율. 80% 명목.</dd></div>
+          <div><dt>상관 ≠ 인과</dt><dd>같이 움직임 ≠ 원인. 제어 논의의 핵심.</dd></div>
+          <div><dt>피처 중요도</dt><dd>어떤 X가 예측에 크게 기여했나. "중요"≠"조절 가능".</dd></div>
+          <div><dt>하이브리드</dt><dd>AI 예측 + 농학 규칙 결합. 우리 대회 전략.</dd></div>
+        </dl>
+      </section>
+
+      <div class="footer">
+        <p>회의록 1·2·3 + 팀 코드(README·노하우.md·submit_pipeline.py) 기반 재구성. 파란 박스는 우리 프로젝트가 실제 사용/검증한 내용. 수치(R²·MAE·커버리지 등)는 팀 기록값으로, 데이터·검증 조건에 따라 달라질 수 있다. 개념 설명은 대화 이해용으로 단순화했으며 엄밀한 정의는 개발자와 확인 권장.</p>
+      </div>
+    </main>
+  </div>
+</div>
+</body>
+</html>
