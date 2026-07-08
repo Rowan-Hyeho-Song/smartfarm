@@ -1,0 +1,93 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>제어 — 점진 보정(ramp-rate 제한)</title>
+<style>
+  :root{--bg:#0e1014;--card:#1b1f2a;--card-2:#222736;--line:#2c3242;--text:#e7e9ee;
+    --text-dim:#a4abba;--text-faint:#7b8294;--berry:#ff5d73;--berry-soft:#ff8a9c;
+    --leaf:#5fd39a;--gold:#ffc861;--sky:#5cc8ff;--violet:#b69bff;--radius:16px;--maxw:900px;}
+  *{box-sizing:border-box;} a{color:inherit;text-decoration:none;}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#1d2230 0%,var(--bg) 55%);
+    color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;line-height:1.75;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px 120px;}
+  header.hero{max-width:var(--maxw);margin:0 auto;padding:56px 22px 22px;}
+  .back{font-size:13.5px;color:var(--sky);margin-bottom:16px;display:inline-block;}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.14em;font-weight:700;color:var(--violet);
+    text-transform:uppercase;border:1px solid rgba(182,155,255,.35);border-radius:999px;padding:6px 14px;margin-bottom:18px;background:rgba(182,155,255,.07);}
+  h1.title{font-size:clamp(25px,5vw,38px);line-height:1.2;margin:0 0 14px;font-weight:800;}
+  h1.title .accent{color:var(--violet);}
+  .lede{font-size:clamp(15px,2.3vw,17.5px);color:var(--text-dim);max-width:720px;margin:0;}
+  .tldr{background:linear-gradient(135deg,rgba(182,155,255,.13),rgba(95,211,154,.09));
+    border:1px solid rgba(182,155,255,.30);border-radius:var(--radius);padding:20px 24px;margin:24px auto 0;max-width:var(--maxw);}
+  .tldr h2{margin:0 0 10px;font-size:15.5px;color:var(--violet);} .tldr ul{margin:0;padding-left:20px;}
+  .tldr li{margin:7px 0;font-size:15px;color:var(--text);} .tldr b{color:#fff;}
+  section{margin-top:44px;} .kicker{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--violet);text-transform:uppercase;margin:0 0 8px;}
+  h2.sec{font-size:clamp(19px,3.4vw,25px);font-weight:800;margin:0 0 8px;} .sec-sub{color:var(--text-dim);margin:0 0 20px;font-size:15px;}
+  p{margin:0 0 14px;} .dim{color:var(--text-dim);}
+  .fig{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 14px;}
+  .cap{font-size:12.5px;color:var(--text-faint);text-align:center;margin:10px 4px 0;}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;margin:6px 0 0;}
+  table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px;}
+  thead th{background:#23283a;color:var(--violet);text-align:left;font-weight:700;padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  tbody td{padding:10px 14px;border-bottom:1px solid var(--line);color:var(--text-dim);font-variant-numeric:tabular-nums;}
+  tbody tr:last-child td{border-bottom:none;} tbody tr:nth-child(even){background:rgba(255,255,255,.018);}
+  td.term{color:#fff;font-weight:700;white-space:nowrap;} .pos{color:var(--leaf);font-weight:700;} .neg{color:var(--berry-soft);font-weight:700;}
+  code{background:var(--card-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-family:Consolas,monospace;font-size:12.5px;color:var(--sky);}
+  pre{background:var(--card-2);border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow-x:auto;color:var(--text);font-size:13px;line-height:1.6;}
+  .plain{border-left:3px solid var(--leaf);background:rgba(95,211,154,.07);border-radius:10px;padding:13px 17px;margin:16px 0 0;color:var(--text);font-size:15px;}
+  .plain b{color:var(--leaf);} .plain::before{content:"🍓 요점";display:block;font-size:12.5px;font-weight:700;color:var(--leaf);margin-bottom:5px;}
+  .warn{border-left:3px solid var(--gold);background:rgba(255,200,97,.07);border-radius:10px;padding:13px 17px;margin:16px 0 0;color:var(--text);font-size:14.5px;}
+  .warn b{color:var(--gold);} .warn::before{content:"⚠ 정직한 한계";display:block;font-size:12.5px;font-weight:700;color:var(--gold);margin-bottom:5px;}
+  footer{max-width:var(--maxw);margin:52px auto 0;padding:20px 22px 0;border-top:1px solid var(--line);color:var(--text-faint);font-size:13px;}
+</style></head><body>
+<header class="hero">
+  <a class="back" href="../index.html">← 문서 인덱스</a>
+  <span class="eyebrow">베리디시전 · 제어 실행 정책</span>
+  <h1 class="title">점진 보정 — <span class="accent">한 번에 되돌리지 않는다</span></h1>
+  <p class="lede">기존 제어 규칙은 '무엇을 어느 방향으로' 바꿀지를 줍니다. 이 문서는 그 위에 얹는 <b style="color:var(--text)">'어떻게' 층</b> — 목표 편차를 하루 상한(0.5℃/일)을 두고 <b style="color:var(--text)">2~5일에 나눠</b> 완만히 옮기는 rate-limiter입니다.</p>
+</header>
+<div class="tldr">
+  <h2>핵심 3가지</h2>
+  <ul>
+    <li><b>급격한 주야 스윙 = 스트레스</b> — 주간이 평소보다 1~2℃ 높았다고 그날 밤 바로 1~2℃ 낮추면 식물에 열 스트레스가 누적됩니다.</li>
+    <li><b>편차를 나눠 흘린다</b> — 하루 최대 <b>0.5℃</b>씩, <b>2~5일</b>에 걸쳐 목표에 도달. 같은 날 반대방향 과보정은 금지.</li>
+    <li><b>DIF는 안전밴드 안에서</b> — 주야온도차(DIF)를 5.0~8.0℃ 밴드 안에 유지하며 전이해, 발달 균형을 깨지 않습니다.</li>
+  </ul>
+</div>
+<div class="wrap">
+
+<section>
+  <div class="kicker">그림으로</div>
+  <h2 class="sec">급격(1일) vs 점진(3일) — 야간 8.0℃ → 6.5℃</h2>
+  <p class="sec-sub">주간이 평소보다 +1.5℃ 높게 측정돼 야간을 1.5℃ 낮추려는 상황. 빨강은 하루에 1.5℃ 떨어뜨리는 급격 보정, 초록은 0.5℃/일씩 3일에 나눈 점진 보정.</p>
+  <div class="fig"><svg viewBox="0 0 560 250" width="100%" role="img" aria-label="급격 vs 점진 야간온도 보정"><line x1="44" y1="200.0" x2="516" y2="200.0" stroke="#2c3242" stroke-width="1"/><text x="36" y="204.0" text-anchor="end" fill="#7b8294" font-size="11">6.0</text><line x1="44" y1="140.0" x2="516" y2="140.0" stroke="#2c3242" stroke-width="1"/><text x="36" y="144.0" text-anchor="end" fill="#7b8294" font-size="11">7.0</text><line x1="44" y1="80.0" x2="516" y2="80.0" stroke="#2c3242" stroke-width="1"/><text x="36" y="84.0" text-anchor="end" fill="#7b8294" font-size="11">8.0</text><text x="44.0" y="224.0" text-anchor="middle" fill="#7b8294" font-size="11">D0</text><text x="138.4" y="224.0" text-anchor="middle" fill="#7b8294" font-size="11">D1</text><text x="232.8" y="224.0" text-anchor="middle" fill="#7b8294" font-size="11">D2</text><text x="327.2" y="224.0" text-anchor="middle" fill="#7b8294" font-size="11">D3</text><text x="421.6" y="224.0" text-anchor="middle" fill="#7b8294" font-size="11">D4</text><text x="516.0" y="224.0" text-anchor="middle" fill="#7b8294" font-size="11">D5</text><polyline points="44.0,80.0 138.4,170.0 232.8,170.0 327.2,170.0 421.6,170.0 516.0,170.0" fill="none" stroke="#ff5d73" stroke-width="2.4" stroke-dasharray="6 5"/><polyline points="44.0,80.0 138.4,110.0 232.8,140.0 327.2,170.0 421.6,170.0 516.0,170.0" fill="none" stroke="#5fd39a" stroke-width="2.6"/><circle cx="138.4" cy="110.0" r="3.2" fill="#5fd39a"/><circle cx="232.8" cy="140.0" r="3.2" fill="#5fd39a"/><circle cx="327.2" cy="170.0" r="3.2" fill="#5fd39a"/><text x="516" y="162.0" text-anchor="end" fill="#5fd39a" font-size="12" font-weight="700">점진(안전)</text><text x="144.4" y="186.0" fill="#ff5d73" font-size="12" font-weight="700">급격(스트레스)</text></svg></div>
+  <p class="cap">가로축 D0(오늘)~D5, 세로축 야간 설정온도(℃). 점진(초록)은 목표에 늦게 닿지만 하루 변화폭이 작아 스트레스를 줄입니다.</p>
+</section>
+
+<section>
+  <div class="kicker">시나리오 표</div>
+  <h2 class="sec">감지 편차별 보정 스케줄</h2>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>감지</th><th>야간 목표</th><th>급격 일일변화</th><th>점진 일일변화</th><th>점진 스케줄(℃)</th></tr></thead>
+    <tbody><tr><td class='term'>주간 +1.0℃</td><td>8.0 → 7.0℃</td><td class='neg'>1.0℃ / 1일</td><td class='pos'>0.50℃ / 2일</td><td>8.0 → 7.5 → 7.0</td></tr><tr><td class='term'>주간 +1.5℃</td><td>8.0 → 6.5℃</td><td class='neg'>1.5℃ / 1일</td><td class='pos'>0.50℃ / 3일</td><td>8.0 → 7.5 → 7.0 → 6.5</td></tr><tr><td class='term'>주간 +2.0℃</td><td>8.0 → 6.0℃</td><td class='neg'>2.0℃ / 1일</td><td class='pos'>0.50℃ / 4일</td><td>8.0 → 7.5 → 7.0 → 6.5 → 6.0</td></tr></tbody>
+  </table></div>
+  <div class="plain">같은 목표에 도달하되, 하루 변화폭을 <b>0.5℃ 이하</b>로 눌러 스트레스를 낮춥니다. 편차가 클수록 분산 일수가 늘어납니다(최대 5일).</div>
+</section>
+
+<section>
+  <div class="kicker">형식화</div>
+  <h2 class="sec">rate-limiter 한 줄</h2>
+  <pre>일일 보정 = clip(목표 − 현재, −cap, +cap)      # cap = 0.5℃/일
+분산 일수 = clip(⌈|편차| / cap⌉, 2, 5)
+규칙: 같은 날 반대방향 과보정 금지 · DIF는 5.0~8.0℃ 밴드 유지</pre>
+  <p class="dim" style="font-size:13.5px;">구현: <code>src/ramp_control.py</code> · <code>ramp_schedule(current, target, cap, min_days, max_days)</code> → 일별 설정값 배열. 기존 <a href="룰베이스_제어규칙.html" style="color:var(--sky)">룰베이스 제어규칙</a>이 '방향'을 정하면, 이 모듈이 '속도'를 정합니다.</p>
+</section>
+
+<section>
+  <div class="kicker">위치</div>
+  <h2 class="sec">제어 트랙에서의 자리</h2>
+  <p>예측 성능은 데이터 크기(600행)에 막혔지만, 이 정책은 <b>도메인 지식으로 바로 값어치를 더하는</b> 층입니다. <a href="../experiments/AB제어실험_CO2.html" style="color:var(--sky)">A/B 제어 실험</a>에서 CO₂를 독립 레버로 규명했고 온도는 DIF 트레이드오프 레버였는데, 이 점진 정책은 그 온도 레버를 <b>안전하게 움직이는 법</b>을 규정합니다.</p>
+  <div class="warn">이 스케줄은 농학 원리(온도적산·완만 전이) 기반 <b>휴리스틱</b>이며, 우리 데이터로 A/B 검증한 값은 아닙니다. cap·분산 일수·DIF 밴드는 작물·시즌에 따라 조정해야 하고, <a href="../plan/실증실험_계획서.html" style="color:var(--gold)">실증 계획</a>의 무작위 배정 프로토콜로 <b>급격 vs 점진</b>을 직접 비교해 검증할 대상입니다.</div>
+</section>
+
+<footer>berry_ai · 딸기 스마트팜 예측·제어 · 점진 보정(ramp-rate) 정책 · 기본값 0.5℃/일 · 2~5일 분산</footer>
+</div></body></html>
