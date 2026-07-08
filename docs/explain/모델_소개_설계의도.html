@@ -327,12 +327,27 @@
         <tr><td class="term">v2</td><td>예측 단위를 <b>온실-날짜 평균</b>으로 + lag(전주 생육)</td><td>개체 노이즈 제거 + 실제 <b>제어 단위(온실)</b>와 일치.</td><td>집계 R² <b>0.87</b></td></tr>
         <tr><td class="term">v2.1</td><td>전주 개체 <b>분포</b>(std·min·max·중앙) 추가</td><td>평균으로 뭉갤 때 잃은 '분포 모양' 신호를 복원.</td><td>집계 R² <b>0.89</b></td></tr>
         <tr><td class="term">v3</td><td><b>개체별 lag</b>(자기 과거) + huber·MAE 튜닝</td><td>개체 자신의 과거가 최강 신호 + MAE 직접 최소화.</td><td>개체 <b>0.85</b>·집계 <b>0.94</b>·MAE <b>0.73</b></td></tr>
+        <tr><td class="term">v3.1</td><td><b>모멘텀 파생</b> — '개체 vs 온실' 상대위치 등 7개</td><td>수준(level)만 알던 모델에 '방향·상대위치'를 추가. 교차항이 중요도 1위.</td><td>개체 <b>0.86</b>·MAE중앙 <b>0.69</b></td></tr>
       </tbody>
     </table>
   </div>
 
-  <div class="plain">핵심 흐름: <b>개체(v1) → 온실 평균으로 노이즈 제거(v2) → 뭉갤 때 잃은 분포 되살리기(v2.1) → 개체를 시계열로 추적(v3)</b>. "문제를 어떻게 정의하느냐"가 정확도를 갈랐습니다.</div>
+  <div class="plain">핵심 흐름: <b>개체(v1) → 온실 평균으로 노이즈 제거(v2) → 뭉갤 때 잃은 분포 되살리기(v2.1) → 개체를 시계열로 추적(v3) → 파생으로 미세 조정(v3.1)</b>. "문제를 어떻게 정의하느냐"가 정확도를 갈랐습니다.</div>
   <div class="honest">v2.1·v3는 온실 4개·소표본(집계 60행 / 개체 600행) 기준이라 데이터가 늘면 수치가 달라질 수 있습니다. v3의 집계 우위(+0.05)는 소표본 차이일 수 있어, <b style="color:var(--text)">개체 해상도라는 '새 능력'</b>에 더 큰 의미가 있습니다.</div>
+
+  <h3 style="margin:34px 0 8px;font-size:18px">파생 엔지니어링 트랙 (v3.1 → v3.3) — 대량 파생을 '측정으로' 걸러내다</h3>
+  <p class="sec-sub" style="margin-bottom:16px">작년 해커톤 팁("파생 파라미터를 20개 가까이 대량 생성")을 그대로 따르지 않고, 하나씩 넣어 <b style="color:var(--text)">온실별 LOGO로 검증</b>하며 살아남는 것만 채택했습니다.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>실험</th><th>넣은 파생</th><th>결과</th><th>판정</th></tr></thead>
+      <tbody>
+        <tr><td class="term">v3.1 모멘텀</td><td>증가속도·상대위치 7개</td><td>교차항(개체 vs 온실) 중요도 1위 · MAE중앙 0.73→<b>0.69</b></td><td><b style="color:var(--leaf)">채택 ✓</b></td></tr>
+        <tr><td class="term">v3.2 환경추세</td><td>최근7일 vs 이전7일 델타 10개</td><td>착과수엔 무효 · 집계 0.935→0.928 (발달 지배 재확인)</td><td><b style="color:var(--text-dim)">기각 ✕</b></td></tr>
+        <tr><td class="term">v3.3 발달축</td><td>누적·템포·소스싱크 6개</td><td>중요도 2·3·4위(정보량 최상위)이나 600행에서 과적합</td><td><b style="color:var(--text-dim)">보류 ◑</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="plain"><b>트랙 결론:</b> 파생 아이디어의 질보다 <b>표본 수</b>가 병목입니다. v3.1의 교차항 하나 이후로, 더 많은(심지어 더 강한) 파생은 일반화를 못 올리고 과적합만 키웠습니다. 다음 투자는 '새 파생'이 아니라 <b>데이터 확대·규제</b> 쪽이 기대값이 큽니다. → 생산 모델은 <b>v3.1</b> 유지.</div>
 </section>
 
 <!-- 용어 풀이 -->

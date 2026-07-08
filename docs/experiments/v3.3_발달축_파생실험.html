@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>실험 — v3.3 발달축 파생 (정보량 최상위, 그러나 과적합)</title>
+<style>
+  :root{
+    --bg:#0e1014; --card:#1b1f2a; --card-2:#222736; --line:#2c3242;
+    --text:#e7e9ee; --text-dim:#a4abba; --text-faint:#7b8294;
+    --berry:#ff5d73; --berry-soft:#ff8a9c; --leaf:#5fd39a; --gold:#ffc861;
+    --sky:#5cc8ff; --violet:#b69bff; --new:#37c8c3; --radius:16px; --maxw:940px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%, #1d2230 0%, var(--bg) 55%);
+    color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px 120px;}
+  a{color:inherit;text-decoration:none;}
+  header.hero{max-width:var(--maxw);margin:0 auto;padding:58px 22px 26px;}
+  .back{font-size:13.5px;color:var(--sky);margin-bottom:18px;display:inline-block;}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.14em;font-weight:700;color:var(--violet);
+    text-transform:uppercase;border:1px solid rgba(182,155,255,.35);border-radius:999px;padding:6px 14px;margin-bottom:20px;background:rgba(182,155,255,.07);}
+  h1.title{font-size:clamp(26px,5vw,40px);line-height:1.2;margin:0 0 16px;font-weight:800;letter-spacing:-.01em;}
+  h1.title .accent{color:var(--violet);}
+  .lede{font-size:clamp(15.5px,2.3vw,18px);color:var(--text-dim);max-width:730px;margin:0;}
+
+  .tldr{background:linear-gradient(135deg,rgba(182,155,255,.13),rgba(92,200,255,.09));
+    border:1px solid rgba(182,155,255,.30);border-radius:var(--radius);padding:22px 26px;margin:26px auto 0;max-width:var(--maxw);}
+  .tldr h2{margin:0 0 12px;font-size:16px;color:var(--violet);letter-spacing:.02em;}
+  .tldr ul{margin:0;padding-left:20px;} .tldr li{margin:8px 0;font-size:15.5px;color:var(--text);} .tldr b{color:#fff;}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:26px auto 0;max-width:var(--maxw);}
+  @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr);}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;}
+  .stat .n{font-size:28px;font-weight:850;font-variant-numeric:tabular-nums;line-height:1;}
+  .stat.s1 .n{color:var(--violet);} .stat.s2 .n{color:var(--berry-soft);} .stat.s3 .n{color:var(--leaf);} .stat.s4 .n{color:var(--gold);}
+  .stat .d{font-size:13px;font-weight:700;margin-top:6px;} .stat .t{font-size:12px;color:var(--text-faint);margin-top:4px;line-height:1.4;}
+
+  section{margin-top:48px;}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--violet);text-transform:uppercase;margin:0 0 8px;}
+  h2.sec{font-size:clamp(20px,3.4vw,26px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;}
+  .sec-sub{color:var(--text-dim);margin:0 0 22px;font-size:15.5px;}
+  p{margin:0 0 15px;} .dim{color:var(--text-dim);}
+
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;margin:6px 0 0;}
+  table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px;}
+  thead th{background:#23283a;color:var(--violet);text-align:left;font-weight:700;padding:12px 15px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  tbody td{padding:11px 15px;border-bottom:1px solid var(--line);color:var(--text-dim);vertical-align:middle;font-variant-numeric:tabular-nums;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:rgba(255,255,255,.018);}
+  tbody td b{color:var(--text);} td.term{color:#fff;font-weight:700;white-space:nowrap;}
+  .pos{color:var(--leaf);font-weight:700;} .neg{color:var(--berry-soft);font-weight:700;}
+  .win{background:rgba(95,211,154,.10);} .hot{background:rgba(182,155,255,.10);}
+
+  .plain{border-left:3px solid var(--violet);background:rgba(182,155,255,.07);border-radius:10px;padding:13px 17px;margin:16px 0 0;color:var(--text);font-size:15px;}
+  .plain b{color:var(--violet);}
+  .plain::before{content:"🍓 결론 (보류)";display:block;font-size:12.5px;font-weight:700;color:var(--violet);margin-bottom:5px;}
+  .why{border-left:3px solid var(--sky);background:rgba(92,200,255,.07);border-radius:10px;padding:13px 17px;margin:16px 0 0;color:var(--text);font-size:14.5px;}
+  .why b{color:var(--sky);}
+  .why::before{content:"왜 이렇게 됐나 — 과적합의 지문";display:block;font-size:12.5px;font-weight:700;color:var(--sky);margin-bottom:5px;}
+
+  footer{max-width:var(--maxw);margin:56px auto 0;padding:22px 22px 0;border-top:1px solid var(--line);color:var(--text-faint);font-size:13.5px;}
+  code{background:var(--card-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-family:Consolas,monospace;font-size:12.5px;color:var(--sky);}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <a class="back" href="../index.html">← 문서 인덱스</a>
+  <span class="eyebrow">베리디시전 · 실험 보고 · v3.1 → v3.3 · 보류</span>
+  <h1 class="title">v3.3 — <span class="accent">발달축</span> 파생 (정보량 최상위, 그러나 과적합)</h1>
+  <p class="lede">v3.2가 "환경은 무효, 발달이 축"이라고 알려줬습니다. 그래서 이번엔 <b style="color:var(--text)">발달 상태</b>를 근사하는 파생 6개(누적·템포·소스싱크·자기 궤적상 위치·국면)를 넣었습니다. 결과는 반전 — <b style="color:var(--violet)">정보량은 압도적(중요도 2·3·4위)인데 일반화 이득은 없었습니다.</b></p>
+</header>
+
+<div class="tldr">
+  <h2>핵심 결론 3가지</h2>
+  <ul>
+    <li><b>가설은 맞았다 (중요도로 증명)</b> — 발달 파생 6개 중 <b>5개가 전체 47개 중 top 9</b>. <code>착과수_개체누적률_전주</code>(2위)·<code>착과수_개체누적_전주</code>(3위)가 개체 lag보다도 위. 착과수가 발달 지배임을 다시, 더 강하게 확인.</li>
+    <li><b>그런데 일반화는 안 됐다</b> — 동일 params에서 v3.1 대비 <b>개체 R² 0.856 → 0.848, MAE중앙 0.686 → 0.744</b>(악화). 자체 튜닝으로 회복해도(0.857·0.938·0.716) <b>v3.1의 MAE중앙 0.686을 못 넘음</b>.</li>
+    <li><b>병목은 피처가 아니라 데이터 크기</b> — 신호가 강한 파생일수록 600행·온실 4개 LOGO에선 <b>과적합</b>으로 기웁니다. 아이디어가 아니라 <b>표본 수</b>가 한계. → v3.1 유지, 발달 파생은 데이터 확대 시 재평가.</li>
+  </ul>
+</div>
+
+<div class="stats">
+  <div class="stat s1"><div class="n">#2·3</div><div class="d">발달 파생 중요도</div><div class="t">누적률·누적이 개체 lag보다 위</div></div>
+  <div class="stat s2"><div class="n">0.744</div><div class="d neg">▲ 0.058</div><div class="t">개체 MAE중앙 (동일 params)<br>v3.1 0.686 대비 악화</div></div>
+  <div class="stat s3"><div class="n">0.716</div><div class="d">자체 튜닝 후</div><div class="t">회복되지만 v3.1(0.686) 미달</div></div>
+  <div class="stat s4"><div class="n">보류</div><div class="d">판정</div><div class="t">v3.1을 생산 모델로 유지</div></div>
+</div>
+
+<div class="wrap">
+
+<section>
+  <div class="kicker">무엇을 넣었나</div>
+  <h2 class="sec">발달축 파생 6개 (모두 전주까지의 과거)</h2>
+  <p class="sec-sub">v3.1 교훈("트리가 못 만드는 조합이 값어치")을 반영해, 단순 곱·차 대신 <b>누적·비율·국면</b>만 골랐습니다.</p>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>발달 파생</th><th>의미</th><th>중요도 순위 (47개 중)</th></tr></thead>
+    <tbody>
+      <tr class="hot"><td class="term">착과수_개체누적률_전주</td><td>누적 착과수 ÷ 경과 조사수 = 주당 착과 템포</td><td class="pos">2</td></tr>
+      <tr class="hot"><td class="term">착과수_개체누적_전주</td><td>그 개체가 지금껏 단 총 착과수 (발달 진척)</td><td class="pos">3</td></tr>
+      <tr class="hot"><td class="term">착과대비관부_전주</td><td>전주 착과수 ÷ 관부직경 (수세 대비 결실)</td><td class="pos">4</td></tr>
+      <tr><td class="term">착과수_자기최고대비_전주</td><td>전주값 ÷ 자기 과거 최고 (궤적상 위치, ≤1)</td><td>8</td></tr>
+      <tr><td class="term">착과대비엽수_전주</td><td>전주 착과수 ÷ 엽수 (소스-싱크 균형)</td><td>9</td></tr>
+      <tr><td class="term">착과수_증가국면_전주</td><td>연속 증가한 주 수 (발달 국면 지속성)</td><td>37</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="kicker">정직한 ablation</div>
+  <h2 class="sec">강한 신호가 오히려 발목을 잡다</h2>
+  <p class="sec-sub">v3 BASE에서 튜닝한 하이퍼파라미터를 v3/v3.1/v3.3에 <b>똑같이</b> 적용(피처 효과만 분리). 검증은 온실별 LOGO out-of-fold.</p>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>구성</th><th>피처 수</th><th>개체 R²</th><th>집계 R²</th><th>전체 MAE</th><th>개체 MAE 중앙</th></tr></thead>
+    <tbody>
+      <tr><td class="term">v3 (BASE)</td><td>34</td><td>0.8479</td><td>0.9393</td><td>0.752</td><td>0.730</td></tr>
+      <tr class="win"><td class="term">v3.1 (+모멘텀 7)</td><td>41</td><td><b class="pos">0.8560</b></td><td>0.9354</td><td><b class="pos">0.726</b></td><td><b class="pos">0.686</b></td></tr>
+      <tr><td class="term">v3.3 (+발달축 6, 동일 params)</td><td>47</td><td class="neg">0.8483</td><td>0.9363</td><td class="neg">0.764</td><td class="neg">0.744</td></tr>
+      <tr><td class="term">v3.3 (자체 재튜닝)</td><td>47</td><td>0.8570</td><td>0.9380</td><td>0.734</td><td>0.716</td></tr>
+    </tbody>
+  </table></div>
+  <div class="why">중요도는 <b>훈련 데이터에서 얼마나 많이 쓰였나</b>이고, R²/MAE는 <b>안 본 온실에서 얼마나 맞나</b>입니다. 발달 파생은 훈련에서 압도적으로 쓰였지만(누적률·누적이 2·3위), 같은 규제(reg)로는 그 강한 신호에 과하게 기대 <b>새 온실에서 미끄러졌습니다</b> — 중요도 최상위 + OOF 악화 = 전형적 과적합 지문. 자체 튜닝(더 센 규제)으로 대부분 회복되지만, 그래도 v3.1을 못 넘습니다.</div>
+</section>
+
+<section>
+  <div class="kicker">배운 것 · 다음</div>
+  <h2 class="sec">이제 병목은 아이디어가 아니라 데이터</h2>
+  <p>파생 3연속 실험(v3.1 모멘텀 채택 · v3.2 환경추세 기각 · v3.3 발달축 보류)이 하나의 결론으로 수렴합니다: <b>600행·온실 4개에서 우리는 이미 피처의 한계 수확 구간</b>에 있습니다. v3.1의 교차항 하나가 준 이득 이후로, 더 많은(심지어 더 강한) 파생은 일반화를 못 올리고 과적합만 키웁니다.</p>
+  <div class="plain"><b>보류.</b> 착과수 생산 모델 = <b>v3.1</b> 유지. 발달 파생은 <code>data_prep.py</code>에 남겨 두고(재현·재사용), <b>표본이 늘면(더 많은 온실·시즌) 최우선 재평가</b> 대상 — 그때는 강한 신호를 과적합 없이 받아낼 여지가 생깁니다.</div>
+  <p class="dim" style="margin-top:16px;">전략 전환 신호 — 다음 투자는 '새 파생'보다 <b>데이터 확대</b>(신규 2022 데이터 통합·온실 추가)나 <b>규제·앙상블</b>(작은 데이터에서 과적합 억제) 쪽이 기대값이 큽니다.</p>
+</section>
+
+<section>
+  <div class="kicker">재현</div>
+  <h2 class="sec">실행 방법</h2>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>단계</th><th>명령</th><th>산출물</th></tr></thead>
+    <tbody>
+      <tr><td>파생 생성</td><td><code>python src/data_prep.py</code></td><td>train_table.csv (+발달 6열)</td></tr>
+      <tr><td>v3.3 실험·비교</td><td><code>python src/train_v33_developmental.py</code></td><td>models/lgbm_fruit_count_v33.txt (참고용)</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>
+  berry_ai · 딸기 스마트팜 예측·제어 &nbsp;·&nbsp; v3.3 발달축 파생 실험 (보류) &nbsp;·&nbsp; 검증: 온실별 LOGO · 착과수 · 600행
+</footer>
+
+</div>
+</body>
+</html>
