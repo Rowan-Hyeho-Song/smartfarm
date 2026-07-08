@@ -48,8 +48,10 @@ def load_individual():
     df = pd.read_csv(DATA_PATH, encoding="utf-8-sig")
     df["조사일자"] = pd.to_datetime(df["조사일자"])
     # 환경요약 + 시점 (그룹/분포/개체 lag 제외한 순수 환경·시점)
+    #  '_추세'·'_14일'(v3.2 파생)은 v3 피처가 아니므로 제외 → v3 모델을 동결.
     env_time = [c for c in df.columns
-                if c not in KEYS + GROWTH and "전주" not in c and "개체" not in c]
+                if c not in KEYS + GROWTH and "전주" not in c and "개체" not in c
+                and "추세" not in c and "14일" not in c]
     plant_lag = [c for c in df.columns if "개체전" in c]
     feat = ["온실번호", "측정라인"] + env_time + plant_lag
     return df, feat

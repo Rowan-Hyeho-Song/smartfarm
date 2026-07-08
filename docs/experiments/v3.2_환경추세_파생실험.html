@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>실험 — v3.2 환경 추세(델타) 파생 (음성 결과)</title>
+<style>
+  :root{
+    --bg:#0e1014; --card:#1b1f2a; --card-2:#222736; --line:#2c3242;
+    --text:#e7e9ee; --text-dim:#a4abba; --text-faint:#7b8294;
+    --berry:#ff5d73; --berry-soft:#ff8a9c; --leaf:#5fd39a; --gold:#ffc861;
+    --sky:#5cc8ff; --violet:#b69bff; --new:#37c8c3; --radius:16px; --maxw:940px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%, #1d2230 0%, var(--bg) 55%);
+    color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px 120px;}
+  a{color:inherit;text-decoration:none;}
+  header.hero{max-width:var(--maxw);margin:0 auto;padding:58px 22px 26px;}
+  .back{font-size:13.5px;color:var(--sky);margin-bottom:18px;display:inline-block;}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.14em;font-weight:700;color:var(--gold);
+    text-transform:uppercase;border:1px solid rgba(255,200,97,.35);border-radius:999px;padding:6px 14px;margin-bottom:20px;background:rgba(255,200,97,.07);}
+  h1.title{font-size:clamp(26px,5vw,40px);line-height:1.2;margin:0 0 16px;font-weight:800;letter-spacing:-.01em;}
+  h1.title .accent{color:var(--gold);}
+  .lede{font-size:clamp(15.5px,2.3vw,18px);color:var(--text-dim);max-width:720px;margin:0;}
+
+  .tldr{background:linear-gradient(135deg,rgba(255,200,97,.13),rgba(92,200,255,.09));
+    border:1px solid rgba(255,200,97,.30);border-radius:var(--radius);padding:22px 26px;margin:26px auto 0;max-width:var(--maxw);}
+  .tldr h2{margin:0 0 12px;font-size:16px;color:var(--gold);letter-spacing:.02em;}
+  .tldr ul{margin:0;padding-left:20px;} .tldr li{margin:8px 0;font-size:15.5px;color:var(--text);} .tldr b{color:#fff;}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:26px auto 0;max-width:var(--maxw);}
+  @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr);}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;}
+  .stat .n{font-size:28px;font-weight:850;font-variant-numeric:tabular-nums;line-height:1;}
+  .stat.s1 .n{color:var(--berry-soft);} .stat.s2 .n{color:var(--berry-soft);} .stat.s3 .n{color:var(--leaf);} .stat.s4 .n{color:var(--sky);}
+  .stat .d{font-size:13px;font-weight:700;margin-top:6px;} .stat .t{font-size:12px;color:var(--text-faint);margin-top:4px;line-height:1.4;}
+
+  section{margin-top:48px;}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;margin:0 0 8px;}
+  h2.sec{font-size:clamp(20px,3.4vw,26px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;}
+  .sec-sub{color:var(--text-dim);margin:0 0 22px;font-size:15.5px;}
+  p{margin:0 0 15px;} .dim{color:var(--text-dim);}
+
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;margin:6px 0 0;}
+  table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px;}
+  thead th{background:#23283a;color:var(--gold);text-align:left;font-weight:700;padding:12px 15px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  tbody td{padding:11px 15px;border-bottom:1px solid var(--line);color:var(--text-dim);vertical-align:middle;font-variant-numeric:tabular-nums;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:rgba(255,255,255,.018);}
+  tbody td b{color:var(--text);} td.term{color:#fff;font-weight:700;white-space:nowrap;}
+  .pos{color:var(--leaf);font-weight:700;} .neg{color:var(--berry-soft);font-weight:700;}
+  .win{background:rgba(95,211,154,.10);} .lose{background:rgba(255,93,115,.07);}
+
+  .plain{border-left:3px solid var(--gold);background:rgba(255,200,97,.07);border-radius:10px;padding:13px 17px;margin:16px 0 0;color:var(--text);font-size:15px;}
+  .plain b{color:var(--gold);}
+  .plain::before{content:"🍓 결론 (음성)";display:block;font-size:12.5px;font-weight:700;color:var(--gold);margin-bottom:5px;}
+  .why{border-left:3px solid var(--sky);background:rgba(92,200,255,.07);border-radius:10px;padding:13px 17px;margin:16px 0 0;color:var(--text);font-size:14.5px;}
+  .why b{color:var(--sky);}
+  .why::before{content:"왜 이렇게 됐나";display:block;font-size:12.5px;font-weight:700;color:var(--sky);margin-bottom:5px;}
+
+  footer{max-width:var(--maxw);margin:56px auto 0;padding:22px 22px 0;border-top:1px solid var(--line);color:var(--text-faint);font-size:13.5px;}
+  code{background:var(--card-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-family:Consolas,monospace;font-size:12.5px;color:var(--sky);}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <a class="back" href="../index.html">← 문서 인덱스</a>
+  <span class="eyebrow">베리디시전 · 실험 보고 · v3.1 → v3.2 · 음성 결과</span>
+  <h1 class="title">v3.2 — <span class="accent">환경 추세(델타)</span> 파생 (기각)</h1>
+  <p class="lede">"최근 7일이 <b style="color:var(--text)">그 이전 7일보다</b> 더웠나·건조했나·밝았나" — 지금 학습표에 없던 새 정보를 10개 넣어 봤습니다. 결과는 <b style="color:var(--gold)">착과수엔 무효(오히려 소폭 악화)</b>. 하지만 이건 실패가 아니라 프로젝트 핵심 논지의 <b style="color:var(--text)">재확인</b>입니다.</p>
+</header>
+
+<div class="tldr">
+  <h2>핵심 결론 3가지</h2>
+  <ul>
+    <li><b>환경 추세는 착과수를 못 돕는다</b> — 동일 params에서 v3.1 대비 <b>집계 R² 0.935 → 0.928</b>, <b>개체 MAE중앙 0.686 → 0.741</b>(악화). 자체 튜닝해도 v3.1을 못 넘었습니다.</li>
+    <li><b>이유 = 착과수는 발달단계 지배</b> — 이미 다른 실험(7지표·집계창 비교)에서 착과수는 '온실·발달 특성' 지배로 나왔습니다. 주간 단위 환경 <i>변동</i>은 착과에 약한 신호라, 추세 10개가 <b>노이즈로 희석</b>만 시켰습니다(600행·LOGO).</li>
+    <li><b>기각 · v3.1 유지</b> — 착과수 생산 모델은 v3.1(개체 추적 + 모멘텀)이 최선. 채택하지 않았으므로 v3.2 결과지는 만들지 않습니다.</li>
+  </ul>
+</div>
+
+<div class="stats">
+  <div class="stat s1"><div class="n">0.741</div><div class="d neg">▲ 0.055</div><div class="t">개체 MAE 중앙값<br>(v3.1 0.686 → 악화)</div></div>
+  <div class="stat s2"><div class="n">0.928</div><div class="d neg">▼ 0.008</div><div class="t">집계 R²<br>(v3.1 0.935 → 하락)</div></div>
+  <div class="stat s3"><div class="n">10위</div><div class="d">최고 추세 피처</div><div class="t">주야온도차_DIF_추세<br>(51개 중, 상위권 아님)</div></div>
+  <div class="stat s4"><div class="n">기각</div><div class="d">판정</div><div class="t">v3.1을 생산 모델로 유지</div></div>
+</div>
+
+<div class="wrap">
+
+<section>
+  <div class="kicker">가설 → 결과</div>
+  <h2 class="sec">"새 정보"였지만 "유용한 정보"는 아니었다</h2>
+  <p class="sec-sub">v3.1의 모멘텀은 이미 있던 lag에서 파생 → GBDT가 일부 스스로 만들 수 있었음. 반면 v3.2의 환경 추세는 '직전 7일 vs 그 이전 7일'이라 학습표에 <b>아예 없던 새 정보</b>. 기대값이 컸지만, 동일 하이퍼파라미터·동일 LOGO에서:</p>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>구성</th><th>피처 수</th><th>개체 R²</th><th>집계 R²</th><th>전체 MAE</th><th>개체 MAE 중앙</th></tr></thead>
+    <tbody>
+      <tr><td class="term">v3 (BASE)</td><td>34</td><td>0.8479</td><td>0.9393</td><td>0.752</td><td>0.730</td></tr>
+      <tr class="win"><td class="term">v3.1 (+모멘텀 7)</td><td>41</td><td><b class="pos">0.8560</b></td><td><b class="pos">0.9354</b></td><td><b class="pos">0.726</b></td><td><b class="pos">0.686</b></td></tr>
+      <tr class="lose"><td class="term">v3.2 (+환경추세 10)</td><td>51</td><td>0.8514</td><td class="neg">0.9277</td><td>0.751</td><td class="neg">0.741</td></tr>
+      <tr><td class="term">v3.2 (자체 재튜닝)</td><td>51</td><td>0.8529</td><td>0.9275</td><td>0.732</td><td>0.691</td></tr>
+    </tbody>
+  </table></div>
+  <p class="dim" style="margin-top:14px;font-size:13.5px;">v3.2 vs v3.1 <b style="color:var(--berry-soft)">Δ개체R² −0.0046 · Δ집계R² −0.0077 · ΔMAE중앙 +0.055</b>. 자체 튜닝으로 MAE중앙은 0.691까지 회복되지만 v3.1(0.686)을 넘지 못하고, 집계 R²는 여전히 0.928로 낮습니다.</p>
+</section>
+
+<section>
+  <div class="kicker">해석</div>
+  <h2 class="sec">추세 10개가 받은 중요도 — 중간, 그러나 희석</h2>
+  <p class="sec-sub">추세 피처가 완전히 무시된 건 아닙니다. <code>주야온도차_DIF_추세</code>(10위)·<code>급액EC_추세</code>(12위)는 중간 중요도를 받았습니다. 하지만 상위는 여전히 개체 lag·모멘텀이 독식했고, 나머지 추세들은 하위권에서 <b>미세한 노이즈</b>를 더해 검증 성능을 갉아먹었습니다.</p>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>환경 추세 피처</th><th>중요도 순위 (51개 중)</th></tr></thead>
+    <tbody>
+      <tr><td class="term">주야온도차_DIF_추세</td><td>10</td></tr>
+      <tr><td class="term">급액EC_추세</td><td>12</td></tr>
+      <tr><td class="term">외부일사량_추세</td><td>14</td></tr>
+      <tr><td class="term">내부온도_추세</td><td>16</td></tr>
+      <tr><td class="term">내부CO2_추세 · 내부습도_추세 · VPD_추세</td><td>19 · 22 · 25</td></tr>
+      <tr><td class="term">외부일사량_14일평균 · 외부온도_추세 · 내부온도_14일평균</td><td>28 · 33 · 37</td></tr>
+    </tbody>
+  </table></div>
+  <div class="why">착과수는 <b>화방 발달주기</b>가 지배합니다. "지난주보다 이번주가 1℃ 더웠다" 같은 주간 환경 <i>변동</i>은 그 주에 몇 개가 달릴지를 거의 못 바꿉니다 — 이미 <b>개체의 지난주 착과수·발달 단계</b>가 압도적 단서이기 때문입니다. 그래서 새 정보였음에도 예측에 기여하지 못했습니다.</div>
+</section>
+
+<section>
+  <div class="kicker">배운 것 · 다음</div>
+  <h2 class="sec">음성 결과의 값어치</h2>
+  <p><b>새 정보 ≠ 유용한 정보.</b> 파생이 도움이 되려면 <b>타깃의 지배 메커니즘</b>에 맞아야 합니다. v3.1의 승자(개체 vs 온실 상대위치)는 '발달 지배'와 정렬됐고, v3.2의 환경 추세는 정렬되지 않았습니다. 해커톤식 "대량 파생"을 그대로 따르지 않고 <b>측정으로 걸러 낸</b> 게 이 트랙의 요점입니다.</p>
+  <div class="plain"><b>기각.</b> 착과수 생산 모델 = <b>v3.1</b>. 환경 추세 10개는 <code>data_prep.py</code>에 남겨 두되(재현·재사용 가능), 착과수 모델에는 넣지 않습니다.</div>
+  <p class="dim" style="margin-top:16px;">다음 후보 — 환경 추세는 <b>'환경이 서서히 반영되는' 지표</b>(초장·엽병장·엽폭)에는 도움될 수 있습니다(7지표 실험에서 이들은 시간분할 검증이 유리했음). 착과수가 아닌 <b>크기 지표</b>를 타깃으로 한 별도 트랙에서 다시 시험해 볼 가치가 있습니다.</p>
+</section>
+
+<section>
+  <div class="kicker">재현</div>
+  <h2 class="sec">실행 방법</h2>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>단계</th><th>명령</th><th>산출물</th></tr></thead>
+    <tbody>
+      <tr><td>파생 생성</td><td><code>python src/data_prep.py</code></td><td>train_table.csv (+추세 10열)</td></tr>
+      <tr><td>v3.2 실험·비교</td><td><code>python src/train_v32_envtrend.py</code></td><td>models/lgbm_fruit_count_v32.txt (참고용)</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>
+  berry_ai · 딸기 스마트팜 예측·제어 &nbsp;·&nbsp; v3.2 환경 추세 파생 실험 (음성 결과·기각) &nbsp;·&nbsp; 검증: 온실별 LOGO · 착과수 · 600행
+</footer>
+
+</div>
+</body>
+</html>

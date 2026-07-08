@@ -247,6 +247,33 @@ def summarize_env_before_survey(env: pd.DataFrame, survey_dates: pd.DataFrame) -
         # 낮밤 온도차(DIF): 값이 클수록 열매 쪽으로 무게가 실리는 경향.
         summary["주야온도차_DIF"] = summary["내부온도_주간평균"] - summary["내부온도_야간평균"]
 
+        # ── v3.2: 추세(델타) feature — '최근 7일' vs '직전 7일(8~14일 전)' ──
+        #  겹치는 7일/14일 창보다 '이번 주 vs 지난 주'가 더 깨끗한 추세 신호.
+        #  전부 조사일 이전(< d) 데이터만 사용 → 누수 없음. 지금 학습표에 없던 '새 정보'.
+        prior_start = d - pd.Timedelta(days=2 * WINDOW_DAYS)          # d-14
+        prior_mask = ((env["온실번호"] == g)
+                      & (env["측정일시"] >= prior_start) & (env["측정일시"] < start))
+        prior = env.loc[prior_mask]                                    # [d-14, d-7)
+        wide14 = env.loc[(env["온실번호"] == g)
+                         & (env["측정일시"] >= prior_start) & (env["측정일시"] < d)]  # [d-14, d)
+
+        # 최근 주 평균 − 직전 주 평균 (오르는 중 +, 내리는 중 −)
+        for col in ["내부온도", "내부습도", "내부CO2", "외부온도", "VPD", "급액EC", "외부일사량"]:
+            summary[f"{col}_추세"] = (window[col].mean() - prior[col].mean()
+                                      if len(prior) else np.nan)
+
+        # 주야온도차(DIF)의 추세
+        if len(prior):
+            pday = prior.loc[prior["주간여부"] == 1, "내부온도"].mean()
+            pnight = prior.loc[prior["주간여부"] == 0, "내부온도"].mean()
+            summary["주야온도차_DIF_추세"] = summary["주야온도차_DIF"] - (pday - pnight)
+        else:
+            summary["주야온도차_DIF_추세"] = np.nan
+
+        # 14일 평균(더 긴 기준선) — 최근 7일 평균과 함께 있으면 '완만/급격'을 구분
+        summary["내부온도_14일평균"] = wide14["내부온도"].mean() if len(wide14) else np.nan
+        summary["외부일사량_14일평균"] = wide14["외부일사량"].mean() if len(wide14) else np.nan
+
         rows.append(summary)
 
     env_summary = pd.DataFrame(rows)

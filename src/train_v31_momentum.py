@@ -54,7 +54,7 @@ def load():
     # v3 BASE 피처: 환경요약+시점(전주/개체 제외) + 개체 lag  ← train_individual.py와 동일 규칙
     env_time = [c for c in df.columns
                 if c not in KEYS + GROWTH and "전주" not in c and "개체" not in c
-                and c not in MOMENTUM]
+                and c not in MOMENTUM and "추세" not in c and "14일" not in c]
     plant_lag = [c for c in df.columns if "개체전" in c]
     base = ["온실번호", "측정라인"] + env_time + plant_lag
     v31 = base + MOMENTUM
