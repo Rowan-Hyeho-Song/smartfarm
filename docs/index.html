@@ -137,10 +137,12 @@
       <div class="jstep muted"><div class="jn">✕</div><div class="jt">v3.2 환경추세</div><div class="jd">무효·기각</div></div>
       <div class="jarrow">→</div>
       <div class="jstep muted"><div class="jn">◑</div><div class="jt">v3.3 발달축</div><div class="jd">과적합·보류</div></div>
+      <div class="jarrow">→</div>
+      <div class="jstep muted"><div class="jn">◑</div><div class="jt">v3.4 앙상블</div><div class="jd">규제로도 못넘음</div></div>
     </div>
   </div>
   <p class="sec-sub" style="margin-top:14px">신규 테스트 데이터(2022, 103열)로 <b style="color:var(--text)">예측·처방·결과지</b> 3트랙을 검증 — '착과수는 발달단계 지배·제어는 상관≠인과'라는 결론이 다른 온실·시즌에서 재현됐습니다.</p>
-  <p class="sec-sub" style="margin-top:6px"><b style="color:var(--text)">파생 엔지니어링 트랙(v3.1~v3.3)</b> — 해커톤식 '대량 파생'을 그대로 따르지 않고 <b style="color:var(--text)">LOGO로 걸러</b>: 모멘텀 교차항은 <b style="color:var(--leaf)">채택</b>(MAE중앙 0.73→0.69), 환경추세는 <b style="color:var(--text-dim)">기각</b>(발달 지배 재확인), 발달축은 정보량 최상위였지만 600행에서 <b style="color:var(--text-dim)">과적합→보류</b>. 결론: 이제 병목은 <b style="color:var(--text)">피처가 아니라 데이터 크기</b>.</p>
+  <p class="sec-sub" style="margin-top:6px"><b style="color:var(--text)">파생 엔지니어링 트랙(v3.1~v3.4)</b> — 해커톤식 '대량 파생'을 그대로 따르지 않고 <b style="color:var(--text)">LOGO로 걸러</b>: 모멘텀 교차항은 <b style="color:var(--leaf)">채택</b>(MAE중앙 0.73→0.69), 환경추세는 <b style="color:var(--text-dim)">기각</b>(발달 지배 재확인), 발달축은 정보량 최상위였지만 <b style="color:var(--text-dim)">과적합→보류</b>, 규제·앙상블(LGBM+CatBoost+Ridge)로도 <b style="color:var(--text-dim)">v3.1 못 넘음</b>. 결론: 이제 병목은 <b style="color:var(--text)">피처가 아니라 데이터 크기</b> — 다음 가치는 예측 밖(제어·불확실성·실증)에 있습니다.</p>
 </section>
 
 <!-- 문서 갤러리 -->
@@ -194,6 +196,9 @@
       <a class="doc" href="experiments/v3.3_발달축_파생실험.html">
         <div class="ic">🧬</div><div class="dt">v3.3 — 발달축 파생 (과적합·보류)</div>
         <div class="dd">누적·템포·소스싱크 6개. 중요도 2·3·4위로 정보량 최상위였지만 600행에서 과적합 → v3.1 미달. 병목은 데이터 크기.</div><span class="badge">실험 · v3.3</span></a>
+      <a class="doc" href="experiments/v3.4_규제앙상블_실험.html">
+        <div class="ic">⚗️</div><div class="dt">v3.4 — 규제·앙상블 (파생 아크 종결)</div>
+        <div class="dd">LGBM+CatBoost+Ridge 등 7종으로 v3.3 과적합 구제 시도. 어떤 조합도 v3.1 미달 → lean한 v3.1이 천장, 병목은 데이터 확정.</div><span class="badge">실험 · v3.4</span></a>
       <a class="doc" href="experiments/생육지표_집계창_비교.html">
         <div class="ic">📊</div><div class="dt">7개 생육 지표 &amp; 집계 창 비교</div>
         <div class="dd">지표별 최적 검증·창을 데이터로 규명.</div><span class="badge">실험</span></a>

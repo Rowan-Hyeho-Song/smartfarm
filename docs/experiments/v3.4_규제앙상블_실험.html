@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>실험 — v3.4 규제·앙상블 (파생 아크의 종결)</title>
+<style>
+  :root{
+    --bg:#0e1014; --card:#1b1f2a; --card-2:#222736; --line:#2c3242;
+    --text:#e7e9ee; --text-dim:#a4abba; --text-faint:#7b8294;
+    --berry:#ff5d73; --berry-soft:#ff8a9c; --leaf:#5fd39a; --gold:#ffc861;
+    --sky:#5cc8ff; --violet:#b69bff; --new:#37c8c3; --radius:16px; --maxw:940px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%, #1d2230 0%, var(--bg) 55%);
+    color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px 120px;}
+  a{color:inherit;text-decoration:none;}
+  header.hero{max-width:var(--maxw);margin:0 auto;padding:58px 22px 26px;}
+  .back{font-size:13.5px;color:var(--sky);margin-bottom:18px;display:inline-block;}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.14em;font-weight:700;color:var(--sky);
+    text-transform:uppercase;border:1px solid rgba(92,200,255,.35);border-radius:999px;padding:6px 14px;margin-bottom:20px;background:rgba(92,200,255,.07);}
+  h1.title{font-size:clamp(26px,5vw,40px);line-height:1.2;margin:0 0 16px;font-weight:800;letter-spacing:-.01em;}
+  h1.title .accent{color:var(--sky);}
+  .lede{font-size:clamp(15.5px,2.3vw,18px);color:var(--text-dim);max-width:730px;margin:0;}
+
+  .tldr{background:linear-gradient(135deg,rgba(92,200,255,.13),rgba(95,211,154,.09));
+    border:1px solid rgba(92,200,255,.30);border-radius:var(--radius);padding:22px 26px;margin:26px auto 0;max-width:var(--maxw);}
+  .tldr h2{margin:0 0 12px;font-size:16px;color:var(--sky);letter-spacing:.02em;}
+  .tldr ul{margin:0;padding-left:20px;} .tldr li{margin:8px 0;font-size:15.5px;color:var(--text);} .tldr b{color:#fff;}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:26px auto 0;max-width:var(--maxw);}
+  @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr);}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;}
+  .stat .n{font-size:28px;font-weight:850;font-variant-numeric:tabular-nums;line-height:1;}
+  .stat.s1 .n{color:var(--leaf);} .stat.s2 .n{color:var(--berry-soft);} .stat.s3 .n{color:var(--berry-soft);} .stat.s4 .n{color:var(--sky);}
+  .stat .d{font-size:13px;font-weight:700;margin-top:6px;} .stat .t{font-size:12px;color:var(--text-faint);margin-top:4px;line-height:1.4;}
+
+  section{margin-top:48px;}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--sky);text-transform:uppercase;margin:0 0 8px;}
+  h2.sec{font-size:clamp(20px,3.4vw,26px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;}
+  .sec-sub{color:var(--text-dim);margin:0 0 22px;font-size:15.5px;}
+  p{margin:0 0 15px;} .dim{color:var(--text-dim);}
+
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;margin:6px 0 0;}
+  table{border-collapse:collapse;width:100%;min-width:620px;font-size:14px;}
+  thead th{background:#23283a;color:var(--sky);text-align:left;font-weight:700;padding:12px 15px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  tbody td{padding:11px 15px;border-bottom:1px solid var(--line);color:var(--text-dim);vertical-align:middle;font-variant-numeric:tabular-nums;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:rgba(255,255,255,.018);}
+  tbody td b{color:var(--text);} td.term{color:#fff;font-weight:700;white-space:nowrap;}
+  .pos{color:var(--leaf);font-weight:700;} .neg{color:var(--berry-soft);font-weight:700;}
+  .win{background:rgba(95,211,154,.10);} .best{background:rgba(92,200,255,.09);} .bad{opacity:.62;}
+
+  .plain{border-left:3px solid var(--sky);background:rgba(92,200,255,.07);border-radius:10px;padding:13px 17px;margin:16px 0 0;color:var(--text);font-size:15px;}
+  .plain b{color:var(--sky);}
+  .plain::before{content:"🍓 결론 — 파생 아크 종결";display:block;font-size:12.5px;font-weight:700;color:var(--sky);margin-bottom:5px;}
+  .why{border-left:3px solid var(--gold);background:rgba(255,200,97,.07);border-radius:10px;padding:13px 17px;margin:16px 0 0;color:var(--text);font-size:14.5px;}
+  .why b{color:var(--gold);}
+  .why::before{content:"의외의 발견";display:block;font-size:12.5px;font-weight:700;color:var(--gold);margin-bottom:5px;}
+
+  footer{max-width:var(--maxw);margin:56px auto 0;padding:22px 22px 0;border-top:1px solid var(--line);color:var(--text-faint);font-size:13.5px;}
+  code{background:var(--card-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-family:Consolas,monospace;font-size:12.5px;color:var(--sky);}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <a class="back" href="../index.html">← 문서 인덱스</a>
+  <span class="eyebrow">베리디시전 · 실험 보고 · 파생 아크 종결</span>
+  <h1 class="title">v3.4 — <span class="accent">규제·앙상블</span>로 과적합을 눌러봤다</h1>
+  <p class="lede">v3.3의 발달 파생은 '정보량 최상위인데 과적합'이었습니다. 데이터는 그대로 두고 <b style="color:var(--text)">규제 강화·시드 배깅·모델 다양성 블렌드</b>로 과적합을 눌러 v3.1을 넘길 수 있는지 — 과적합의 '탈출구'를 전부 시험했습니다. 결과: <b style="color:var(--sky)">탈출구는 없었다.</b></p>
+</header>
+
+<div class="tldr">
+  <h2>핵심 결론 3가지</h2>
+  <ul>
+    <li><b>어떤 앙상블도 v3.1을 못 넘었다</b> — 7개 후보 중 최고(LGBM+CatBoost 블렌드)도 MAE중앙 <b>0.737</b>로 v3.1(<b>0.693</b>)에 미달. 강규제·배깅·CatBoost·ExtraTrees·블렌드 전부 v3.3 언저리(0.73~0.77)에 머묾.</li>
+    <li><b>Ridge는 완전 실패</b> — 발달 비율·누적 피처가 선형일 거란 가설은 틀렸습니다(개체 R² 0.86→<b>0.65</b>, MAE 1.2). 이 신호는 <b>트리라야</b> 잡히고, 블렌드에 Ridge를 섞으면 오히려 악화.</li>
+    <li><b>병목은 데이터 — 이제 확정</b> — 과적합의 정석 해법을 모두 동원해도 안 넘어갔습니다. 600행·온실 4개에선 <b>lean한 v3.1이 천장</b>. 파생 엔지니어링 트랙을 여기서 닫습니다(생산 = v3.1).</li>
+  </ul>
+</div>
+
+<div class="stats">
+  <div class="stat s1"><div class="n">0.693</div><div class="d">v3.1 MAE중앙</div><div class="t">넘어야 할 벽 (생산 최고)</div></div>
+  <div class="stat s2"><div class="n">0.737</div><div class="d neg">최고 앙상블</div><div class="t">LGBM+CatBoost 블렌드<br>여전히 v3.1 미달</div></div>
+  <div class="stat s3"><div class="n">0.65</div><div class="d neg">Ridge 개체R²</div><div class="t">선형은 이 피처에 부적합</div></div>
+  <div class="stat s4"><div class="n">보류</div><div class="d">판정</div><div class="t">v3.1을 생산 모델로 확정</div></div>
+</div>
+
+<div class="wrap">
+
+<section>
+  <div class="kicker">전체 결과</div>
+  <h2 class="sec">기준선 3 + 앙상블 후보 7 (모두 온실별 LOGO)</h2>
+  <p class="sec-sub">후보는 전부 v3.3의 rich 피처(v3.1 + 발달 = 47개)를 씁니다. 과적합을 누르는 방법만 바꿔가며 v3.1(0.693)을 넘는지 봤습니다.</p>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>구성</th><th>개체 R²</th><th>집계 R²</th><th>전체 MAE</th><th>MAE 중앙</th><th>vs v3.1</th></tr></thead>
+    <tbody>
+      <tr><td class="term">v3 (base 34)</td><td>0.848</td><td>0.939</td><td>0.752</td><td>0.730</td><td>—</td></tr>
+      <tr class="win"><td class="term">v3.1 (v31 41·생산 최고)</td><td><b class="pos">0.860</b></td><td>0.936</td><td><b class="pos">0.717</b></td><td><b class="pos">0.693</b></td><td>기준</td></tr>
+      <tr><td class="term">v3.3 (rich 47·튜닝 LGBM)</td><td>0.857</td><td>0.938</td><td>0.734</td><td>0.716</td><td class="neg">+0.023</td></tr>
+      <tr><td colspan="6" style="color:var(--sky);font-weight:700;background:#20242f">— v3.4 앙상블 후보 (rich 피처) —</td></tr>
+      <tr><td class="term">a. 강규제 LGBM(단일)</td><td>0.854</td><td>0.937</td><td>0.751</td><td>0.736</td><td class="neg">+0.043</td></tr>
+      <tr><td class="term">b. LGBM 시드배깅 ×5</td><td>0.852</td><td>0.935</td><td>0.752</td><td>0.744</td><td class="neg">+0.051</td></tr>
+      <tr><td class="term">c. CatBoost(배깅 ×3)</td><td>0.850</td><td>0.925</td><td>0.756</td><td>0.733</td><td class="neg">+0.040</td></tr>
+      <tr class="bad"><td class="term">d. Ridge(선형)</td><td class="neg">0.654</td><td class="neg">0.735</td><td class="neg">1.205</td><td class="neg">1.187</td><td class="neg">+0.494</td></tr>
+      <tr><td class="term">e. ExtraTrees</td><td>0.848</td><td>0.936</td><td>0.766</td><td>0.768</td><td class="neg">+0.075</td></tr>
+      <tr class="best"><td class="term">f. 블렌드 LGBM+CatBoost</td><td><b>0.857</b></td><td>0.934</td><td><b>0.738</b></td><td><b>0.737</b></td><td class="neg">+0.044</td></tr>
+      <tr class="bad"><td class="term">g. 블렌드 +Ridge</td><td>0.846</td><td>0.922</td><td>0.788</td><td>0.772</td><td class="neg">+0.079</td></tr>
+    </tbody>
+  </table></div>
+  <p class="dim" style="margin-top:14px;font-size:13.5px;">최고 후보 <b>f(LGBM+CatBoost)</b>는 개체 R²만 v3.1과 대등(0.857)할 뿐, MAE중앙 0.737로 여전히 <b style="color:var(--berry-soft)">+0.044 뒤집니다</b>. 나머지는 더 나쁩니다.</p>
+</section>
+
+<section>
+  <div class="kicker">왜 안 됐나</div>
+  <h2 class="sec">과적합이 아니라 '정보 대 잡음' 비율의 문제</h2>
+  <p>규제·배깅·블렌드는 <b>분산(variance)</b>을 줄이는 도구입니다. 그런데 v3.3의 문제는 단순 분산 과다가 아니라, 발달 파생이 <b>훈련 온실에선 강하지만 새 온실로 옮기면 관계가 흔들리는</b> 것(온실 4개뿐이라 일반화할 표본이 없음)이었습니다. 분산을 줄여도 '새 온실에서 무너지는' 편향은 그대로라, 앙상블이 v3.3 수준에서 멈췄습니다.</p>
+  <div class="why">Ridge가 처참했던 건(<b>개체 R² 0.65</b>) 발달 신호가 <b>비선형</b>이기 때문입니다. '누적 착과수 → 이번주 착과수'는 화방 주기로 오르내려 직선이 아니고, 자기최고대비·소스싱크 비도 임계값에서 꺾입니다. 선형모델엔 안 맞고, 그래서 블렌드에 넣으면 좋은 트리 예측을 <b>끌어내리기만</b> 했습니다. — "다양성 앙상블"도 멤버가 쓸 만해야 효과가 있다는 교훈.</div>
+</section>
+
+<section>
+  <div class="kicker">파생 아크 4연속의 결론</div>
+  <h2 class="sec">v3.1 → v3.4, 하나의 이야기</h2>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>실험</th><th>시도</th><th>결과</th><th>판정</th></tr></thead>
+    <tbody>
+      <tr><td class="term">v3.1</td><td>모멘텀(상대위치) 파생</td><td>교차항 중요도 1위 · MAE중앙 0.73→0.69</td><td><b class="pos">채택</b></td></tr>
+      <tr><td class="term">v3.2</td><td>환경 추세 델타</td><td>착과수엔 무효(발달 지배 재확인)</td><td class="dim">기각</td></tr>
+      <tr><td class="term">v3.3</td><td>발달축 파생(누적·비율)</td><td>정보량 최상위(중요도 2·3위)이나 과적합</td><td class="dim">보류</td></tr>
+      <tr><td class="term">v3.4</td><td>규제·앙상블로 v3.3 구제</td><td>어떤 조합도 v3.1 미달</td><td class="dim">보류</td></tr>
+    </tbody>
+  </table></div>
+  <div class="plain">파생 아이디어(v3.1~v3.3)도, 그걸 살리려는 모델링 기법(v3.4)도 <b>600행이라는 벽</b> 앞에서 멈췄습니다. <b>생산 모델 = v3.1</b>(개체 추적 + 모멘텀, 개체 R² 0.86 · MAE중앙 0.69). 이 데이터에서 예측 성능을 더 짜내는 건 한계 수확 구간이며, 다음 가치는 <b>예측 밖</b>(제어 설계·불확실성·실증)에 있습니다.</p></div>
+</section>
+
+<section>
+  <div class="kicker">재현</div>
+  <h2 class="sec">실행 방법</h2>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>단계</th><th>명령</th><th>비고</th></tr></thead>
+    <tbody>
+      <tr><td>v3.4 실험</td><td><code>python src/train_v34_ensemble.py</code></td><td>LGBM·CatBoost·Ridge·ExtraTrees·블렌드 7종 LOGO 비교</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>
+  berry_ai · 딸기 스마트팜 예측·제어 &nbsp;·&nbsp; v3.4 규제·앙상블 실험 (파생 아크 종결) &nbsp;·&nbsp; 검증: 온실별 LOGO · 착과수 · 600행
+</footer>
+
+</div>
+</body>
+</html>
