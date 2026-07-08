@@ -33,6 +33,8 @@ optuna.logging.set_verbosity(optuna.logging.WARNING)
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 DATA_PATH = PROJECT_DIR / "data" / "processed" / "train_table.csv"
 MODEL_DIR = PROJECT_DIR / "models"
+CSV_OUT = PROJECT_DIR / "data" / "processed" / "result_sheet_v3_1.csv"
+HTML_OUT = PROJECT_DIR / "docs" / "report" / "착과수_개체별_결과지_v3_1.html"
 
 TARGET = "착과수"
 GROWTH = ["관부직경", "엽병장", "엽수", "엽장", "엽폭", "착과수", "초장"]
@@ -109,6 +111,128 @@ def row(tag, s):
           f"전체MAE {mae:.3f} · MAE중앙 {med:.3f}")
 
 
+def sparkline(actual, pred, w=150, h=34, pad=4):
+    """개체 궤적: 실제(회색) vs 예측(초록) 미니 그래프 (v3 결과지와 동일 포맷)."""
+    vals = np.concatenate([actual, pred])
+    lo, hi = float(np.nanmin(vals)), float(np.nanmax(vals))
+    rng = hi - lo if hi > lo else 1.0
+    n = len(actual)
+    def pts(arr):
+        p = []
+        for i, v in enumerate(arr):
+            x = pad + (i / (n - 1)) * (w - 2 * pad) if n > 1 else w / 2
+            y = (h - pad) - ((v - lo) / rng) * (h - 2 * pad)
+            p.append(f"{x:.1f},{y:.1f}")
+        return " ".join(p)
+    return (f'<svg width="{w}" height="{h}" viewBox="0 0 {w} {h}">'
+            f'<polyline points="{pts(actual)}" fill="none" stroke="#9ca3af" stroke-width="1.5"/>'
+            f'<polyline points="{pts(pred)}" fill="none" stroke="#16a34a" stroke-width="1.8"/>'
+            f'</svg>')
+
+
+def write_result_sheet(oof, ind, agg, base_med):
+    """v3.1 개체별 결과지(CSV·HTML) 생성. base_med = v3(모멘텀 없음) MAE중앙(비교용)."""
+    oof = oof.copy()
+    oof["오차"] = (oof[TARGET] - oof["예측"]).abs()
+    save = oof[["온실번호", "측정라인", "표본번호", "조사일자", TARGET, "예측", "오차"]].copy()
+    save["조사일자"] = save["조사일자"].dt.date
+    save = save.sort_values(["온실번호", "측정라인", "표본번호", "조사일자"])
+    CSV_OUT.parent.mkdir(parents=True, exist_ok=True)
+    save.to_csv(CSV_OUT, index=False, encoding="utf-8-sig")
+
+    mae = mean_absolute_error(oof[TARGET], oof["예측"])
+    pm = oof.groupby(["온실번호", "측정라인", "표본번호"]).apply(
+        lambda s: np.mean(np.abs(s[TARGET] - s["예측"])), include_groups=False)
+    mae_med = float(np.median(pm))
+    n_plant = oof.groupby(["온실번호", "측정라인", "표본번호"]).ngroups
+    delta_med = base_med - mae_med  # v3 대비 개선폭(+면 좋아짐)
+
+    rows = []
+    grp = oof.sort_values("조사일자").groupby(["온실번호", "측정라인", "표본번호"])
+    for (gh, ln, sp), sub in grp:
+        a = sub[TARGET].to_numpy(); p = sub["예측"].to_numpy()
+        pmae = np.mean(np.abs(a - p))
+        mae_bg = "#e8f5e9" if pmae < 0.7 else ("#fff8e1" if pmae < 1.2 else "#fdeaea")
+        rows.append(f"""<tr>
+<td>{int(gh)}</td><td>{int(ln)}</td><td>{int(sp)}</td>
+<td class="num">{a.mean():.2f}</td><td class="num strong">{p.mean():.2f}</td>
+<td class="num" style="background:{mae_bg}">{pmae:.2f}</td>
+<td class="spark">{sparkline(a, p)}</td>
+</tr>""")
+    rows_html = "\n".join(rows)
+
+    html = f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>착과수 개체별 결과지 (v3.1)</title>
+<style>
+:root{{--bd:#e3e6ea;--mut:#6b7280;--ink:#111827;--accent:#16a34a}}
+*{{box-sizing:border-box}}
+body{{font-family:"Segoe UI","Malgun Gothic",system-ui,sans-serif;margin:0;background:#f7f8fa;color:var(--ink)}}
+.wrap{{max-width:960px;margin:0 auto;padding:28px 20px 60px}}
+h1{{font-size:24px;margin:0 0 4px}}
+.sub{{color:var(--mut);font-size:14px;margin:0 0 20px}}
+.chips{{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}}
+.chip{{background:#eef2ff;color:#3730a3;border-radius:999px;padding:4px 12px;font-size:12.5px;font-weight:600}}
+.chip.new{{background:#e0f7f5;color:#0f766e}}
+.cards{{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}}
+.card{{background:#fff;border:1px solid var(--bd);border-radius:14px;padding:16px 14px;text-align:center}}
+.card .v{{font-size:26px;font-weight:800;line-height:1}}
+.card .l{{font-size:12px;color:var(--mut);margin-top:6px}}
+.card.main .v{{color:var(--accent)}}
+.delta{{font-size:12px;font-weight:700;color:var(--accent);margin-top:3px}}
+.legend{{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin:0 2px 14px;align-items:center}}
+.legend .ln{{display:inline-block;width:18px;height:0;border-top:2px solid #9ca3af;vertical-align:middle;margin-right:4px}}
+.legend .lp{{display:inline-block;width:18px;height:0;border-top:2px solid var(--accent);vertical-align:middle;margin-right:4px}}
+.tablewrap{{max-height:74vh;overflow:auto;background:#fff;border:1px solid var(--bd);border-radius:14px}}
+table{{border-collapse:collapse;width:100%;font-size:13px;min-width:640px}}
+th,td{{padding:6px 10px;border-bottom:1px solid #eef0f3;text-align:center;white-space:nowrap}}
+th{{background:#eef1f5;color:#374151;font-weight:700;position:sticky;top:0;z-index:2;box-shadow:inset 0 -1px 0 #d5d9df}}
+td.num{{font-variant-numeric:tabular-nums}}
+td.strong{{font-weight:700;color:var(--accent)}}
+td.spark{{padding:2px 10px}}
+.note{{margin-top:20px;font-size:12.5px;color:var(--mut);line-height:1.7;background:#fff;border:1px solid var(--bd);border-radius:12px;padding:14px 16px}}
+a.back{{font-size:13px;color:#4f46e5;text-decoration:none}}
+</style></head><body><div class="wrap">
+<a class="back" href="../index.html">← 문서 인덱스</a>
+<h1>🍓 착과수 개체별 결과지 <span style="font-size:15px;color:var(--mut)">v3.1 · 개체 추적 + 모멘텀</span></h1>
+<p class="sub">v3(개체 추적)에 증가속도·상대위치 파생 7개를 더한 모델. LOGO out-of-fold 예측.</p>
+<div class="chips">
+<span class="chip">모델 LightGBM v3.1</span>
+<span class="chip">손실 huber · MAE 최소화</span>
+<span class="chip new">+모멘텀 7개 (개체대비온실 등)</span>
+<span class="chip">검증 LOGO (온실별)</span>
+<span class="chip">개체 {n_plant}개 × 15주</span>
+</div>
+<div class="cards">
+<div class="card main"><div class="v">{mae_med:.2f}</div><div class="l">개체 MAE 중앙값</div><div class="delta">▼ {delta_med:.3f} vs v3</div></div>
+<div class="card"><div class="v">{ind:.2f}</div><div class="l">개체 R²<br>(개체 하나하나)</div></div>
+<div class="card"><div class="v">{agg:.2f}</div><div class="l">집계 R²<br>(온실-날짜 평균)</div></div>
+<div class="card"><div class="v">{n_plant}</div><div class="l">추적 개체 수<br>(온실당 10)</div></div>
+</div>
+<div class="legend">
+<span><span class="ln"></span>실제 착과수</span>
+<span><span class="lp"></span>예측 착과수</span>
+<span>· 궤적은 15주간 변화 (왼쪽 정식 초기 → 오른쪽 최근)</span>
+<span>· 오차 칸 색: 초록 낮음 / 노랑 중간 / 빨강 높음</span>
+</div>
+<div class="tablewrap"><table>
+<thead><tr>
+<th>온실</th><th>라인</th><th>표본</th><th>평균 실제</th><th>평균 예측</th><th>MAE</th><th>15주 궤적 (실제 vs 예측)</th>
+</tr></thead>
+<tbody>
+{rows_html}
+</tbody></table></div>
+<div class="note">
+<b>v3와 무엇이 다른가</b> — 같은 개체 추적 모델에 <b>모멘텀 파생 7개</b>(증가속도 + '개체 vs 온실평균' 상대위치)를 더했습니다.
+그중 <code>착과수_개체대비온실_전주</code>가 전체 피처 중 <b>중요도 1위</b>가 되면서, 개체 MAE 중앙값이 v3 <b>{base_med:.3f} → {mae_med:.3f}</b>로 낮아졌습니다.<br>
+<b>정직한 한계</b> — 개체 40개·600행·온실 4개 LOGO 기준이라 데이터가 늘면 수치는 달라질 수 있습니다. 집계 R²는 v3와 사실상 동일(노이즈 수준)하고, 개선은 <b>개체 해상도</b>에서 나옵니다.
+</div>
+</div></body></html>"""
+    HTML_OUT.parent.mkdir(parents=True, exist_ok=True)
+    HTML_OUT.write_text(html, encoding="utf-8")
+    return mae_med, delta_med
+
+
 def main():
     print("=" * 70)
     print("v3.1 실험 — 모멘텀(증가속도) 파생 7개 추가 vs v3 (대상: 착과수)")
@@ -153,6 +277,11 @@ def main():
     final.booster_.save_model(str(out))
     print("-" * 70)
     print(f"[저장] v3.1 모델 → {out}")
+
+    # ── (4-2) v3.1 개체별 결과지 (CSV·HTML) — v3 대비 개선폭 표기 ──
+    med, dmed = write_result_sheet(oof_v31, s_v31t[0], s_v31t[1], base_med=s_base[3])
+    print(f"[저장] v3.1 결과지 CSV  → {CSV_OUT}")
+    print(f"[저장] v3.1 결과지 HTML → {HTML_OUT}  (MAE중앙 {med:.3f}, v3 대비 ▼{dmed:.3f})")
 
     # ── (5) 판정 ──
     print("=" * 70)
